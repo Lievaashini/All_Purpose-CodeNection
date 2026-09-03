@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CapCoach — UI v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Roboto:wght@400;500;700;900&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#5B8DEF; --blue-deep:#3D6BC4; --blue-ink:#16233F;
+  --cyan:#35C4F0; --ink:#17233A;
+  --surface:#FBFCFE; --surface-2:#EDF3FD; --line:#DCE6F5; --muted:#6B7A93;
+  --s-thriving:#22C48A; --s-steady:#F5B93C; --s-stacked:#FF8A3D; --s-overload:#F0524D;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+body{background:radial-gradient(900px 520px at 12% -10%, #24406F 0%, transparent 62%), var(--blue-ink);
+  color:#E9EFF9; font-family:"Outfit",system-ui,sans-serif; -webkit-font-smoothing:antialiased}
+.wrap{max-width:1250px;margin:0 auto;padding:38px 24px 70px}
+.masthead{display:flex;justify-content:space-between;align-items:flex-end;gap:28px;flex-wrap:wrap}
+.wordmark{font-family:"Silkscreen",monospace;font-size:25px;line-height:1;color:#fff}
+.wordmark em{font-style:normal;color:#8FB4FF}
+.masthead p{margin:9px 0 0;font-size:14.5px;line-height:1.55;color:#A6BAD6;max-width:56ch}
+.meta{font-size:12.5px;line-height:1.75;color:#7F94B4;text-align:right}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 30px}
+.ctl{display:flex;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:999px}
+.ctl > b{font-size:11.5px;font-weight:600;color:#93A9C8;padding:0 6px 0 15px}
+.ctl button{font:inherit;font-size:13px;font-weight:600;border:0;background:transparent;color:#C9D8EE;padding:9px 15px;cursor:pointer;border-radius:999px;margin:3px}
+.ctl button:hover{background:rgba(255,255,255,.09)}
+.ctl button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.ctl button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.stage{display:grid;grid-template-columns:minmax(0,350px) minmax(0,1fr);gap:44px;align-items:start}
+@media(max-width:920px){.stage{grid-template-columns:1fr}}
+.phone-col{position:sticky;top:26px}
+.phone{width:330px;margin:0 auto;background:#0B1526;border-radius:38px;padding:10px;box-shadow:0 26px 70px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.07)}
+.screen{background:var(--surface);border-radius:30px;height:658px;overflow:hidden;position:relative;color:var(--ink);font-family:"Roboto",sans-serif;display:flex;flex-direction:column}
+.body{flex:1;overflow-y:auto;overflow-x:hidden}.body::-webkit-scrollbar{width:0}
+.statusbar{display:flex;justify-content:space-between;font-size:10.5px;color:#93A0B5;padding:9px 16px 0;font-weight:500;flex:0 0 auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 10px;flex:0 0 auto}
+.topbar .brand{font-family:"Silkscreen",monospace;font-size:13px;color:var(--blue-deep)}
+.pill{font-size:10.5px;font-weight:700;color:var(--blue-deep);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.pad{padding:0 18px 22px}
+.h1{font-size:22px;font-weight:900;letter-spacing:-.02em;line-height:1.2;margin:4px 0 6px}
+.sub{font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 14px}
+.sec{font-size:11.5px;font-weight:700;color:var(--muted);margin:20px 0 8px;display:flex;justify-content:space-between;align-items:center}
+.dino{image-rendering:pixelated;background-repeat:no-repeat;flex:0 0 auto;display:inline-block}
+@keyframes f3{to{background-position:-300% 0}}@keyframes f4{to{background-position:-400% 0}}
+@keyframes f5{to{background-position:-500% 0}}@keyframes f6{to{background-position:-600% 0}}
+.card{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:15px}
+.field{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:9px 13px;display:flex;align-items:center;gap:8px}
+.field label{display:block;font-size:10.5px;font-weight:600;color:var(--blue-deep);margin-bottom:1px}
+.field input{border:0;font:inherit;font-size:15px;width:100%;padding:2px 0;outline:none;background:none}
+.mic{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:0;background:var(--surface-2);color:var(--blue-deep);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mic[data-on="1"]{background:var(--blue);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(91,141,239,.25)}}
+.rowlabel{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;margin:14px 0 2px}
+.rowlabel b{font-weight:500}.rowlabel span{font-weight:900;color:var(--blue-deep);font-size:15px}
+input[type=range]{width:100%;accent-color:var(--blue);height:26px}
+.marks{display:flex;justify-content:space-between;font-size:10.5px;color:#9DAAC0;margin-top:-6px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font:inherit;font-size:13px;font-weight:500;border:1.5px solid var(--line);background:#fff;color:#3F4D64;border-radius:999px;padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.chip i{width:9px;height:9px;border-radius:50%;display:block}
+.chip.sm{font-size:12px;padding:7px 12px}
+.chip:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.moods{display:flex;gap:6px}
+.mood{flex:1;font-size:23px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:11px 0;cursor:pointer;line-height:1}
+.mood[aria-pressed="true"]{border-color:var(--blue);border-width:2.5px;background:var(--surface-2)}
+.moodscale{display:flex;justify-content:space-between;font-size:10.5px;color:#9DAAC0;margin-top:5px}
+.likert{display:flex;gap:5px;margin-top:7px}
+.likert button{flex:1;font:inherit;font-size:11px;font-weight:600;background:#fff;border:1.5px solid var(--line);border-radius:11px;padding:9px 2px;cursor:pointer;color:#53617A;line-height:1.15}
+.likert button[aria-pressed="true"]{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
+.qtext{font-size:13.5px;line-height:1.45;font-weight:500;margin:16px 0 0}
+.btn{width:100%;font:inherit;font-size:15px;font-weight:700;background:var(--blue);color:#fff;border:0;border-bottom:4px solid var(--blue-deep);border-radius:16px;padding:15px;margin-top:22px;cursor:pointer}
+.btn:active{transform:translateY(2px);border-bottom-width:2px}
+.btn.ghost{background:#fff;color:var(--blue-deep);border:2px solid var(--line);border-bottom-width:4px;margin-top:9px}
+.btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.coach{display:flex;gap:11px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:13px 14px;margin-bottom:15px}
+.coach .bubble{flex:1;font-size:13.5px;line-height:1.45;font-weight:500}
+.coach .tag{display:block;font-family:"Silkscreen",monospace;font-size:8.5px;margin-bottom:5px}
+.gauge{display:flex;justify-content:center;margin:2px 0 4px}
+.bar{margin:12px 0}
+.bar .top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;align-items:baseline}
+.bar .top b{font-weight:800}
+.bar .top .over{font-size:10px;font-weight:800;color:var(--s-overload);background:#FDEBEA;border-radius:999px;padding:2px 7px;margin-left:6px}
+.bar .track{height:12px;background:#E8EEF9;border-radius:999px;position:relative;overflow:hidden}
+.bar .fill{height:100%;border-radius:999px;position:absolute;left:0;top:0}
+.bar .fill.spill{background:repeating-linear-gradient(115deg,#F0524D 0 6px,#C03733 6px 12px)}
+.bar .limit{position:absolute;top:-3px;bottom:-3px;width:2px;background:#9DAAC0;border-radius:1px}
+.bufferrow{display:flex;align-items:baseline;gap:8px;background:#EAF8F1;border:1.5px solid #C4EBD8;border-radius:14px;padding:11px 13px;margin:14px 0 2px;font-size:12.5px;color:#1E6B4C;font-weight:600}
+.bufferrow b{font-size:15px;font-weight:900;color:#159A6B}
+.bufferrow em{font-style:normal;font-size:11px;font-weight:500;color:#4A8A6E;margin-left:auto;text-align:right;max-width:52%;line-height:1.3}
+.limitkey{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);margin:14px 0 2px;line-height:1.45}
+.limitkey i{width:2px;height:14px;background:#9DAAC0;border-radius:1px;flex:0 0 auto}
+.note{display:flex;gap:9px;align-items:center;background:var(--surface-2);border:1.5px solid var(--line);border-radius:16px;padding:12px 13px;font-size:12.5px;line-height:1.45;margin-top:14px;color:#3D4B63}
+.banner{display:flex;gap:9px;align-items:center;justify-content:space-between;background:#fff;border:2px solid var(--blue);border-radius:16px;padding:11px 13px;font-size:12.5px;margin:0 0 12px;color:var(--blue-deep);font-weight:600}
+.banner button{background:none;border:0;font:inherit;font-weight:700;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
+.weekstrip{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px}
+.weekstrip::-webkit-scrollbar{height:0}
+.day{flex:0 0 46px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:8px 0 7px;cursor:pointer;font:inherit;text-align:center;position:relative}
+.day[aria-pressed="true"]{border-color:var(--blue);border-width:2.5px;background:var(--surface-2)}
+.day[data-past="1"]{opacity:.78}
+.day .dow{font-size:9.5px;color:var(--muted);font-weight:700;display:block}
+.day .num{font-size:15px;font-weight:900;display:block;line-height:1.25}
+.day .dot{width:22px;height:4px;border-radius:2px;margin:3px auto 0;display:block;background:#E4EAF5}
+.day .cnt{position:absolute;top:-5px;right:-3px;background:var(--blue);color:#fff;font-size:9px;font-weight:700;border-radius:999px;min-width:16px;height:16px;line-height:16px;padding:0 4px}
+.prigroup{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--muted);margin:16px 0 8px}
+.prigroup:first-of-type{margin-top:4px}
+.prigroup i{flex:1;height:1px;background:var(--line)}
+.prigroup b{font-weight:800}
+.taskwrap{background:#fff;border:1.5px solid var(--line);border-radius:16px;margin-bottom:9px;overflow:hidden;border-left:5px solid}
+.taskwrap[data-moved="1"]{border-color:var(--blue);border-left-color:var(--blue);box-shadow:0 2px 10px rgba(91,141,239,.14)}
+.taskwrap[data-pri="2"]:not([data-done="1"]){border-top-color:var(--s-overload);border-right-color:var(--s-overload);border-bottom-color:var(--s-overload)}
+.ribbon{display:flex;align-items:center;gap:7px;background:var(--blue);color:#fff;font-size:11px;font-weight:800;padding:6px 12px}
+.ribbon span{opacity:.85;font-weight:600}
+.task{display:flex;gap:10px;align-items:center;padding:11px 12px}
+.task .tick{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);background:#fff;cursor:pointer;font-size:13px;color:#fff;line-height:1;display:flex;align-items:center;justify-content:center}
+.task .tick[data-done="1"]{background:var(--s-thriving);border-color:var(--s-thriving)}
+.task .info{flex:1;min-width:0;background:none;border:0;padding:0;text-align:left;font:inherit;cursor:pointer;color:inherit}
+.task .title{font-size:14px;font-weight:600;line-height:1.3;display:flex;align-items:baseline;gap:6px}
+.taskwrap[data-done="1"] .title{text-decoration:line-through;color:#9DAAC0;font-weight:400}
+.taskwrap[data-done="1"]{opacity:.72}
+.flag{flex:0 0 auto;font-size:12px;line-height:1}
+.task .meta{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.task .meta em{font-style:normal;font-weight:800}
+.task .resch{flex:0 0 auto;background:var(--surface-2);border:1.5px solid var(--line);border-radius:11px;width:34px;height:34px;font-size:15px;cursor:pointer;color:var(--blue-deep);line-height:1}
+.due[data-urgent="1"]{color:var(--s-overload);font-weight:800}
+.filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:10px;margin-bottom:2px}
+.filters::-webkit-scrollbar{height:0}
+.filters .chip{flex:0 0 auto}
+.empty{text-align:center;padding:26px 10px;color:var(--muted);font-size:13px;line-height:1.5}
+.fab{position:absolute;right:16px;bottom:78px;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;border:0;border-bottom:4px solid var(--blue-deep);font-size:26px;line-height:1;cursor:pointer;z-index:7;box-shadow:0 8px 22px rgba(30,60,120,.32)}
+.fab:active{transform:translateY(2px);border-bottom-width:2px}
+.scrim{position:absolute;inset:0;background:rgba(12,25,50,.58);display:flex;align-items:flex-end;z-index:9}
+.sheet{background:#fff;border-radius:26px 26px 30px 30px;padding:20px 18px 18px;width:100%;max-height:93%;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.28)}
+.sheet::-webkit-scrollbar{width:0}
+.sheet .grab{width:40px;height:4px;background:#D8E2F2;border-radius:2px;margin:0 auto 14px}
+.sheet h3{margin:0 0 8px;font-size:17px;font-weight:900;letter-spacing:-.01em}
+.sheet p{margin:0;font-size:13.5px;line-height:1.5;color:#3D4B63}
+.sheet .acts{display:flex;gap:9px;margin-top:18px}
+.sheet .acts button{flex:1;font:inherit;font-size:14px;font-weight:700;padding:14px;border-radius:15px;cursor:pointer}
+.sheet .acts .primary{background:var(--blue);color:#fff;border:0;border-bottom:4px solid var(--blue-deep)}
+.sheet .acts .secondary{background:#fff;color:var(--muted);border:2px solid var(--line);border-bottom-width:4px}
+.howrow{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.howrow:last-child{border-bottom:0}
+.howrow b{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.detail{margin-top:12px}
+.drow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.drow:last-child{border-bottom:0}
+.drow span{color:var(--muted);font-weight:600}
+.drow b{font-weight:700;text-align:right}
+.hrow{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--blue-deep);background:var(--surface-2);border-radius:11px;padding:9px 12px;margin-bottom:6px}
+.hrow b{color:var(--muted)}
+.hrow.muted{color:var(--muted);font-weight:500;background:none;border:1.5px dashed var(--line)}
+.attachrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.attach{display:flex;align-items:center;gap:6px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:11px;padding:8px 11px;font-size:12px;font-weight:600;color:#3D4B63}
+.attach button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0}
+.addfile{background:#fff;border:1.5px dashed var(--blue);border-radius:11px;padding:8px 13px;font:inherit;font-size:12px;font-weight:700;color:var(--blue-deep);cursor:pointer}
+.snackbar{position:absolute;left:14px;right:14px;bottom:76px;background:#1B2C4A;color:#E9F1FF;border-radius:16px;padding:14px 15px;font-size:12.5px;line-height:1.4;z-index:8;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.snackbar button{background:none;border:0;color:#7FDCFF;font:inherit;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.bottomnav{flex:0 0 auto;display:flex;background:#fff;border-top:1.5px solid var(--line);padding:6px 0 10px;z-index:10}
+.bottomnav button{flex:1;background:none;border:0;font:inherit;font-size:10px;font-weight:700;color:#9DAAC0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 0}
+.bottomnav button[aria-current="true"]{color:var(--blue)}
+.bottomnav .ic{font-size:18px;line-height:1}
+.path{padding:6px 0 10px;position:relative}
+.pathrow{display:flex;align-items:center;gap:12px;margin:0 0 4px;position:relative;height:62px}
+.node{width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:12.5px;font-family:"Roboto";flex:0 0 auto}
+.node::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 -4px 0 rgba(0,0,0,.2)}
+.node[data-skip="1"]{background:#E4EAF5;color:#9DAAC0}
+.node[data-skip="1"]::after{box-shadow:inset 0 -4px 0 rgba(0,0,0,.05)}
+.connector{position:absolute;top:46px;width:3px;height:20px;background:#E4EAF5;border-radius:2px}
+.daylabel{font-size:12px;color:var(--muted);font-weight:500}
+.daylabel b{display:block;color:var(--ink);font-size:13px;font-weight:700}
+.rmark{font-size:10.5px;font-weight:700;color:var(--blue-deep);background:var(--surface-2);border-radius:999px;padding:3px 8px}
+.chev{margin-left:auto;color:#B4C1D4;font-size:17px}
+.todaydino{margin-left:auto;margin-right:2px}
+.spec h2{font-size:20px;font-weight:700;letter-spacing:-.015em;margin:0 0 5px}
+.lede{font-size:14.5px;line-height:1.6;color:#A6BAD6;margin:0 0 22px;max-width:64ch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.panel{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.11);border-radius:18px;padding:17px 18px}
+.panel h3{margin:0 0 11px;font-size:12px;font-weight:700;color:#93A9C8}
+.panel ul{margin:0;padding-left:17px}
+.panel li{font-size:13.3px;line-height:1.65;color:#D2DEEE;margin-bottom:6px}
+.panel li:last-child{margin-bottom:0}
+code{font-family:ui-monospace,monospace;font-size:12.3px;background:rgba(53,196,240,.16);color:#8FE1FF;padding:1px 5px;border-radius:4px}
+.navlist{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 24px}
+.navlist button{font:inherit;font-size:13px;font-weight:600;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#BCCCE4;border-radius:999px;padding:9px 15px;cursor:pointer}
+.navlist button[aria-current="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.mathbox{margin-top:20px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.11);border-radius:18px;padding:17px 18px}
+.mathbox h3{margin:0 0 11px;font-size:12px;font-weight:700;color:#93A9C8}
+.mathbox table{width:100%;border-collapse:collapse;font-size:13.2px}
+.mathbox td{padding:6px 0;color:#D2DEEE;border-bottom:1px solid rgba(255,255,255,.08)}
+.mathbox td:last-child{text-align:right;font-weight:700;color:#fff}
+.mathbox tr:last-child td{border-bottom:0;padding-top:10px;font-size:14.5px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.sw{display:flex;align-items:center;gap:7px;font-size:11.5px;color:#BCCCE4;background:rgba(255,255,255,.05);border-radius:999px;padding:5px 11px 5px 5px}
+.sw i{width:19px;height:19px;border-radius:50%;display:block}
+.foot{margin-top:30px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14);font-size:12.5px;line-height:1.75;color:#7F94B4;max-width:82ch}
+.warn{margin-top:16px;background:rgba(245,160,60,.11);border:1px solid rgba(245,160,60,.34);border-radius:16px;padding:15px 17px;font-size:13.3px;line-height:1.65;color:#FFDFC0}
+.warn b{color:#FFBE85}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div><div class="wordmark">Cap<em>Coach</em></div>
+    <p>Fourth pass. Soft-blue default palette, the mascot recoloured live to match your capacity state, task rescheduling with file attachments, and pathway days that open the tasks for that day.</p></div>
+    <div class="meta">Native Android · Java + XML<br>Room DB · SharedPreferences · local-first<br>MVP target: 11 Oct 2026</div>
+  </header>
+  <div class="controls">
+    <div class="ctl"><b>Language</b><button data-lang="en" aria-pressed="true">English</button><button data-lang="ms" aria-pressed="false">Bahasa Melayu</button></div>
+    <div class="ctl"><b>Tone</b><button data-tone="hype" aria-pressed="false">Hype</button><button data-tone="chill" aria-pressed="true">Chill</button><button data-tone="plain" aria-pressed="false">Plain</button></div>
+    <div class="ctl"><b>Demo</b><button id="loadBad">Bad week</button><button id="reset">Reset</button></div>
+  </div>
+  <div class="stage">
+    <div class="phone-col"><div class="phone"><div class="screen" id="screen"></div></div></div>
+    <div class="spec">
+      <div class="navlist" id="nav"></div>
+      <h2 id="specTitle"></h2><p class="lede" id="specLede"></p>
+      <div class="grid2">
+        <div class="panel"><h3>XML — what to drag in</h3><ul id="specXml"></ul></div>
+        <div class="panel"><h3>Java — what to wire</h3><ul id="specJava"></ul></div>
+      </div>
+      <div class="mathbox"><h3>Live capacity calculation</h3><table id="mathTable"></table></div>
+      <div class="mathbox"><h3>Palette — soft blue default</h3>
+        <div class="swatches">
+          <span class="sw"><i style="background:#5B8DEF"></i>#5B8DEF brand</span>
+          <span class="sw"><i style="background:#3D6BC4"></i>#3D6BC4 brand deep</span>
+          <span class="sw"><i style="background:#35C4F0"></i>#35C4F0 accent</span>
+          <span class="sw"><i style="background:#EDF3FD"></i>#EDF3FD surface</span>
+          <span class="sw"><i style="background:#17233A"></i>#17233A ink</span>
+        </div>
+        <div class="swatches">
+          <span class="sw"><i style="background:#22C48A"></i>thriving</span>
+          <span class="sw"><i style="background:#F5B93C"></i>steady</span>
+          <span class="sw"><i style="background:#FF8A3D"></i>stacked</span>
+          <span class="sw"><i style="background:#F0524D"></i>overload</span>
+        </div>
+      </div>
+      <div class="warn" id="scopeWarn"></div>
+      <p class="foot">Weights follow the research already gathered: academic pressure (66.2%) and role overload (50.4%) as the top burnout factors among Malaysian medical and health sciences students; a 2.07 odds ratio for burnout under poor sleep among Perak undergraduates; social support negatively correlated with burnout. The four baseline questions are structured on the Burnout Assessment Tool's core dimensions but written from scratch — the BAT is copyrighted and its authors state plainly that no self-report tool diagnoses burnout. CapCoach estimates load. It does not diagnose.</p>
+    </div>
+  </div>
+</div>
+
+<script>window.__SPRITES__ = {"idle": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAAAYCAYAAABZY7uwAAADiElEQVR4Ae3BMWvbaBjA8f+by1IoDrgUNDx64aCLPWnr0NtFKP0IPXko3pOhSzqkUG7o4BuyGRdO+Qo36QN46KapGlvkZ1CgEcSUdHzPAgtEcRLF9l1v8O/Hzs7Ozk9kuIWIOFpQVcMaRMTRgqoafhLDDUTE6XhGRYY+oU2oed0eTXFqUVXDPYiI0/GMigx9QptQ87o9muLUoqqGexIRRwuqarjBL9yg0+mczl8cI0Of0CY0ffv+lYcPHlMLvCM+X384nc/nb2mp0+mczl8cI0Of0CY0ffv+lYcPHlMLvCM+X384nc/nb2lJRJyOZ8xfHNP5+09Cm/Dk4CVPDl7y269/EHhHBN4RgXfE5+sPp/P5/C0r7NHSZNpnMu0zmfZZJQpyRMSxpsm0z2TaZzLts0oU5IiI455k6BPahKaizGiKghwRcaywxz34vo/v+9Ti1FKLU0sU5IiIY02+7+P7PrU4tdTi1BIFOSLiWMNk2mcy7TOZ9lklCnJExPGDPe6g4xlJHrJKFOTUoiCnKDPuS8czkjxklSjIqUVBTlFmbML3fXzfpxanllqcWqIgR0QcDfu09OrZJ0KbsEpRZmzq1bNPhDZhlaLMWJeOZyRDH5jxoyjIqUVBTlFm/MhwCxFxLIQ2YRWv2yNOLU2qamhJRBwLoU1Yxev2iFNLk6oaWhARp+MZFRn6hDahyev2qBVlRi3JQ1TVsGS4g4i40CZUvG6Ppji1qKphAyLiQptQ8bo9muLUoqqGNYmIYyG0Cat43R5xamlSVUPDPi29fveRg0dfaIqf87+mqkZEHEtet0dTnFpU1XCLfW4gIo7/0Ot3Hzl49IWm+Dlb8/rdRw4efaEpfs6d9rlFFORUijJj20TEsRAFOUWZsW0i4tiCfW4Rp5bQJlTev3mK1+3x+/FfVM5HAzYVBTlFmfFviYKcSlFmrGuPG6iqYSHJQypet0flfDTgfDRgU6pq4tRSe//mKWcnh1xdXnB1ecHZySGbilNLUWZU3r95ytnJIVeXF1xdXnB2ckgbe9xCVQ0NcWqJU0tRZmyDqpokD6l43R6V89GA89GATamqYSHJQypet0flfDTgfDSgrT1ailOLqhqW4tSiqoYtilNLnFqKMmMbVNXQEKeWOLUUZUZbhjuIiGNBVQ0LIuJYUFXDFoiIY0lVjYg4llTVsCERcSypqhERx5KqGnZ2dn6mfwAofnHraT9mMQAAAABJRU5ErkJggg==", "move": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJAAAAAYCAYAAAAVpXQNAAAGoklEQVR4Ae3BP4sU2RrA4d/xmgjSAyVCBW8dWDDpjioQDNxsg2IY/AhuTSBtPAYmI8sIsoHBbDDRbdqg5issNzgfoAPhBhVZoVL9BjXgFEwjGp7bBRYUQ4/2n9lld28/D1tbW1tbW1tb/4cM3yAiniWoquEvSEQ8S1BVwxpExLMEVTX8BYmIZwmqariC4Qoi4nU0pSHDiMQ6WmHQpyvLLapqWJGIeJagqoYViYjX0ZSGDCMS62iFQZ+uLLeoqmEFIuJ1NKUhw4jEOlph0Kcryy2qaliRiHiWoKqGFYmI19GUhgwjEutohUGfriy3qKphgX9xhV6vdzR79AwZRiTW0fXpy0du37pLKw4PeP/5zdFsNnvJkkTE62jK7NEzer//RmId93Yec2/nMT/+8CtxeEAcHhCHB7z//OZoNpu9ZAW9Xu9o9ugZMoxIrKPr05eP3L51l1YcHvD+85uj2Wz2kiX1er2j2aNnyDAisY6uT18+cvvWXVpxeMD7z2+OZrPZS5YkIl5HU2aPntH7/TcS67i385h7O4/58YdficMD4vCAODzg/ec3R7PZ7CUr6PV6R7NHz5BhRGIdXZ++fOT2rbu04vCA95/fHM1ms5dccoMljScDxpMB48mARdK4REQ8K5JhRGIdXVVd0JXGJSLi2cB4MmA8GTCeDFgkjUtExLOm8WTAeDJgPBmwSBqXiIhnRTKMSKyjq6oLutK4REQ8GxhPBownA8aTAYukcYmIeC65wQqiKCKKIlpZbmlluSWNS0TEs4bxZMB4MmA8GbBIGpeIiGcDURQRRRGtLLe0stySxiUi4llTFEVEUUQryy2tLLekcYmIeNYwngwYTwaMJwMWSeMSEfFsIIoioiiileWWVpZb0rhERDwdN/gOHU1xZcIiaVzSSuOSqi7YRBRFRFFEK8strSy3pHGJiHhWoKMprkxYJI1LWmlcUtUFq9LRFFcmLJLGJa00Lqnqgk1EUUQURbSy3NLKcksal4iIZwU6muLKhEXSuKSVxiVVXXDZTZb05OE7EutYpKoL1qWjKW4YAVMuS+OSVhqXVHXBup48fEdiHYtUdcGmnjx8R2Idi1R1wbp0NMUNI2DKZWlc0krjkqouWNeTh+9IrGORqi64iuEbRMQzl1jHImHQJ8stXapqWIKIeB1NacgwIrGOrjDo06rqgpYrE1TVsAQR8cwl1rFIGPTJckuXqhqWJCKeucQ6FgmDPllu6VJVwxJExOtoSkOGEYl1dIVBn1ZVF7RcmaCqhiWIiGcusY5FwqBPllu6VNXQYfgOEfGJdTTCoE9XlltU1bAmEfHMJdaxSBj0yXJLl6oaViAiPrGORhj06cpyi6oaNiAiPrGORhj06cpyi6oa1iQinrnEOhYJgz5ZbulSVcMKRMQn1tEIgz5dWW5RVcM33GRJz1+9ZefOB7qyPTaiqkZEPF+FQZ+uLLeoquEaPH/1lp07H+jK9rg2z1+9ZefOB7qyPTaiqkZEPF+FQZ+uLLeoquEaPH/1lp07H+jK9vium1xBRDx/ouev3rJz5wNd2R5rExHPH0hEPH+i56/esnPnA13ZHmsTEc81uMk3pHFJo6oL/o7SuKRR1QVXERGvqoY1pHFJo6oL/o7SuKRR1QU//fwLjf/+59+s4gbfkOWWqi5ovH7xgPt7T7k4P+Pi/IyTw102ISJeRHwal7Tu7z3lOmW5paoLGq9fPODkcJeL8zMuzs84OdwljUs2keWWqi5ovH7xgJPDXS7Oz7g4P+PkcJdNiIgXEZ/GJX+ULLdUdUEjjUvSuOT+3lMuzs84OdxlGTe4gqoa5lyZ0AiDPmlc8tPPv3B6vM91SOOSqi5onB7vk8Yl9/eecnF+xsnhLptQVcOcKxMaYdCncXq8z+nxPlVdUNUF61JVw5wrExph0KdxerzP6fE+jTQuERHPmtK4pKoLGqfH+9zfe8rF+RkX52ecHO7SEBHPGlTVMOfKhEZVF1R1QeP0eJ9l3eQbVNUw50h8giMM+jSy3NJQVcMGstzSSKyj6/WLB4QBG1NVIyKer7LccpmqGjaQWEcryy2txDrCoM8mstzSSKyjqgsap8f7tNK4JMst61JVw5wj8VyS5RZVNXyHYUki4ulQVcM1ERGfWEcY9MlyS0tVDRsSEZ9YhysTVNVwjUTE06Gqhq9ExPOVqhrWJCKeBRLrCIM+WW5RVcM1EBGfWIcrE1TVsATDX4CIeDpU1XBNRMQzp6qGfwgR8XylqoZrIiKeOVU1bG1tbW1t/bP9DxAo4GM79UE7AAAAAElFTkSuQmCC", "scan": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJAAAAAYCAYAAAAVpXQNAAAE6ElEQVR4Ae3BP27bTBrA4d8Y7g3Ixap4Z3qpYrFAihyAMHwIugi0N3DjlK5SuHFnqBnfggdQ4W6qsA3It6ALE/AJZocfLICfoTj6u8nu6nk4Ojo6Ojo6Ovo/ZPiAiETWoKqGLcSENZiELYhIZA2qatiCiETWoKqGLYhIZA2qathCTFiDSfgJw0+ISNSHhp7MLLkrWRqPJgz54FBVwwZiwgZMwgZEJOpDQ09mltyVLI1HE4Z8cKiqYQMiEvWhoSczS+5KlsajCUM+OFTVsAERifrQ0JOZJXclS+PRhCEfHKpq2EBM2IBJWOGEX5CZJXclQ21XMVRkNSISOaCYsAWZWXJXMtR2FUNFViMikS3IzJK7kqG2qxgqshoRiWxBZpbclQy1XcVQkdWISOSAYsIKJ6xpvpgyX0yZL6asUmQ1IhI5oJiwpfliynwxZb6YskqR1YhIZEvzxZT5Ysp8MWWVIqsRkciW5osp88WU+WLKKkVWIyKRA4oJ75ywAWst1lqWfHAs+eAoshoRiRxQTNiStRZrLUs+OJZ8cBRZjYhEtmStxVrLkg+OJR8cRVYjIpEtWWux1rLkg2PJB0eR1YhI5IBiwsApv6APDeXMAg3vFVnNUpHVtF3Fuqy16ENDT2aWpmmw1tLLXcl4NOG9tqso65x1NE3DX5qGpaZpGLqlYemWht4tDcYY1qUPDeXMAg3vFVnNUpHVtF3FpvShoZxZoOG9IqtZKrKatqv4TztlTV8+fyd3Jau0XcWuvnz+Tu5KVmm7ij/dl8/fyV3JKm1Xsasvn7+Tu5JV2q7idzF8QEQiSe5KVhmPJvjgGFJVw5pEJJLkrmSV8WiCD44hVTWsKSZsyCSsSUQiSe5KVhmPJvjgGFJVw5pEJJLkrmSV8WiCD44hVTWsKSZsyCQMGH5BRGLuSnrj0YQhHxyqatiBiMTclfTGowlDPjhU1bCDmPABk7ADEYm5K+mNRxOGfHCoqmEHIhJzV9IbjyYM+eBQVcMOYsIHTMIHTlnT9e0TZ+c/GPKX7M317RNn5z8Y8pf817i+feLs/AdD/pK9ub594uz8B0P+kt/ulJ8QkcgBiUjkgGLCAYlI5IBEJHJAMWEPTvlAkdX02q7iEIqsptd2FftmraXIanptV3F9+8TZ+T8Y+uflv9hW0zT83ZT3mqbBGMO2iqym13YVf6oTPuCDo+0qet++fuL+5oLXl2deX565v7lgVz442q6i9+3rJ+5vLnh9eeb15Zn7mwt25YOj7Sp6375+4v7mgteXZ15fnrm/ueBP54Oj7Sp6375+4v7mgteXZ15fnrm/ueBPcMJPqKohKeuc3ng0ofd4d8Xj3RW7UlVDUtY5vfFoQu/x7orHuyt2paqGpKxzeuPRhN7j3RWPd1fsyiQckKoakrLO6Y1HE3qPd1c83l2xK5OwByd8QFUNAz44fHC0XcU+qKphwAeHD462q9gHVTUM+ODwwdF2FftgEg5IVQ0DPjh8cLRdxT6YhB2dsCYfHKpqeOODQ1UNe+KDQ1UNb3xwqKphT3xwqKrhjQ8OVTXskUkYMAl74oNDVQ1vfHCoqmGPTMKASfiFE9ZQ1jmqanhT1jmqatiTss5RVcObss5RVcOelHWOqhrelHWOqhr2yCQMmIQ9KescVTW8KescVTXskUkYMAlHR0dHR0f/u/4N+Lo8Cw664OMAAAAASUVORK5CYII=", "hurt": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAYCAYAAAAF6fiUAAAEPUlEQVR4Ae3BsWscVx7A8e9TxEHAKDAmMMVvXj+uhuPAxZVXvBPG/0LGRVCTylukkTlkyHHgwleosrAhE/IfhBSvS+MikGKKkKmCzdtfMYJoYJfDV77MQBYWoV3NSivOPvT5cOvWrVv/O4b3iIhELqCqhv9ThjVEJDKCqhquQEQiS5z1DNIkZ1lVW1TVcEWxxwVMjy0QkcgFVNVwCcMKIhL1ZMpADjKc9SykSc6yqraoqmEDIhL1ZMpADjKWOetJk5xlVW1RVcMIscdIpseGRCSyxFnPIE1yllW1RVUNa3zECnt7e0fzhxPkIMNZz7L//Pc37nz8KQtF+pg3714dzefzp4y0t7d3NH84QQ4ynPX88PO/mEwmTCYTvjj6M0X6mGVF+pg3714dzefzp6wRe2zgqPe0x0giEvVkyvzhhL3v/s3g19m3/Dr7lvRPf+fOx5+yUKSPefPu1dF8Pn/KCjuM9PL1PV6+vsfL1/e4SFkERCSyRVVtWahqS1kERCSyZbHHhuQgw1nPdDplOp0ynU7xwXFeWQREJLLCDhvIsowsy1ioastCVVvKIiAikS0pi8BCWQTaruGmxB5bUtWWhaq2lEVARCIX2OESejLFB8dFyiKwUBaBtmvYlJ5M8cGRZRmDLMsoi8B5bdfwoSiLwEJZBNquYZUdRvr8r7/grMdZz3lt19B2DdvSdg3L2q7BB4cPDlU1vAf0ZIoPjizLGGRZRlkEzmu7hnV2WUFVjRxkkZ6znvPariFNcqraskxVDSOoqpGDLNJz1jPIsgxnPYO2a0iTnKq2DFTVcINMj2tqu4Y0yVlouwYfHANVNVzAcAkRic56BmmSs6yqLapquAYRic56BmmSs6yqLapq2FDsMZLpsSERifSc9Qx8cDjrWUiTnKq2DFTVsMYuI3351Y98cvcty6oHbM2XX/3IJ3ffsqx6wJWYXuyxhulxRapqRCSmSc5nk6/5590XwFsW/vLAoaqGEXZYQUSiiEQ+UKbHGrHHNaiqqWrLsyf3mZ2dsuyn718gIpERdlmjLAKDtmvYNhGJ9Moi0HYNq4hIVFXDBmKPEWLP9NiQiER6ZRFou4ZVRCSqqmGNHdaoakvbNQyePbnP8eE+s7NTZmenHB/uc11lEWi7hsGzJ/c5PtxndnbK7OyU48N9yiLwviqLQNs1DJ49uc/x4T6zs1NmZ6ccH+5TFoExdllBVY2IRB8cznrSJGfwzfNHbEtVWwbOetIkZ/DN80cM2q7hfVbVloGznjTJGfzts39QFoG2axjLcAkRic560iSnqi0DZz1pklPVFlU1XIOIRGc9aZJT1ZbzVNVwRbHHGqbHNYhIdNaTJjlVbTlPVQ2X2GWkqraoqhGRSK+qLapq2JKqtqiq4YaYHjekqi2qariCHUbwwaGqhj/44FBVw5b44FBVww0xPW6IDw5VNdy6devWh+d3ZfTqzrwm4ekAAAAASUVORK5CYII=", "dead": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAAYCAYAAAAxkDmIAAAEPklEQVR4Ae3BsWsbZxjA4d/rejEYB1QMGj59Uxd5uj1/wBVK/4TmMgRvGZohswTJau/GCfmyd0mHcGMHD90uSzy2fHoHQYKHIzTj11dwgquw7JMjQdrqedja2tra+loJW1+9ZLiGGG4h3MA5l+hAVYWtjUqGFjF0ICzhnEt6NmHGHQ/IfclcvzekLVQeVRW2vlgyGDEsSAYjhpZkxHANYQnnXNKzCe54QO5LFvV7Q9pC5VFVYQXOuUQHqir8DyRDQwwdJENDDAt26ej84oi5R/ffs6jIIgGfVFXowDmX9GzCjDsekPuSuX5vSFvAJ1UVtla2wwoGgwGDwYC5UHnmQuUpsohzLrECdzwg9yVt06tL2oos4pxL/MdJCx2J4Qa73ELPJpTHA2DCoiKLzBVZZHp1yV2dXxwx9+j+exYVWSTgk6oKW/8ghiV26ejR/ffkvuQ606tLNiFUniKLzITKU2SRgE+qKnTgnEt0oKrCHSRDB2L4AsmIoYNkxNDYYQlVFXc8wB0PyH3JounVJTOh8pQxp4w5ZcxRVWEFejahjDnXKbLIXJFFVuGcS3o2Qc8mzOS+JPcluS8pskiRRYosUmQR51xiRcnQUTLcIjVYIhk6SobGN9ygruvxwcHB6Lt7PzHT7w3Z3ztkf++Q/b1DQuVRVanrelzX9biu6zEd1XU9dr+9GB38esrM+1++583LD7x5+YGZT58/sr93SKg876anvJue8m56iqoKHRwcHIzqH5/gjgfkvqTt0+eP7O8dMpf1f+aPv16M6roe09HIsIKRGRuWGBnMyIwNLSODGZmxwSQzNjSSGRkaIzM2O3T09NnvPH7+lsfP3/L4+VseP3/Ll1JVweS+ZKbfG9LvDen3hvR7Q0LlUVVRVVFVUVXhjs4vjji/OOL84ojrFFnEOZfYoGS4gRgWJENLamCS4Ra7LOGcS2yQcy7R8vTZ79z79k/awg9sVKg8RRaZCZWnyCIBn1RV2JBkxLBADEYMLWKS4RZiuMYONyiySJFFNqXIIkUW2SQ9m1DGnOsUWWSuyCJfi2QwyWDEcEfCEs65hMl9yVy/N+TBk1fMvD55SKg8qircgXMuYXJfMtfvDXnw5BUzr08eEiqPqgp35JxLNHJfsqjfGxIqT5uqCh0lw4rEcItkaIjBJEMHYmjZZQlVFedcKmNO7kv6vSEzr08esg6qKs65VMac3Jf0e0NmXp88ZN1yX9LvDVkUKo+qChskhjsSg0mGJcRwgx1uoKpCS6g8ofJMry5ZB1UVWkLlCZVnenXJOqiq0BIqT6g806tL1kEMGyANTDJ8gR06CpVHVYVGqDyqKqxJqDyqKjRC5VFVYU1C5VFVoREqj6oKaySGFjGskRhaxHCLHTooY46qCo0y5qiqsCZlzFFVoVHGHFUV1qSMOaoqNMqYo6rCGomhRQxrJIYWMWxtbW1t/Zv9DQl3Iz65iMdoAAAAAElFTkSuQmCC", "jump": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAYCAYAAAAF6fiUAAAENklEQVR4Ae3BLXLcSByH4bddw1OlEIG/mstIbIEPIJA7RAauOUBA0MKgBT6AyyDtW/QBDMKELJrq+QEhXaF3VOWpUk3ZztiTD282z+P4jZlZ5gCSHL+I4zdlZllXG2a2rmh9ZKcsapZC75Hk+AVO+M3ZuqL1kaVxGljqmoSZZX6BE/4nrm9Pub495fr2lId0TcLMMj/ZiieYWeYAkhz/AVVVMWt9ZBZ6T9ckZqH3dE0i4LMkx0+y4hFmlnW1YWbritZHdsqiZingsyTHM5lZ5gCSHC+kqw1xXQEb9nVNYqdrEuM08BxmljmAJMcjVnyDrStaH1kap4GyqNnpmkTAZ0mOA5lZ1tWGma0rWh/ZKYuapYDPkhxHuDi7o/WRh4zTwHOZWdbVhpmtK1of2SmLmqWAz5IcDzjhQNe3p1zfnnJ9e8pDuiZhZplnsnVF6yNL4zSw1DUJM8s8gyRn6wpbV7Q+sm+cBmah98TUElNLTC2SHM9g64rWR5bGaWCpaxJmlnnAimeoqopZ6yOz0Hu6JjELvadrEgGfJTme6fr2lJ2Lszv2dU0i4LMkx4EkOTPL3CuLmqXQeyQ5voPr21N2Ls7u2Nc1iYDPkhwLJ3yDrjbE1PKQrknsdE1inAaOUVUVVVWxE3rPTug9XZMws8wrVVUVVVWxE3rPTug9XZMws8zCigNdnN3R+shDxmngpXS1Ia4rYMO+rknsdE1inAZe6uOnL7x5+5Wl8I6j6WpDXFfAhn1dk9jpmsQ4Dexb8QhJztZVZqv1kX3jNFAWNaH3LElyvMDF2R2tjzxknAaey8wyW12TGKeBH+3i7I7WRx4yTgOPWfEESc7MMvfKomYp9B5JjheQ5GxdZbZaH9k3TgNlURN6z5Ikx4G6JjFOAz+CJGfrKrPV+si+cRooi5rQe5YkORZWHOjjpy+8efuVpfCOo0hyZpa5VxY1S6H3SHK8gCQX8Ln1kdk/f/9FWdS8//CZ2c3lOceS5Mwsc68sapZC75HkeMKKR5hZ5if6+OkLb95+ZSm84yiSXKTNrY+URc3s5vKcH+Hjpy+8efuVpfCOb1rxhK5JzMZp4Hszs8xPFnrPrPWRsqg5hpllvoMVTwi9p/WR2T9//0VZ1Lz/8JnZzeU5x+qaxGycBn6kmFpIIMmZWY6phQSSHEfomsRsnAZeyvEEM8tstT5SFjX7Qu+R5HgBM8tstT6yUxY17z98ZnZzeU7oPZIcr5CZZbZaH9kpi5r3Hz4zu7k8J/QeSY4nnPAESY6F0HtC7xmngWNJcmzF1DIri5rZzeU5N5fnvHaSHFsxtczKomZ2c3nOzeU5hzrhQKH3SHLcC71HkuMIkhwLofeE3jNOA/8FkhwLofeE3jNOA4dyfIOZZbYkObbMLLMlyfEdmFnmniRnZpl7khyvnJll7klyZpa5J8nxxx9//PF6/QueHOriHWHBvAAAAABJRU5ErkJggg=="};</script>
+<script>
+const RAW = window.__SPRITES__;
+const ANIM={idle:{f:3,d:1.1},move:{f:6,d:.75},scan:{f:6,d:1.0},hurt:{f:4,d:.7},dead:{f:5,d:.9,once:1},jump:{f:4,d:.6}};
+const SRC_L=[123,76,254], SRC_D=[99,58,213];
+const TINT={brand:["#5B8DEF","#3D6BC4"],thriving:["#22C48A","#159A6B"],steady:["#F5B93C","#C88F1E"],
+  stacked:["#FF8A3D","#D46722"],overload:["#F0524D","#C03733"],recovered:["#F5B93C","#C88F1E"]};
+const TINTED={};
+const hx=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const loadImg=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=s;});
+async function buildTints(){
+  const imgs={}; for(const k in RAW) imgs[k]=await loadImg(RAW[k]);
+  for(const st in TINT){
+    const [L,D]=TINT[st].map(hx); TINTED[st]={};
+    for(const k in imgs){
+      const im=imgs[k],c=document.createElement("canvas");
+      c.width=im.width;c.height=im.height;
+      const x=c.getContext("2d");x.drawImage(im,0,0);
+      const dd=x.getImageData(0,0,c.width,c.height),p=dd.data;
+      for(let i=0;i<p.length;i+=4){
+        if(p[i+3]<20)continue;
+        if(p[i]===SRC_L[0]&&p[i+1]===SRC_L[1]&&p[i+2]===SRC_L[2]){p[i]=L[0];p[i+1]=L[1];p[i+2]=L[2];}
+        else if(p[i]===SRC_D[0]&&p[i+1]===SRC_D[1]&&p[i+2]===SRC_D[2]){p[i]=D[0];p[i+1]=D[1];p[i+2]=D[2];}
+      }
+      x.putImageData(dd,0,0); TINTED[st][k]=c.toDataURL();
+    }
+  }
+}
+function sprite(n,px,st){
+  st=st||"brand"; const a=ANIM[n], src=(TINTED[st]&&TINTED[st][n])||RAW[n];
+  return '<span class="dino" style="width:'+px+'px;height:'+px+'px;background-image:url(\''+src+'\');background-size:'+(a.f*100)+'% 100%;animation:f'+a.f+' '+a.d+'s steps('+a.f+') '+(a.once?"1 forwards":"infinite")+'"></span>';
+}
+
+const S={
+ en:{
+  lang_label:"Language", lang_en:"English", lang_ms:"Bahasa Melayu",
+  setup_title:"Set your limits", setup_sub:"Two minutes now, three taps a day after that.",
+  name:"Your name", sec_limits:"Your weekly ceiling", sec_baseline:"Your normal week",
+  limits_sub:"Hours you can realistically give each week. This becomes the 100% line on your dashboard — not what you actually do.",
+  baseline_sub:"Not about today — about how a normal week tends to leave you. Asked once, never again.", sec_tone:"Coach tone",
+  study:"Study", work:"Work or shifts", social:"Social",
+  save:"Save and start", tone_hype:"Hype", tone_chill:"Chill", tone_plain:"Plain",
+  tone_hint:"Pick what you'd actually want to read at 2am. You can change it any time.",
+  scale:["Never","Rarely","Sometimes","Often","Always"],
+  q:["At the end of a study day, how often is it hard to get your energy back?",
+     "How often do you struggle to find any interest in your coursework?",
+     "How often do you have trouble concentrating on your work?",
+     "How often do you get irritable when things don't go your way?"],
+  checkin_title:"How are we doing?", checkin_sub:"Today only. The same workload weighs more on four hours' sleep — this is what adjusts for that.",
+  sec_mood:"Mood right now", sec_sleep:"Last night's sleep", sec_energy:"Energy",
+  mood_low:"Drained", mood_high:"Energised", energy_low:"Empty", energy_high:"Full",
+  sleep:["Under 5h","5–6h","7–8h","8h+"], calc:"See my load",
+  dash_title:"Your capacity", total:"of your week",
+  cats:{mental:"Mental",time:"Time",physical:"Physical",social:"Social",errands:"Errands"},
+  fix:"Fix one thing", trigger:"Trigger overload demo",
+  tasks_title:"Your tasks", tasks_sub:"Tap a day. Use ↻ to reschedule anything.",
+  all:"All", add_title:"New task", edit_title:"Reschedule",
+  t_what:"What is it?", t_voice:"Type, or hold the mic", t_listening:"Listening…",
+  t_cat:"Category", t_pri:"Priority", t_due:"Deadline", t_hours:"Rough hours", t_files:"Attachments",
+  cat:["Academics","Work","Social","Errands","Self-care"], pri:["Low","Medium","High"],
+  due:["Today","Tomorrow","In 3 days","This week","Next week"],
+  save_task:"Add task", save_move:"Move it", cancel:"Cancel", addfile:"+ Attach a file",
+  no_tasks:"Nothing due here. That's allowed.",
+  today:"Today", tomorrow:"Tomorrow", yesterday:"Yesterday",
+  indays:"In %d days", daysago:"%d days ago",
+  load_from:"of today's load comes from tasks", moved:"Moved from", from_path:"Showing %s",
+  tasks_word:"tasks", moved_why:"rescheduled", done_label:"Done", over:"OVER",
+  by:"by", added:"Added", deadline:"Deadline", hist_label:"Reschedule history",
+  never_moved:"Never moved", close:"Close", moved_arrow:"Rescheduled", moved_times:"moved %d times",
+  how_title:"What each question is for", how_1:"Weekly ceiling — how much you can take. The denominator.",
+  how_2:"Your tasks — how much you actually have. The numerator.",
+  how_3:"Daily check-in — how heavy that load feels today. The multiplier.",
+  limit_key:"The line is 100% — the limit you set for yourself. Past it you are borrowing hours from somewhere else, usually sleep.",
+  buffer_note:"Social time protects you, so it subtracts instead of adding.",
+  path_title:"Your check-ins", path_sub:"Tap any day to open its tasks.",
+  path_skip:"No check-in", path_legend:"Missing a day costs you nothing. This is a record, not a streak.",
+  sheet_title:"Let's move one thing", yes:"Swap it", no:"I'll survive",
+  snack:"Take a 15-minute screen-free break.", snack_act:"Start",
+  helpline:"Feels like more than workload? Talian HEAL 15555",
+  nav_today:"Today", nav_tasks:"Tasks", nav_path:"Path", nav_me:"Me",
+  due_today:"tasks due today or overdue — counted for you."
+ },
+ ms:{
+  lang_label:"Bahasa", lang_en:"English", lang_ms:"Bahasa Melayu",
+  setup_title:"Tetapkan had anda", setup_sub:"Dua minit sekarang, tiga ketik sehari selepas ini.",
+  name:"Nama anda", sec_limits:"Had mingguan anda", sec_baseline:"Minggu biasa anda",
+  limits_sub:"Jam yang anda mampu beri setiap minggu. Ini menjadi garisan 100% pada papan pemuka — bukan apa yang anda buat sebenarnya.",
+  baseline_sub:"Bukan tentang hari ini — tentang bagaimana minggu biasa meninggalkan anda. Ditanya sekali sahaja.", sec_tone:"Nada jurulatih",
+  study:"Belajar", work:"Kerja atau syif", social:"Sosial",
+  save:"Simpan dan mula", tone_hype:"Semangat", tone_chill:"Santai", tone_plain:"Ringkas",
+  tone_hint:"Pilih yang anda sanggup baca pukul 2 pagi. Boleh tukar bila-bila masa.",
+  scale:["Tidak pernah","Jarang","Kadang","Kerap","Selalu"],
+  q:["Di akhir hari belajar, berapa kerap anda sukar mengumpul semula tenaga?",
+     "Berapa kerap anda sukar untuk berminat dengan kerja kursus anda?",
+     "Berapa kerap anda sukar untuk fokus pada kerja anda?",
+     "Berapa kerap anda mudah naik angin bila sesuatu tidak menjadi?"],
+  checkin_title:"Apa khabar hari ini?", checkin_sub:"Hari ini sahaja. Beban yang sama terasa lebih berat dengan tidur empat jam — ini yang melaraskannya.",
+  sec_mood:"Perasaan sekarang", sec_sleep:"Tidur malam tadi", sec_energy:"Tenaga",
+  mood_low:"Penat", mood_high:"Bersemangat", energy_low:"Kosong", energy_high:"Penuh",
+  sleep:["Bawah 5j","5–6j","7–8j","8j+"], calc:"Lihat beban saya",
+  dash_title:"Kapasiti anda", total:"daripada minggu anda",
+  cats:{mental:"Mental",time:"Masa",physical:"Fizikal",social:"Sosial",errands:"Urusan"},
+  fix:"Betulkan satu perkara", trigger:"Papar demo lebihan beban",
+  tasks_title:"Tugasan anda", tasks_sub:"Ketik satu hari. Guna ↻ untuk jadual semula.",
+  all:"Semua", add_title:"Tugas baharu", edit_title:"Jadual semula",
+  t_what:"Apa tugasnya?", t_voice:"Taip, atau tekan mikrofon", t_listening:"Mendengar…",
+  t_cat:"Kategori", t_pri:"Keutamaan", t_due:"Tarikh akhir", t_hours:"Anggaran jam", t_files:"Lampiran",
+  cat:["Akademik","Kerja","Sosial","Urusan luar","Jaga diri"], pri:["Rendah","Sederhana","Tinggi"],
+  due:["Hari ini","Esok","3 hari lagi","Minggu ini","Minggu depan"],
+  save_task:"Tambah", save_move:"Alihkan", cancel:"Batal", addfile:"+ Lampirkan fail",
+  no_tasks:"Tiada tugas di sini. Itu tidak mengapa.",
+  today:"Hari ini", tomorrow:"Esok", yesterday:"Semalam",
+  indays:"%d hari lagi", daysago:"%d hari lepas",
+  load_from:"daripada beban hari ini datang dari tugasan", moved:"Dialih dari", from_path:"Memaparkan %s",
+  tasks_word:"tugas", moved_why:"dijadual semula", done_label:"Selesai", over:"LEBIH",
+  by:"sebelum", added:"Ditambah", deadline:"Tarikh akhir", hist_label:"Sejarah penjadualan",
+  never_moved:"Tidak pernah dialih", close:"Tutup", moved_arrow:"Dijadual semula", moved_times:"dialih %d kali",
+  how_title:"Setiap soalan untuk apa", how_1:"Had mingguan — berapa banyak anda mampu. Penyebut.",
+  how_2:"Tugasan anda — berapa banyak yang ada. Pengangka.",
+  how_3:"Daftar masuk harian — berapa berat rasanya hari ini. Pendarab.",
+  limit_key:"Garisan itu 100% — had yang anda tetapkan sendiri. Melebihinya bermakna anda meminjam masa dari tempat lain, selalunya tidur.",
+  buffer_note:"Masa sosial melindungi anda, jadi ia menolak dan bukan menambah.",
+  path_title:"Daftar masuk anda", path_sub:"Ketik mana-mana hari untuk buka tugasnya.",
+  path_skip:"Tiada daftar masuk", path_legend:"Terlepas sehari tidak dikira apa-apa. Ini rekod, bukan rentetan.",
+  sheet_title:"Jom alihkan satu benda", yes:"Tukar", no:"Saya boleh tahan",
+  snack:"Rehat 15 minit tanpa skrin.", snack_act:"Mula",
+  helpline:"Rasa ini lebih daripada beban kerja? Talian HEAL 15555",
+  nav_today:"Hari ini", nav_tasks:"Tugas", nav_path:"Laluan", nav_me:"Saya",
+  due_today:"tugas hari ini atau lewat — dikira untuk anda."
+ }
+};
+const COACH={
+ en:{thriving:{hype:"Look at you, thriving.",chill:"You've got room to breathe this week.",plain:"Bandwidth available."},
+  steady:{hype:"Busy, but you got this.",chill:"Steady week. Keep an eye on Thursday.",plain:"Manageable."},
+  stacked:{hype:"Okay, this week is a LOT huh.",chill:"You're stacked. Let's find something to move.",plain:"Approaching overload."},
+  overload:{hype:"Bro. BRO. Sleep exists.",chill:"This isn't sustainable — let's fix one thing.",plain:"Overloaded. Action recommended."},
+  recovered:{hype:"There it is. Crisis averted.",chill:"Better. That bought you back some room.",plain:"Load reduced. Within range."}},
+ ms:{thriving:{hype:"Mantap, awak memang on.",chill:"Minggu ini anda ada ruang bernafas.",plain:"Kapasiti mencukupi."},
+  steady:{hype:"Sibuk, tapi awak boleh.",chill:"Minggu yang stabil. Perhatikan hari Khamis.",plain:"Masih terkawal."},
+  stacked:{hype:"Okay minggu ni padat betul.",chill:"Jadual anda padat. Jom alihkan satu benda.",plain:"Menghampiri lebihan beban."},
+  overload:{hype:"Woi. WOI. Tidur itu wujud.",chill:"Ini tidak mampan — jom betulkan satu perkara.",plain:"Lebihan beban. Tindakan disyorkan."},
+  recovered:{hype:"Haa, itu dia. Selamat.",chill:"Lebih baik. Anda dapat balik sedikit ruang.",plain:"Beban berkurang. Dalam julat."}}
+};
+const META={thriving:{hex:"#22C48A",tag:"THRIVING",anim:"move"},steady:{hex:"#F5B93C",tag:"STEADY",anim:"idle"},
+  stacked:{hex:"#FF8A3D",tag:"STACKED",anim:"scan"},overload:{hex:"#F0524D",tag:"OVERLOAD",anim:"dead"},
+  recovered:{hex:"#F5B93C",tag:"RECOVERED",anim:"jump"}};
+const CAT_HEX=["#5B8DEF","#35C4F0","#22C48A","#F5A03C","#E87BA8"];
+const PRI_W=[0.7,1.0,1.45];
+const DOW={en:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],ms:["Ahd","Isn","Sel","Rab","Kha","Jum","Sab"]};
+
+let app={lang:"en",tone:"chill",flow:"setup",tab:"today",
+  name:"Alia",baseStudy:15,baseWork:10,baseSocial:12,q:[2,2,3,2],
+  mood:4,energy:7,sleep:2,
+  selDay:0,filterCat:null,fromPath:false,
+  editId:null,viewId:null,addOpen:false,listening:false,
+  draft:{title:"",cat:0,pri:1,due:0,hours:2,files:[]},
+  sheet:false,snack:false,swapped:false};
+
+let TASKS=[],nextId=1;
+function seedTasks(){
+  nextId=1;
+  const mk=(title,cat,pri,due,hours,done,files,created,hist)=>
+    ({id:nextId++,title:title,cat:cat,pri:pri,due:due,hours:hours,done:!!done,files:files||[],
+      created:(created===undefined?-7:created), history:hist||[],
+      movedFrom:(hist&&hist.length?hist[hist.length-1]:null)});
+  TASKS=[
+    mk("Algorithms quiz 2",0,1,-3,2,true,[],-10),
+    mk("Café shift, 4–10pm",1,1,-2,6,true,[],-9),
+    mk("Lab report draft",0,2,-2,3,false,["lab_brief.pdf"],-9,[-4]),
+    mk("Call home",2,1,-1,1,true,[],-3),
+    mk("OOP assignment 2 — submit",0,2,0,4,false,["assignment_2.docx","rubric.pdf"],-12),
+    mk("Café shift, 4–10pm",1,1,0,6,false,[],-7),
+    mk("Gym session",4,0,0,1,false,[],-1),
+    mk("Read chapter 7 for tutorial",0,1,1,2,false,[],-2),
+    mk("Data Structures lab report",0,2,2,5,false,["ds_spec.pdf"],-8),
+    mk("Dinner with the group",2,0,2,3,false,[],-5),
+    mk("Grocery run",3,0,3,1,false,[],-4,[0])
+  ];
+}
+seedTasks();
+const HISTORY={"-7":41,"-6":47,"-5":58,"-4":null,"-3":62,"-2":88,"-1":72};
+
+function taskLoad(){
+  const urg=d=>d<0?1.6:d===0?1.5:d===1?1.3:d<=3?1.15:1.0;
+  const by=[0,0,0,0,0];
+  TASKS.filter(x=>!x.done&&x.due<=6).forEach(x=>{by[x.cat]+=x.hours*PRI_W[x.pri]*urg(x.due);});
+  return by;
+}
+function calc(){
+  const sleepMult=[2.0,1.4,1.0,0.85][app.sleep];
+  const moodMod=1+(5-app.mood)*0.06, energyMod=1+(10-app.energy)*0.02;
+  const strain=app.q.reduce((a,b)=>a+b,0)/4, strainMod=0.92+(strain-1)*0.05;
+  const T=taskLoad(), acad=T[0],work=T[1],soc=T[2],err=T[3],self=T[4];
+  let time=(app.baseStudy+app.baseWork+(acad+work)*0.5)/65;
+  let mental=(0.5*(app.baseStudy/32)+0.5*(acad/54))*moodMod*energyMod*strainMod;
+  let physical=0.42*sleepMult*energyMod-Math.min(self/10,0.15);
+  let errands=0.22+err/9;
+  let social=app.baseSocial/20+soc/16;
+  const buffer=Math.min(soc/26,0.12);
+  const cl=v=>Math.max(0,Math.min(1.5,v));
+  time=cl(time);mental=cl(mental);physical=cl(physical);errands=cl(errands);social=cl(social);
+  const W={time:1.5,mental:1.5,physical:1.0,errands:0.6};
+  const div=W.time+W.mental+W.physical+W.errands;
+  let o=(time*W.time+mental*W.mental+physical*W.physical+errands*W.errands)/div-buffer;
+  if(app.swapped)o-=0.20;
+  const pct=Math.max(4,Math.round(o*100));
+  let state=pct>=100?"overload":pct>=80?"stacked":pct>=50?"steady":"thriving";
+  if(app.swapped&&pct<100)state="recovered";
+  const taskShare=Math.round(Math.min(99,(acad+work+err)/(acad+work+err+18)*100));
+  return {pct:pct,state:state,strainMod:strainMod,sleepMult:sleepMult,buffer:buffer,taskShare:taskShare,T:T,
+    cats:{mental:Math.round(mental*100),time:Math.round(time*100),physical:Math.round(physical*100),
+          social:Math.round(social*100),errands:Math.round(errands*100)}};
+}
+const stateOf=p=>p===null||p===undefined?null:p>=100?"overload":p>=80?"stacked":p>=50?"steady":"thriving";
+const t=()=>S[app.lang];
+function dueLabel(d){
+  if(d===0)return t().today; if(d===1)return t().tomorrow; if(d===-1)return t().yesterday;
+  if(d<0)return t().daysago.replace("%d",-d); return t().indays.replace("%d",d);
+}
+function dayName(o){return DOW[app.lang][new Date(2026,8,3+o).getDay()];}
+var MON={en:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+         ms:["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogo","Sep","Okt","Nov","Dis"]};
+function fullDate(o){var d=new Date(2026,8,3+o);
+  return DOW[app.lang][d.getDay()]+" "+d.getDate()+" "+MON[app.lang][d.getMonth()];}
+function dateAndRel(o){return fullDate(o)+" ("+dueLabel(o).toLowerCase()+")";}
+function dayNum(o){return new Date(2026,8,3+o).getDate();}
+function topTask(){
+  return TASKS.filter(x=>!x.done&&x.cat!==2&&x.cat!==4&&x.due>=0)
+    .sort((a,b)=>(b.hours*PRI_W[b.pri])-(a.hours*PRI_W[a.pri]))[0];
+}
+
+function shell(inner,overlay,fab){
+  overlay=overlay||"";fab=fab||"";
+  const nav=(app.flow==="setup"||app.flow==="checkin")?"":
+   '<nav class="bottomnav">'+
+   '<button data-tab="today" aria-current="'+(app.tab==="today")+'"><span class="ic">🏠</span>'+t().nav_today+'</button>'+
+   '<button data-tab="tasks" aria-current="'+(app.tab==="tasks")+'"><span class="ic">📋</span>'+t().nav_tasks+'</button>'+
+   '<button data-tab="path" aria-current="'+(app.tab==="path")+'"><span class="ic">🗺️</span>'+t().nav_path+'</button>'+
+   '<button data-tab="me" aria-current="'+(app.tab==="me")+'"><span class="ic">🦖</span>'+t().nav_me+'</button></nav>';
+  return '<div class="statusbar"><span>9:41</span><span>▮▮ ▾ ▮</span></div>'+
+   '<div class="topbar"><span class="brand">CapCoach</span><span class="pill">'+(app.lang==="en"?"EN":"BM")+' · '+t()["tone_"+app.tone]+'</span></div>'+
+   '<div class="body">'+inner+'</div>'+fab+nav+overlay;
+}
+function langRow(){
+  return '<div class="chips" style="margin-top:6px">'+
+    [["en",t().lang_en],["ms",t().lang_ms]].map(function(p){
+      return '<button class="chip sm" data-lang="'+p[0]+'" aria-pressed="'+(app.lang===p[0])+'">'+p[1]+'</button>';}).join("")+'</div>';
+}
+
+function vSetup(){
+  const sl=(k,l,mx)=>'<div class="rowlabel"><b>'+l+'</b><span>'+app[k]+'h</span></div>'+
+    '<input type="range" min="0" max="'+mx+'" value="'+app[k]+'" data-slider="'+k+'">'+
+    '<div class="marks"><span>0</span><span>'+mx+'</span></div>';
+  const qs=t().q.map(function(x,i){
+    return '<p class="qtext">'+x+'</p><div class="likert">'+t().scale.map(function(s,v){
+      return '<button data-q="'+i+'" data-v="'+(v+1)+'" aria-pressed="'+(app.q[i]===v+1)+'">'+s+'</button>';}).join("")+'</div>';}).join("");
+  return shell('<div class="pad">'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-top:6px">'+sprite("idle",56,"brand")+
+    '<div><div class="h1" style="margin:0">'+t().setup_title+'</div><p class="sub" style="margin:2px 0 0">'+t().setup_sub+'</p></div></div>'+
+    '<div class="sec">'+t().lang_label+'</div>'+langRow()+
+    '<div class="sec">'+t().sec_limits+'</div><p class="sub" style="margin:-4px 0 8px">'+t().limits_sub+'</p>'+
+    '<div class="field"><div style="flex:1"><label>'+t().name+'</label><input id="nm" value="'+app.name+'"></div></div>'+
+    sl("baseStudy",t().study,40)+sl("baseWork",t().work,40)+sl("baseSocial",t().social,20)+
+    '<div class="sec">'+t().sec_baseline+'</div><p class="sub" style="margin:-4px 0 0">'+t().baseline_sub+'</p>'+qs+
+    '<div class="sec">'+t().sec_tone+'</div><div class="chips">'+
+    ["hype","chill","plain"].map(function(x){return '<button class="chip" data-tonepick="'+x+'" aria-pressed="'+(app.tone===x)+'">'+t()["tone_"+x]+'</button>';}).join("")+'</div>'+
+    '<p class="sub" style="margin-top:9px">'+t().tone_hint+'</p>'+
+    '<button class="btn" data-flow="checkin">'+t().save+'</button></div>');
+}
+function vCheckin(){
+  const moods=["😫","😕","😐","🙂","🚀"];
+  const due=TASKS.filter(x=>!x.done&&x.due<=0).length;
+  return shell('<div class="pad">'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-top:6px">'+sprite("scan",56,"brand")+
+    '<div><div class="h1" style="margin:0">'+t().checkin_title+'</div><p class="sub" style="margin:2px 0 0">'+t().checkin_sub+'</p></div></div>'+
+    '<div class="sec">'+t().sec_mood+'</div><div class="moods">'+
+    moods.map(function(m,i){return '<button class="mood" data-mood="'+(i+1)+'" aria-pressed="'+(app.mood===i+1)+'">'+m+'</button>';}).join("")+'</div>'+
+    '<div class="moodscale"><span>'+t().mood_low+'</span><span>'+t().mood_high+'</span></div>'+
+    '<div class="sec">'+t().sec_sleep+'</div><div class="chips">'+
+    t().sleep.map(function(l,i){return '<button class="chip" data-sleep="'+i+'" aria-pressed="'+(app.sleep===i)+'">'+l+'</button>';}).join("")+'</div>'+
+    '<div class="rowlabel" style="margin-top:20px"><b>'+t().sec_energy+'</b><span>'+app.energy+'/10</span></div>'+
+    '<input type="range" min="1" max="10" value="'+app.energy+'" data-slider="energy">'+
+    '<div class="marks"><span>'+t().energy_low+'</span><span>'+t().energy_high+'</span></div>'+
+    '<div class="note" style="display:block"><b>'+due+'</b> '+t().due_today+'</div>'+
+    '<button class="btn" data-flow="app">'+t().calc+'</button></div>');
+}
+function gauge(pct,hex){
+  const R=54,C=2*Math.PI*R,f=Math.min(pct,120)/120;
+  return '<div class="gauge"><svg width="164" height="164" viewBox="0 0 164 164">'+
+   '<circle cx="82" cy="82" r="'+R+'" fill="none" stroke="#E8EEF9" stroke-width="15"/>'+
+   '<circle cx="82" cy="82" r="'+R+'" fill="none" stroke="'+hex+'" stroke-width="15" stroke-linecap="round" stroke-dasharray="'+(C*f)+' '+C+'" transform="rotate(-90 82 82)"/>'+
+   '<text x="82" y="82" text-anchor="middle" font-size="35" font-weight="900" fill="#17233A" font-family="Roboto">'+pct+'%</text>'+
+   '<text x="82" y="101" text-anchor="middle" font-size="11" fill="#6B7A93" font-family="Roboto">'+t().total+'</text></svg></div>';
+}
+function vToday(){
+  const r=calc(),m=META[r.state];
+  const SCALE=150;
+  const bars=["mental","time","physical","errands"].map(function(k){
+    const v=r.cats[k], over=v>100;
+    const c=v>=100?"#F0524D":v>=80?"#FF8A3D":v>=50?"#F5B93C":"#22C48A";
+    const w=Math.min(v,SCALE)/SCALE*100, base=Math.min(v,100)/SCALE*100;
+    return '<div class="bar"><div class="top"><span>'+t().cats[k]+'</span>'+
+      '<span><b style="color:'+c+'">'+v+'%</b>'+(over?'<span class="over">'+t().over+'</span>':"")+'</span></div>'+
+      '<div class="track">'+
+      (over?'<div class="fill spill" style="width:'+w+'%"></div>':"")+
+      '<div class="fill" style="width:'+base+'%;background:'+c+'"></div>'+
+      '<div class="limit" style="left:'+(100/SCALE*100)+'%"></div></div></div>';}).join("");
+  const key='<div class="limitkey"><i></i><span>'+t().limit_key+'</span></div>';
+  const bufPct=Math.round(r.buffer*100);
+  const buffer='<div class="bufferrow"><span>🤝 '+t().cats.social+'</span>'+
+    '<b>'+(bufPct?"−"+bufPct+"%":"0%")+'</b><em>'+t().buffer_note+'</em></div>';
+  const tt=topTask();
+  const body=tt?(app.lang==="en"
+    ? '“'+tt.title+'” is your heaviest open item at '+tt.hours+'h. Push it three days and you get those hours back.'
+    : '“'+tt.title+'” tugas terberat anda ('+tt.hours+' jam). Alihkan tiga hari dan anda dapat balik jam tersebut.'):"";
+  const sheet=app.sheet?'<div class="scrim"><div class="sheet"><div class="grab"></div>'+
+    '<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">'+sprite("hurt",44,r.state)+'<h3 style="margin:0">'+t().sheet_title+'</h3></div>'+
+    '<p>'+body+'</p><div class="acts"><button class="secondary" data-sheet="no">'+t().no+'</button>'+
+    '<button class="primary" data-sheet="yes">'+t().yes+'</button></div></div></div>':"";
+  const snack=app.snack?'<div class="snackbar"><span>'+t().snack+'</span><button data-snack="1">'+t().snack_act+'</button></div>':"";
+  const help=r.state==="overload"?'<div class="note"><span style="font-size:16px">☎</span><span>'+t().helpline+'</span></div>':"";
+  const cta=(r.state==="overload"||r.state==="stacked")?'<button class="btn" data-sheet="open">'+t().fix+'</button>'
+    :(!app.swapped?'<button class="btn ghost" data-bad="1">'+t().trigger+'</button>':"");
+  return shell('<div class="pad"><div class="h1" style="margin-top:6px">'+app.name+' · '+t().dash_title+'</div>'+
+    '<div class="coach" style="border-color:'+m.hex+'">'+sprite(m.anim,58,r.state)+
+    '<span class="bubble"><span class="tag" style="color:'+m.hex+'">'+m.tag+'</span>'+COACH[app.lang][r.state][app.tone]+'</span></div>'+
+    gauge(r.pct,m.hex)+
+    '<div class="note" style="margin-top:4px"><b style="font-size:15px">'+r.taskShare+'%</b><span>'+t().load_from+'</span></div>'+
+    key+bars+buffer+help+cta+'<button class="btn ghost" data-tab="tasks">'+t().nav_tasks+'</button></div>',sheet+snack);
+}
+var FLAG=["","🟠","🔴"];
+function taskRow(x){
+  const moved=x.movedFrom!==null&&!x.done;
+  return '<div class="taskwrap" data-done="'+(x.done?1:0)+'" data-pri="'+x.pri+'" data-moved="'+(moved?1:0)+'" style="border-left-color:'+CAT_HEX[x.cat]+'">'+
+   (moved?'<div class="ribbon">↻ '+t().moved_arrow+' <b>'+fullDate(x.movedFrom)+' → '+fullDate(x.due)+'</b>'+
+     (x.history.length>1?'<span>· '+t().moved_times.replace("%d",x.history.length)+'</span>':"")+'</div>':"")+
+   '<div class="task">'+
+   '<button class="tick" data-done-id="'+x.id+'" data-done="'+(x.done?1:0)+'">'+(x.done?"✓":"")+'</button>'+
+   '<button class="info" data-view="'+x.id+'"><div class="title">'+(x.pri&&!x.done?'<span class="flag">'+FLAG[x.pri]+'</span>':"")+'<span>'+x.title+'</span></div>'+
+   '<div class="meta"><em style="color:'+CAT_HEX[x.cat]+'">'+t().cat[x.cat]+'</em>·'+
+   '<span class="due" data-urgent="'+(x.due<=0&&!x.done?1:0)+'">'+t().by+' '+fullDate(x.due)+'</span>·<span>'+x.hours+'h</span>'+
+   (x.files.length?'<span>· 📎'+x.files.length+'</span>':"")+
+   '</div></button><button class="resch" data-edit="'+x.id+'">↻</button></div></div>';
+}
+function vTasks(){
+  const r=calc();
+  const days=[-3,-2,-1,0,1,2,3,4,5,6];
+  const strip=days.map(function(i){
+    const open=TASKS.filter(x=>!x.done&&x.due===i);
+    const w=open.reduce(function(a,x){return a+x.hours*PRI_W[x.pri];},0);
+    const hex=w>=8?"#F0524D":w>=5?"#FF8A3D":w>=2?"#F5B93C":w>0?"#22C48A":"#E4EAF5";
+    const cnt=TASKS.filter(x=>x.due===i).length;
+    return '<button class="day" data-selday="'+i+'" data-past="'+(i<0?1:0)+'" aria-pressed="'+(app.selDay===i)+'">'+
+      '<span class="dow">'+dayName(i)+'</span><span class="num">'+dayNum(i)+'</span>'+
+      '<span class="dot" style="background:'+hex+'"></span>'+(cnt?'<span class="cnt">'+cnt+'</span>':"")+'</button>';}).join("");
+  const filters='<div class="filters">'+
+    '<button class="chip sm" data-fcat="" aria-pressed="'+(app.filterCat===null)+'">'+t().all+'</button>'+
+    t().cat.map(function(c,i){return '<button class="chip sm" data-fcat="'+i+'" aria-pressed="'+(app.filterCat===i)+'"><i style="background:'+CAT_HEX[i]+'"></i>'+c+'</button>';}).join("")+'</div>';
+  let list=TASKS.filter(x=>x.due===app.selDay);
+  if(app.filterCat!==null)list=list.filter(x=>x.cat===app.filterCat);
+  var open=list.filter(function(x){return !x.done;}), done=list.filter(function(x){return x.done;});
+  open.sort(function(a,b){return (b.pri-a.pri)||(b.hours-a.hours);});
+  var rows="";
+  [2,1,0].forEach(function(p){
+    var g=open.filter(function(x){return x.pri===p;});
+    if(!g.length) return;
+    rows+='<div class="prigroup"><b style="color:'+(p===2?"#F0524D":p===1?"#FF8A3D":"#9DAAC0")+'">'+
+      (p?FLAG[p]+" ":"")+t().pri[p]+'</b><i></i><span>'+g.length+'</span></div>'+g.map(taskRow).join("");
+  });
+  if(done.length) rows+='<div class="prigroup"><b>'+t().done_label+'</b><i></i><span>'+done.length+'</span></div>'+done.map(taskRow).join("");
+  if(!list.length) rows='<div class="empty">'+sprite("idle",44,r.state)+'<br>'+t().no_tasks+'</div>';
+  const banner=app.fromPath?'<div class="banner"><span>🗺️ '+t().from_path.replace("%s",dueLabel(app.selDay))+'</span><button data-clearpath="1">✕</button></div>':"";
+  var det="";
+  if(app.viewId!==null&&app.viewId!==undefined){
+    var x=TASKS.filter(function(y){return y.id===app.viewId;})[0];
+    if(x){
+      var hist=x.history.length
+        ? x.history.map(function(oldDue,i){
+            var nxt=(i<x.history.length-1)?x.history[i+1]:x.due;
+            return '<div class="hrow"><span>'+fullDate(oldDue)+'</span><b>→</b><span>'+fullDate(nxt)+'</span></div>';}).join("")
+        : '<div class="hrow muted">'+t().never_moved+'</div>';
+      det='<div class="scrim"><div class="sheet"><div class="grab"></div>'+
+        '<h3>'+x.title+'</h3>'+
+        '<div class="detail">'+
+        '<div class="drow"><span>'+t().t_cat+'</span><b style="color:'+CAT_HEX[x.cat]+'">'+t().cat[x.cat]+'</b></div>'+
+        '<div class="drow"><span>'+t().t_pri+'</span><b>'+(x.pri?FLAG[x.pri]+" ":"")+t().pri[x.pri]+'</b></div>'+
+        '<div class="drow"><span>'+t().t_hours+'</span><b>'+x.hours+'h</b></div>'+
+        '<div class="drow"><span>'+t().added+'</span><b>'+dateAndRel(x.created)+'</b></div>'+
+        '<div class="drow"><span>'+t().deadline+'</span><b'+(x.due<=0&&!x.done?' style="color:#F0524D"':'')+'>'+dateAndRel(x.due)+'</b></div>'+
+        '</div>'+
+        '<div class="sec">'+t().hist_label+'</div>'+hist+
+        (x.files.length?'<div class="sec">'+t().t_files+'</div><div class="attachrow">'+
+          x.files.map(function(f){return '<span class="attach">📎 '+f+'</span>';}).join("")+'</div>':"")+
+        '<div class="acts"><button class="secondary" data-view="close">'+t().close+'</button>'+
+        '<button class="primary" data-edit="'+x.id+'">↻ '+t().edit_title+'</button></div></div></div>';
+    }
+  }
+  const editing=app.editId!==null;
+  const d=app.draft;
+  const sheet=(app.addOpen||editing)?'<div class="scrim"><div class="sheet"><div class="grab"></div>'+
+    '<h3>'+(editing?t().edit_title:t().add_title)+'</h3>'+
+    (editing?"":'<div class="field" style="margin-top:12px"><div style="flex:1"><label>'+t().t_what+'</label>'+
+      '<input id="tt" value="'+d.title+'" placeholder="'+(app.listening?t().t_listening:t().t_voice)+'"></div>'+
+      '<button class="mic" data-mic="1" data-on="'+(app.listening?1:0)+'">🎙</button></div>')+
+    (editing?"":'<div class="sec" style="margin-top:16px">'+t().t_cat+'</div><div class="chips">'+
+      t().cat.map(function(c,i){return '<button class="chip sm" data-dcat="'+i+'" aria-pressed="'+(d.cat===i)+'"><i style="background:'+CAT_HEX[i]+'"></i>'+c+'</button>';}).join("")+'</div>')+
+    '<div class="sec">'+t().t_pri+'</div><div class="chips">'+
+      t().pri.map(function(p,i){return '<button class="chip sm" data-dpri="'+i+'" aria-pressed="'+(d.pri===i)+'">'+"!".repeat(i+1)+' '+p+'</button>';}).join("")+'</div>'+
+    '<div class="sec">'+t().t_due+'</div><div class="chips">'+
+      t().due.map(function(l,i){const v=[0,1,3,5,7][i];
+        return '<button class="chip sm" data-ddue="'+v+'" aria-pressed="'+(d.due===v)+'">'+l+'</button>';}).join("")+'</div>'+
+    '<div class="rowlabel"><b>'+t().t_hours+'</b><span>'+d.hours+'h</span></div>'+
+    '<input type="range" min="1" max="10" value="'+d.hours+'" data-dhours="1">'+
+    '<div class="sec">'+t().t_files+'</div><div class="attachrow">'+
+      d.files.map(function(f,i){return '<span class="attach">📎 '+f+'<button data-rmfile="'+i+'">✕</button></span>';}).join("")+
+      '<button class="addfile" data-addfile="1">'+t().addfile+'</button></div>'+
+    '<div class="acts"><button class="secondary" data-add="cancel">'+t().cancel+'</button>'+
+    '<button class="primary" data-add="'+(editing?"move":"save")+'">'+(editing?t().save_move:t().save_task)+'</button></div></div></div>':"";
+  return shell('<div class="pad"><div class="h1" style="margin-top:6px">'+t().tasks_title+'</div>'+
+    '<p class="sub">'+t().tasks_sub+'</p>'+banner+
+    '<div class="weekstrip">'+strip+'</div>'+
+    '<div class="sec" style="margin-top:18px"><span>'+dueLabel(app.selDay)+'</span><span style="color:'+META[r.state].hex+'">'+r.pct+'%</span></div>'+
+    filters+rows+'<div style="height:60px"></div></div>',
+    det||sheet,'<button class="fab" data-add="open">+</button>');
+}
+function vPath(){
+  const r=calc();
+  const offs=[-7,-6,-5,-4,-3,-2,-1,0];
+  const rows=offs.map(function(off,i){
+    const pct=off===0?r.pct:HISTORY[String(off)];
+    const st=stateOf(pct),hex=st?META[st].hex:"#E4EAF5",last=i===offs.length-1;
+    const x=[0,22,44,22][i%4];
+    const moved=TASKS.filter(y=>y.due===off&&y.movedFrom!==null).length;
+    const cnt=TASKS.filter(y=>y.due===off).length;
+    return '<div class="pathrow" style="padding-left:'+x+'px">'+
+      '<button class="node" data-day="'+off+'" data-skip="'+(pct==null?1:0)+'" style="'+(pct!=null?"background:"+hex:"")+'">'+(pct==null?"–":pct)+'</button>'+
+      (!last?'<span class="connector" style="left:'+(x+22)+'px"></span>':"")+
+      '<span class="daylabel"><b>'+(off===0?t().today:dayName(off)+" "+dayNum(off))+'</b>'+
+      (pct==null?t().path_skip:cnt+" "+t().tasks_word)+'</span>'+
+      (moved?'<span class="rmark">↻ '+moved+'</span>':"")+
+      (off===0?'<span class="todaydino">'+sprite(META[r.state].anim,42,r.state)+'</span>':'<span class="chev">›</span>')+'</div>';}).join("");
+  return shell('<div class="pad"><div class="h1" style="margin-top:6px">'+t().path_title+'</div>'+
+    '<p class="sub">'+t().path_sub+'</p><div class="path">'+rows+'</div>'+
+    '<div class="note">'+t().path_legend+'</div></div>');
+}
+function vMe(){
+  const r=calc();
+  return shell('<div class="pad">'+
+    '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:16px 0 4px">'+sprite("jump",92,r.state)+
+    '<div class="h1" style="margin:6px 0 0">'+app.name+'</div>'+
+    '<p class="sub" style="margin:0;color:'+META[r.state].hex+';font-weight:700">'+META[r.state].tag+' · '+r.pct+'%</p></div>'+
+    '<div class="sec">'+t().lang_label+'</div>'+langRow()+
+    '<div class="sec">'+t().sec_tone+'</div><div class="chips">'+
+    ["hype","chill","plain"].map(function(x){return '<button class="chip" data-tonepick="'+x+'" aria-pressed="'+(app.tone===x)+'">'+t()["tone_"+x]+'</button>';}).join("")+'</div>'+
+    '<div class="sec">'+t().sec_limits+'</div><div class="card">'+
+    '<div class="bar"><div class="top"><span>'+t().study+'</span><b>'+app.baseStudy+'h</b></div></div>'+
+    '<div class="bar"><div class="top"><span>'+t().work+'</span><b>'+app.baseWork+'h</b></div></div>'+
+    '<div class="bar"><div class="top"><span>'+t().social+'</span><b>'+app.baseSocial+'h</b></div></div></div>'+
+    '<div class="sec">'+t().how_title+'</div>'+
+    '<div class="card" style="font-size:12.5px;line-height:1.55;color:#3D4B63">'+
+    '<div class="howrow"><b>1</b><span>'+t().how_1+'</span></div>'+
+    '<div class="howrow"><b>2</b><span>'+t().how_2+'</span></div>'+
+    '<div class="howrow"><b>3</b><span>'+t().how_3+'</span></div></div>'+
+    '<div class="note">'+t().helpline+'</div>'+
+    '<button class="btn ghost" data-flow="setup">'+t().setup_title+'</button></div>');
+}
+
+const SPEC={
+ setup:{title:"Setup — language, limits, baseline",
+  lede:"Language is now an explicit first choice rather than a hidden toggle, so a Malay-first student never has to read an English screen to find the switch. Below it, the weekly limits and the one-time strain baseline structured on the BAT's core dimensions.",
+  xml:["Language <code>ChipGroup</code> at the very top, before anything else is read",
+       "<code>EditText</code> for name, three <code>SeekBar</code> rows for weekly hours",
+       "Four question blocks, each a 5-button <code>RadioGroup</code> as a segmented row",
+       "<code>ChipGroup</code> for the tone picker"],
+  java:["Language writes to prefs, calls <code>setLocale()</code>, then <code>recreate()</code>",
+        "Hours, tone and name to <code>SharedPreferences</code>",
+        "<code>strainMod = 0.80f + (baselineStrain - 1f) * 0.15f</code>",
+        "Never label the four answers as a burnout score in the UI"]},
+ checkin:{title:"Check-in — three taps",
+  lede:"Still zero typing. The task table supplies the workload half, so the check-in only has to capture how the student feels about it.",
+  xml:["<code>RadioGroup</code> of five emoji buttons for mood",
+       "<code>ChipGroup</code> for sleep band — drives the 2.0× penalty",
+       "<code>SeekBar</code> 1–10 for energy",
+       "Read-only row counting today's and overdue tasks"],
+  java:["<code>CheckIn</code> entity: date, mood, energy, sleepBand",
+        "Upsert one row per calendar day",
+        "Overdue tasks carry 1.6× urgency — heavier than same-day, which is the point",
+        "Route to the dashboard, which re-reads both tables"]},
+ today:{title:"Today — dashboard and intervention",
+  lede:"The mascot is recoloured to the capacity state rather than swapped for a different asset, so one sprite set covers every state and the colour can never drift out of sync with the gauge.",
+  xml:["<code>ImageView</code> for the sprite, nearest-neighbour scaling",
+       "<code>PieChart</code> from MPAndroidChart with a hole, used as a gauge",
+       "Five <code>ProgressBar</code> rows for the breakdown",
+       "<code>BottomSheetDialogFragment</code> for the rebalance prompt"],
+  java:["The dino has two body tones, so a single <code>setColorFilter</code> flattens it",
+        "Either recolour the bitmap per state once and cache in an <code>LruCache</code>…",
+        "…or export four pre-tinted PNG sets — about 40KB, zero runtime risk",
+        "Swap candidate = highest <code>hours × PRI_W[priority]</code>, never social or self-care",
+        "Accepting writes <code>dueDate += 3</code> and <code>movedFrom = oldDate</code>"]},
+ tasks:{title:"Tasks — calendar, priority, reschedule, files",
+  lede:"Ten-day strip covering three days back and six forward, because overdue work is what actually breaks a student's week. Every task reschedules in two taps and keeps a record of where it came from.",
+  xml:["Week strip: horizontal <code>RecyclerView</code>, each item a <code>MaterialCardView</code> with a load dot",
+       "Task rows: <code>RecyclerView</code>, coloured left border via a <code>layer-list</code>",
+       "Reschedule button opening the same <code>BottomSheetDialogFragment</code> in edit mode",
+       "Attachments: chip row plus a dashed add button",
+       "<code>FloatingActionButton</code> for new tasks"],
+  java:["<code>@Entity Task</code>: id, title, category, priority, dueDate, estHours, done, movedFrom",
+        "Attachments: a second <code>@Entity</code> with a foreign key storing a content URI",
+        "<code>ACTION_OPEN_DOCUMENT</code> + <code>takePersistableUriPermission</code> — never copy the file",
+        "Category load = <code>Σ(estHours × PRI_W[priority] × urgency(daysToDue))</code>",
+        "Urgency: 1.6× overdue, 1.5× today, 1.3× tomorrow, 1.15× within three days"]},
+ path:{title:"Path — check-ins, and the way back to a day",
+  lede:"Each node reports how many tasks that day held and how many were moved into it. Tapping a day opens the Tasks tab filtered to it, so the pathway is navigation rather than decoration.",
+  xml:["<code>RecyclerView</code>, vertical, alternating left offset",
+       "Node = <code>MaterialButton</code>, 50% corner radius",
+       "A chevron on every past row signals the row is tappable",
+       "Missed days render grey with a dash — no red, no penalty styling"],
+  java:["Node click sets the selected date, then <code>bottomNav.setSelectedItemId(R.id.tasks)</code>",
+        "Pass the date through a shared <code>ViewModel</code>, not an Intent extra",
+        "Moved count: <code>WHERE dueDate = :d AND movedFrom IS NOT NULL</code>",
+        "Never compute or display a consecutive-day counter"]},
+ me:{title:"Me — language, tone, limits",
+  lede:"Both toggles live here permanently, so switching them is a setting rather than a demo trick. The mascot at the top is tinted to the current state, which makes this screen double as a status glance.",
+  xml:["Large sprite <code>ImageView</code> header, tinted to state",
+       "Language and tone <code>ChipGroup</code>s",
+       "Read-only summary of the saved weekly limits",
+       "Persistent helpline row"],
+  java:["Everything read from <code>SharedPreferences</code>",
+        "Language change calls <code>setLocale()</code> then <code>recreate()</code>",
+        "Re-running setup overwrites the baseline but keeps history and tasks",
+        "Helpline reachable here always, not only during overload"]}
+};
+const WARN={
+ tasks:'<b>Attachments are the riskiest item on your list.</b> Storage Access Framework, persistable URI permissions, and files that vanish when the user clears another app\'s storage. Budget a full day and treat it as a stretch goal — the task tracker demos perfectly without it. If you keep it: store the URI, never a copy, and handle a dead URI without crashing.',
+ today:'<b>On tinting the sprite.</b> The dino has two body tones (#7B4CFE and #633AD5), so a single <code>setColorFilter</code> flattens it into a silhouette. Either recolour the bitmap pixel-by-pixel once per state and cache it, or export four pre-tinted PNG sets from your sprite editor. The second costs about 40KB and zero runtime risk — take it.',
+ path:'<b>Pathway navigation is cheap and worth it.</b> One shared ViewModel field and a <code>setSelectedItemId</code> call. It turns the Path tab from a chart into the app\'s second entry point, which is the difference between a feature judges look at and one they use.',
+ setup:'<b>Language first is not cosmetic.</b> If the switch is buried in settings, a Malay-first student has to read English to find it. Putting it at the top of the first screen is a two-minute change that makes the bilingual claim real rather than a checkbox.',
+ checkin:'<b>Guard the three-tap rule.</b> Now that tasks exist there will be pressure to ask "which tasks did you finish?" here. Don\'t. The check-in captures feeling; the task list captures work. Merging them turns a 10-second habit into a chore and you lose the daily open.',
+ me:'<b>Keep the helpline out of the overload path only.</b> A student who needs it may never hit 100% capacity. Having it permanently on this screen costs one row and covers the case your ethics slide claims to.'
+};
+
+function view(){return app.flow==="setup"?"setup":app.flow==="checkin"?"checkin":app.tab;}
+function render(){
+  const v=view();
+  document.getElementById("screen").innerHTML=
+    v==="setup"?vSetup():v==="checkin"?vCheckin():v==="tasks"?vTasks():v==="path"?vPath():v==="me"?vMe():vToday();
+  document.getElementById("nav").innerHTML=Object.keys(SPEC).map(function(k){
+    return '<button data-nav="'+k+'" aria-current="'+(k===v)+'">'+SPEC[k].title.split(" — ")[0]+'</button>';}).join("");
+  const s=SPEC[v];
+  document.getElementById("specTitle").textContent=s.title;
+  document.getElementById("specLede").textContent=s.lede;
+  document.getElementById("specXml").innerHTML=s.xml.map(function(x){return '<li>'+x+'</li>';}).join("");
+  document.getElementById("specJava").innerHTML=s.java.map(function(x){return '<li>'+x+'</li>';}).join("");
+  document.getElementById("scopeWarn").innerHTML=WARN[v]||WARN.tasks;
+  const r=calc();
+  document.getElementById("mathTable").innerHTML=
+   '<tr><td>Weighted task hours — academics</td><td>'+r.T[0].toFixed(1)+'</td></tr>'+
+   '<tr><td>Weighted task hours — work</td><td>'+r.T[1].toFixed(1)+'</td></tr>'+
+   '<tr><td>Weighted task hours — errands</td><td>'+r.T[3].toFixed(1)+'</td></tr>'+
+   '<tr><td>Time load (weight 1.5)</td><td>'+r.cats.time+'%</td></tr>'+
+   '<tr><td>Mental load (1.5, strain ×'+r.strainMod.toFixed(2)+')</td><td>'+r.cats.mental+'%</td></tr>'+
+   '<tr><td>Physical load (sleep ×'+r.sleepMult.toFixed(2)+')</td><td>'+r.cats.physical+'%</td></tr>'+
+   '<tr><td>Errands load (weight 0.6)</td><td>'+r.cats.errands+'%</td></tr>'+
+   '<tr><td>Social buffer (protective, subtracts)</td><td>−'+Math.round(r.buffer*100)+'%</td></tr>'+
+   '<tr><td>Overall → '+META[r.state].tag+'</td><td style="color:'+META[r.state].hex+'">'+r.pct+'%</td></tr>';
+}
+
+const VOICE={en:["Finish OOP lab report","Submit CGPA appeal form","Buy groceries for the week"],
+             ms:["Siapkan laporan makmal OOP","Hantar borang rayuan CGPA","Beli barang dapur minggu ini"]};
+const FILES=["assignment_brief.pdf","lecture_notes.pdf","group_slides.pptx","rubric.docx","lab_data.xlsx"];
+document.addEventListener("click",function(e){
+  const b=e.target.closest("button"); if(!b) return; const d=b.dataset;
+  if(d.lang){app.lang=d.lang;sync("lang");}
+  if(d.tone){app.tone=d.tone;sync("tone");}
+  if(d.tonepick){app.tone=d.tonepick;sync("tone");}
+  if(d.tab){app.tab=d.tab;if(d.tab!=="tasks")app.fromPath=false;}
+  if(d.flow){app.flow=d.flow;if(d.flow==="app")app.tab="today";app.sheet=false;app.snack=false;}
+  if(d.q){app.q[+d.q]=+d.v;}
+  if(d.mood){app.mood=+d.mood;}
+  if(d.sleep!==undefined&&d.sleep!==""){app.sleep=+d.sleep;}
+  if(d.selday!==undefined&&d.selday!==""){app.selDay=+d.selday;app.fromPath=false;}
+  if(d.fcat!==undefined){app.filterCat=d.fcat===""?null:+d.fcat;}
+  if(d.clearpath){app.fromPath=false;}
+  if(d.doneId){const x=TASKS.filter(y=>y.id===+d.doneId)[0];if(x)x.done=!x.done;}
+  if(d.day!==undefined&&d.day!==""){app.selDay=+d.day;app.tab="tasks";app.fromPath=true;app.filterCat=null;}
+  if(d.view==="close"){app.viewId=null;}
+  else if(d.view!==undefined&&d.view!==""){app.viewId=+d.view;}
+  if(d.edit){
+    app.viewId=null;
+    const x=TASKS.filter(y=>y.id===+d.edit)[0];
+    if(x){app.editId=x.id;app.addOpen=false;
+      app.draft={title:x.title,cat:x.cat,pri:x.pri,due:x.due,hours:x.hours,files:x.files.slice()};}
+  }
+  if(d.add==="open"){app.addOpen=true;app.editId=null;
+    app.draft={title:"",cat:0,pri:1,due:Math.max(0,app.selDay),hours:2,files:[]};}
+  if(d.add==="cancel"){app.addOpen=false;app.editId=null;app.viewId=null;app.listening=false;}
+  if(d.add==="save"){
+    const ti=document.getElementById("tt");
+    const title=(ti&&ti.value.trim())||VOICE[app.lang][0];
+    TASKS.push({id:nextId++,title:title,cat:app.draft.cat,pri:app.draft.pri,due:app.draft.due,
+      hours:app.draft.hours,files:app.draft.files.slice(),done:false,movedFrom:null,created:0,history:[]});
+    app.selDay=app.draft.due;app.addOpen=false;app.listening=false;app.fromPath=false;
+  }
+  if(d.add==="move"){
+    const x=TASKS.filter(y=>y.id===app.editId)[0];
+    if(x){ if(x.due!==app.draft.due){x.history.push(x.due);x.movedFrom=x.due;}
+      x.due=app.draft.due;x.pri=app.draft.pri;x.hours=app.draft.hours;x.files=app.draft.files.slice(); }
+    app.selDay=app.draft.due;app.editId=null;app.fromPath=false;
+  }
+  if(d.dcat!==undefined&&d.dcat!==""){app.draft.cat=+d.dcat;}
+  if(d.dpri!==undefined&&d.dpri!==""){app.draft.pri=+d.dpri;}
+  if(d.ddue!==undefined&&d.ddue!==""){app.draft.due=+d.ddue;}
+  if(d.addfile){app.draft.files.push(FILES[app.draft.files.length%FILES.length]);}
+  if(d.rmfile!==undefined&&d.rmfile!==""){app.draft.files.splice(+d.rmfile,1);}
+  if(d.mic){app.listening=true;render();
+    setTimeout(function(){const p=VOICE[app.lang];app.draft.title=p[Math.floor(Math.random()*p.length)];
+      app.listening=false;render();},1300); return;}
+  if(d.sheet==="open"){app.sheet=true;}
+  if(d.sheet==="yes"){app.swapped=true;app.sheet=false;app.snack=true;
+    const tt=topTask(); if(tt){tt.history.push(tt.due);tt.movedFrom=tt.due;tt.due=Math.min(6,tt.due+3);}}
+  if(d.sheet==="no"){app.sheet=false;}
+  if(d.snack){app.snack=false;}
+  if(d.bad||b.id==="loadBad"){bad();app.flow="app";app.tab="today";app.swapped=false;app.sheet=true;}
+  if(b.id==="reset"){good();seedTasks();
+    app.flow="setup";app.tab="today";app.selDay=0;app.filterCat=null;app.fromPath=false;
+    app.swapped=false;app.sheet=false;app.snack=false;app.addOpen=false;app.editId=null;app.viewId=null;}
+  render();
+});
+document.addEventListener("input",function(e){
+  const el=e.target;
+  if(el.dataset.slider){app[el.dataset.slider]=+el.value;render();}
+  if(el.dataset.dhours){app.draft.hours=+el.value;render();}
+  if(el.id==="nm"){app.name=el.value;}
+  if(el.id==="tt"){app.draft.title=el.value;}
+});
+function sync(k){var n=document.querySelectorAll("[data-"+k+"]");
+  for(var i=0;i<n.length;i++) n[i].setAttribute("aria-pressed",String(n[i].dataset[k]===app[k]));}
+function bad(){
+  app.baseStudy=34;app.baseWork=22;app.baseSocial=3;app.mood=2;app.energy=3;app.sleep=0;app.q=[4,3,4,4];
+  seedTasks();
+  TASKS.push({id:nextId++,title:"Final year project proposal",cat:0,pri:2,due:1,hours:8,done:false,files:["fyp_template.docx"],movedFrom:0});
+  TASKS.push({id:nextId++,title:"Extra shift — someone called in sick",cat:1,pri:2,due:0,hours:7,done:false,files:[],movedFrom:null,created:-1,history:[]});
+  TASKS.push({id:nextId++,title:"Group presentation slides",cat:0,pri:2,due:2,hours:5,done:false,files:["slides_v3.pptx"],movedFrom:null});
+  TASKS=TASKS.filter(function(x){return x.cat!==4;});
+}
+function good(){app.baseStudy=15;app.baseWork=10;app.baseSocial=12;app.mood=4;app.energy=7;app.sleep=2;app.q=[2,2,3,2];}
+
+buildTints().then(render).catch(render);
+</script>
+</body>
+</html>
