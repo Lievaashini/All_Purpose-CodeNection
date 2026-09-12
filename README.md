@@ -1,4 +1,4 @@
-# CapCoach by All Purpose**
+# CapCoach by All Purpose
 
 **Team:** Lievaashini Thanasegaran, Dhanya Gotami, Lee Jian Cheng, Wong Yan Wen  
 **Problem Statement:** Lifestyle Track: Beating the Burnout (Stress & Workload Manager)  
