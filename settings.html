@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html class="dark" lang="en" style=""><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { 'colors': { 'on-tertiary-fixed-variant': '#5b4300', 'surface-container-high': '#292a2a', 'surface-container-highest': '#343535', 'outline': '#859585', 'surface-tint': '#00e475', 'on-error-container': '#ffdad6', 'on-primary-fixed-variant': '#005226', 'surface-variant': '#343535', 'error': '#ffb4ab', 'error-container': '#93000a', 'tertiary-fixed': '#ffdf9e', 'on-primary': '#003918', 'primary-fixed-dim': '#00e475', 'on-background': '#e3e2e2', 'surface-container-low': '#1a1c1c', 'surface': '#121414', 'inverse-on-surface': '#2f3131', 'tertiary': '#ffe1a6', 'tertiary-container': '#fcbf01', 'outline-variant': '#3b4a3d', 'on-error': '#690005', 'secondary-container': '#0068ed', 'on-tertiary': '#3f2e00', 'secondary-fixed': '#d9e2ff', 'on-surface-variant': '#bacbb9', 'on-surface': '#e3e2e2', 'tertiary-fixed-dim': '#fabd00', 'on-secondary': '#002d6e', 'secondary-fixed-dim': '#b0c6ff', 'on-primary-container': '#00612e', 'primary-fixed': '#62ff96', 'on-secondary-fixed': '#001945', 'on-primary-fixed': '#00210b', 'on-secondary-fixed-variant': '#00429b', 'inverse-surface': '#e3e2e2', 'surface-bright': '#383939', 'background': '#121414', 'on-secondary-container': '#f2f3ff', 'primary': '#75ff9e', 'on-tertiary-fixed': '#261a00', 'secondary': '#b0c6ff', 'surface-dim': '#121414', 'primary-container': '#00e676', 'surface-container': '#1e2020', 'surface-container-lowest': '#0d0e0f', 'on-tertiary-container': '#6b4f00', 'inverse-primary': '#006d35' }, 'borderRadius': { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, 'spacing': { 'gutter-desktop': '1.5rem', 'space-lg': '1.5rem', 'space-xl': '2rem', 'space-xs': '0.5rem', 'gutter-mobile': '1rem', 'space-md': '1rem', 'space-2xl': '3rem', 'space-sm': '0.75rem', 'space-xxs': '0.25rem', 'touch-target-min': '3rem' }, 'fontFamily': { 'label-lg': ['Space Mono'], 'body-md': ['Inter'], 'label-md': ['Space Mono'], 'body-sm': ['Inter'], 'headline-xl': ['Inter'], 'label-sm': ['Space Mono'], 'headline-xl-mobile': ['Inter'], 'headline-md': ['Inter'], 'headline-sm': ['Inter'], 'headline-lg': ['Inter'], 'body-lg': ['Inter'] }, 'fontSize': { 'label-lg': ['14px', { 'lineHeight': '18px', 'letterSpacing': '0.04em', 'fontWeight': '700' }], 'body-md': ['14px', { 'lineHeight': '20px', 'fontWeight': '400' }], 'label-md': ['12px', { 'lineHeight': '16px', 'letterSpacing': '0.05em', 'fontWeight': '700' }], 'body-sm': ['12px', { 'lineHeight': '16px', 'fontWeight': '400' }], 'headline-xl': ['40px', { 'lineHeight': '48px', 'letterSpacing': '-0.02em', 'fontWeight': '800' }], 'label-sm': ['10px', { 'lineHeight': '14px', 'letterSpacing': '0.06em', 'fontWeight': '400' }], 'headline-xl-mobile': ['32px', { 'lineHeight': '38px', 'letterSpacing': '-0.02em', 'fontWeight': '800' }], 'headline-md': ['22px', { 'lineHeight': '28px', 'letterSpacing': '-0.01em', 'fontWeight': '700' }], 'headline-sm': ['18px', { 'lineHeight': '24px', 'fontWeight': '600' }], 'headline-lg': ['28px', { 'lineHeight': '36px', 'letterSpacing': '-0.015em', 'fontWeight': '700' }], 'body-lg': ['16px', { 'lineHeight': '24px', 'fontWeight': '400' }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+  </style>
+</head><body class="bg-background dark:bg-background font-body-md text-body-md text-on-surface dark:text-on-surface antialiased min-h-screen flex flex-col"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 dark:bg-surface/80 dark:border-b-0 border-b border-slate-200/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter-mobile flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs"><img alt="CapCoach Dino Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1U7G2FTMLjYGZ34DluHVFVLG1iHDVMn8sTR6_R1JZNUXfMhiuF2yIDNppAHzA_Vl9FGiKap7QT4OfzqlFq1l2wuPp0RC5L2QQDyjVg61z1KBajExDbLaXeqWIiADVLmtOxL1O21ygUwUmmz86ctQaj-BIPUQAD4S7CETv_i3yKQX5jqCqF43LXMI3d8KT4wQ6Bih2MsG_mRV2o7R73zThMBAAaIKRXTpsN0yFwjgDb8KYz0qhU29F0nUQ"/><div class="flex flex-col"><span class="font-label-md text-label-md text-primary dark:text-primary tracking-wider uppercase leading-none">CapCoach</span><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Settings</span></div></div><div class="flex items-center gap-space-xs"><!-- Header Theme Toggle Button --><button aria-label="Toggle Night/Bright Theme" class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container dark:bg-surface-container border border-slate-200 dark:border-transparent text-primary hover:scale-105 active:scale-95 transition-all shadow-sm" id="headerThemeBtn"><span class="material-symbols-outlined text-[19px]" id="headerThemeIcon">light_mode</span></button><div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container dark:bg-surface-container text-primary shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span><span class="font-label-sm text-label-sm tracking-wide">Offline ML</span></div><div class="w-8 h-8 rounded-full bg-primary dark:bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-24 bg-background dark:bg-background min-h-screen"><div class="flex flex-col w-full px-gutter-mobile gap-space-lg pb-space-2xl">
+<!-- Privacy Shield Intro Hero -->
+<section class="flex flex-col gap-space-xs pt-space-xs">
+<div class="flex flex-col gap-1"></div>
+<!-- Dino Guard Mascot Mini-Card -->
+</section>
+<!-- Appearance: Theme Mode Control Section -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Appearance</span>
+<span class="font-label-sm text-label-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">palette</span> Display
+</span>
+</div>
+<div class="flex flex-col p-space-md rounded-xl bg-surface-container dark:bg-surface-container shadow-sm gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Theme Mode</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Switch UI between dark contrast &amp; crisp bright surfaces</span>
+</div>
+</div>
+<!-- Segmented Control -->
+<div class="grid grid-cols-2 p-1 rounded-lg bg-surface-container-low dark:bg-surface-container-low gap-1 border border-slate-200 dark:border-outline-variant/30">
+<button class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-md font-label-md text-label-md transition-all shadow-sm bg-surface text-primary border border-primary/20" id="themeNightBtn" type="button">
+<span class="material-symbols-outlined text-[17px]">dark_mode</span>
+<span class="">Night</span>
+</button>
+<button class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-md font-label-md text-label-md transition-all text-on-surface-variant hover:text-on-surface" id="themeBrightBtn" type="button">
+<span class="material-symbols-outlined text-[17px]">light_mode</span>
+<span class="">Bright</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Proof-of-Local Indicators Grid -->
+<section class="flex flex-col gap-space-sm"></section>
+<!-- Network Activity Live Monitor -->
+<!-- University & B2B Telemetry Toggle Card -->
+<section class="flex flex-col gap-space-sm">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Institutional Data Controls</span>
+<div class="flex flex-col p-space-md rounded-xl bg-surface-container dark:bg-surface-container shadow-sm gap-space-sm">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface">Share anonymized burnout data</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-0.5">University B2B Analytics Link</span>
+</div>
+<!-- Controlled Toggle -->
+<button aria-checked="false" class="relative shrink-0 w-14 h-8 rounded-full bg-surface-container-highest dark:bg-surface-container-highest transition-colors duration-200 focus:outline-none flex items-center px-1" id="telemetryToggle" role="switch">
+<span class="inline-block w-6 h-6 rounded-full bg-outline transition-transform duration-200 translate-x-0" id="telemetryThumb"></span>
+</button>
+</div>
+<div class="flex items-start gap-space-xs p-space-sm rounded-lg bg-surface-container-low dark:bg-surface-container-low"><span class="material-symbols-outlined text-outline text-[18px] shrink-0 mt-0.5">info</span></div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Academic Link Status</span>
+<span class="px-2.5 py-1 rounded-full bg-surface-container-high dark:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1" id="statusTag">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Disconnected
+        </span>
+</div>
+</div>
+</section>
+<!-- Export & Verification Action -->
+<section class="flex flex-col gap-space-sm">
+<!-- Verification Hash Output Drawer -->
+</section>
+</div>
+<script>
+  // Theme Toggle Engine (Dark <-> Bright)
+  const htmlRoot = document.documentElement;
+  const headerThemeBtn = document.getElementById('headerThemeBtn');
+  const headerThemeIcon = document.getElementById('headerThemeIcon');
+  const themeNightBtn = document.getElementById('themeNightBtn');
+  const themeBrightBtn = document.getElementById('themeBrightBtn');
+
+  const darkPalette = {
+    'background': '#121414',
+    'surface': '#121414',
+    'surface-dim': '#121414',
+    'surface-bright': '#383939',
+    'surface-container-lowest': '#0d0e0f',
+    'surface-container-low': '#1a1c1c',
+    'surface-container': '#1e2020',
+    'surface-container-high': '#292a2a',
+    'surface-container-highest': '#343535',
+    'on-surface': '#e3e2e2',
+    'on-surface-variant': '#bacbb9',
+    'outline': '#859585',
+    'outline-variant': '#3b4a3d',
+    'primary': '#75ff9e',
+    'primary-container': '#00e676',
+    'on-primary': '#003918',
+    'secondary': '#b0c6ff',
+    'tertiary': '#ffe1a6'
+  };
+
+  const brightPalette = {
+    'background': '#f8fafc',
+    'surface': '#ffffff',
+    'surface-dim': '#f1f5f9',
+    'surface-bright': '#ffffff',
+    'surface-container-lowest': '#f1f5f9',
+    'surface-container-low': '#f8fafc',
+    'surface-container': '#ffffff',
+    'surface-container-high': '#eef2f6',
+    'surface-container-highest': '#e2e8f0',
+    'on-surface': '#0f172a',
+    'on-surface-variant': '#475569',
+    'outline': '#94a3b8',
+    'outline-variant': '#cbd5e1',
+    'primary': '#008a3e',
+    'primary-container': '#00c853',
+    'on-primary': '#ffffff',
+    'secondary': '#2563eb',
+    'tertiary': '#b45309'
+  };
+
+  let currentTheme = 'dark';
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    const targetColors = theme === 'dark' ? darkPalette : brightPalette;
+
+    tailwind.config.theme.extend.colors = {
+      ...tailwind.config.theme.extend.colors,
+      ...targetColors
+    };
+
+    if (theme === 'dark') {
+      htmlRoot.classList.add('dark');
+      headerThemeIcon.textContent = 'light_mode';
+      headerThemeBtn.setAttribute('title', 'Switch to Bright Mode');
+
+      // Segmented controls styles
+      themeNightBtn.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-md font-label-md text-label-md transition-all shadow-sm bg-surface text-primary border border-primary/20';
+      themeBrightBtn.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-md font-label-md text-label-md transition-all text-on-surface-variant hover:text-on-surface';
+    } else {
+      htmlRoot.classList.remove('dark');
+      headerThemeIcon.textContent = 'dark_mode';
+      headerThemeBtn.setAttribute('title', 'Switch to Night Mode');
+
+      // Segmented controls styles
+      themeBrightBtn.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-md font-label-md text-label-md transition-all shadow-sm bg-white text-emerald-600 border border-emerald-500/30';
+      themeNightBtn.className = 'flex items-center justify-center gap-1.5 py-2 px-3 rounded-md font-label-md text-label-md transition-all text-on-surface-variant hover:text-on-surface';
+    }
+
+    // Re-eval tailwind config styles
+    tailwind.refresh?.();
+  }
+
+  // Header quick-toggle
+  headerThemeBtn.addEventListener('click', () => {
+    applyTheme(currentTheme === 'dark' ? 'bright' : 'dark');
+  });
+
+  // Segmented control buttons
+  themeNightBtn.addEventListener('click', () => applyTheme('dark'));
+  themeBrightBtn.addEventListener('click', () => applyTheme('bright'));
+
+  // Telemetry Switch Toggle Logic
+  const toggleBtn = document.getElementById('telemetryToggle');
+  const toggleThumb = document.getElementById('telemetryThumb');
+  const statusTag = document.getElementById('statusTag');
+  let isTelemetryEnabled = false;
+
+  toggleBtn.addEventListener('click', () => {
+    isTelemetryEnabled = !isTelemetryEnabled;
+    toggleBtn.setAttribute('aria-checked', isTelemetryEnabled.toString());
+
+    if (isTelemetryEnabled) {
+      toggleBtn.classList.remove('bg-surface-container-highest');
+      toggleBtn.classList.add('bg-primary-container');
+      toggleThumb.classList.remove('bg-outline', 'translate-x-0');
+      toggleThumb.classList.add('bg-on-primary', 'translate-x-6');
+      statusTag.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Anonymized Active';
+      statusTag.classList.remove('text-on-surface-variant');
+      statusTag.classList.add('text-primary');
+    } else {
+      toggleBtn.classList.remove('bg-primary-container');
+      toggleBtn.classList.add('bg-surface-container-highest');
+      toggleThumb.classList.remove('bg-on-primary', 'translate-x-6');
+      toggleThumb.classList.add('bg-outline', 'translate-x-0');
+      statusTag.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Disconnected';
+      statusTag.classList.remove('text-primary');
+      statusTag.classList.add('text-on-surface-variant');
+    }
+  });
+
+  // Export & Hash Drawer reveal
+  const exportBtn = document.getElementById('exportDbBtn');
+  const hashDrawer = document.getElementById('hashDrawer');
+  exportBtn.addEventListener('click', () => {
+    hashDrawer.classList.toggle('hidden');
+    hashDrawer.classList.toggle('flex');
+    if (!hashDrawer.classList.contains('hidden')) {
+      exportBtn.querySelector('span:nth-child(2)').textContent = "Re-Calculate SHA-256 Hash";
+    }
+  });
+
+  // Console refresh button simulation
+  const refreshLogsBtn = document.getElementById('refreshLogsBtn');
+  const terminalStream = document.getElementById('terminalStream');
+  refreshLogsBtn.addEventListener('click', () => {
+    const now = new Date();
+    const timeStr = now.toTimeString().split(' ')[0];
+    const newEntry = document.createElement('div');
+    newEntry.className = "flex items-center gap-2 text-primary font-label-sm text-label-sm";
+    newEntry.innerHTML = `<span class="font-bold">[${timeStr}]</span><span>&gt; Verified 0 active sockets. Sandbox intact.</span>`;
+    terminalStream.appendChild(newEntry);
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/80 dark:bg-surface/80 border-t border-slate-200/80 dark:border-transparent backdrop-blur-xl shadow-[0_-4px_16px_rgba(0,0,0,0.15)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.45)]" data-active-classes="text-primary font-bold"><div class="flex items-center justify-around h-16 px-gutter-mobile"><a class="flex flex-col items-center justify-center min-w-touch-target-min min-h-touch-target-min gap-0.5 text-on-surface-variant transition-colors hover:text-on-surface" data-path="home" href="#"><span class="material-symbols-outlined text-[22px]">dashboard</span><span class="font-label-sm text-label-sm">Home</span></a><a class="flex flex-col items-center justify-center min-w-touch-target-min min-h-touch-target-min gap-0.5 text-on-surface-variant transition-colors hover:text-on-surface" data-path="biometrics" href="#"><span class="material-symbols-outlined text-[22px]">ecg_heart</span><span class="font-label-sm text-label-sm">Biometrics</span></a><a aria-current="page" class="flex flex-col items-center justify-center min-w-touch-target-min min-h-touch-target-min gap-0.5 transition-colors text-primary font-bold" data-path="settings" href="#"><span class="material-symbols-outlined text-[22px]">settings</span><span class="font-label-sm text-label-sm">Settings</span></a></div></nav>
+<script>document.addEventListener('DOMContentLoaded', () => {
+  const go = (p) => { window.location.href = p; };
+  const buttons = [...document.querySelectorAll('button, a')];
+  const find = (needle) => buttons.find(el => (el.innerText || '').replace(/\s+/g,' ').trim().toLowerCase().includes(needle));
+  const set = (needle, p) => { const el=find(needle); if(el){ el.onclick=()=>go(p); if(el.tagName==='A') el.href=p; } };
+  set('continue to hard limits','hard-limits.html');
+  set('save & launch','dashboard.html');
+  set('launch dashboard','dashboard.html');
+  set('done for now','dashboard.html');
+  set('feast all apples','dashboard.html');
+  set('collect 4 apples','feast.html');
+  set('weekly pop-up','feast.html');
+  set('daily pop-up','daily-harvest.html');
+  set('add task','add-task.html');
+  set('home','dashboard.html');
+  set('biometrics','biometrics.html');
+  set('settings','settings.html');
+  // Keep the browser from trying to navigate to Stitch preview anchors.
+  document.querySelectorAll('a[href="#"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
+});</script></body></html>
