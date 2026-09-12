@@ -69,6 +69,7 @@ Existing market solutions like *MyPossibleSelf* or standard calendar apps fail t
 ### **3\. Design & Prototype**
 
 **UI Prototype:** https://allpurposecapcoach.netlify.app 
+
 (Please click on the above link to view the prototype, encouraged to view on phone since it's prepared in mobile view.)
 
 Design System:  
