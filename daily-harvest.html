@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Daily Harvest - CapCoach</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              green: '#00E676',
+              mint: '#10B981',
+              apple: '#FF3B30',
+              appleGold: '#FFB800',
+              surface: '#121414',
+              surfaceCard: '#1A1D1D',
+              surfaceBorder: '#282D2D'
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          animation: {
+            'bounce-subtle': 'bounceSubtle 2s infinite ease-in-out',
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 2s infinite ease-in-out',
+            'apple-grow': 'applePop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
+          },
+          keyframes: {
+            bounceSubtle: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-4px)' }
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+              '50%': { opacity: '0.8', transform: 'scale(1.08)' }
+            },
+            applePop: {
+              '0%': { transform: 'scale(0) translateY(-10px)', opacity: '0' },
+              '70%': { transform: 'scale(1.2) translateY(2px)', opacity: '1' },
+              '100%': { transform: 'scale(1) translateY(0)', opacity: '1' }
+            }
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    /* Pixel art rendering crispness */
+    .pixelated {
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+    
+    /* Shimmer effect for progress bar */
+    @keyframes shimmer {
+      100% { transform: translateX(100%); }
+    }
+    .animate-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .animate-shimmer::after {
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      animation: shimmer 2.2s infinite;
+      content: '';
+    }
+
+    /* Falling apple into basket animation */
+    @keyframes harvestFall {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      40% { transform: translate(var(--tx, 0), 60px) scale(1.15) rotate(12deg); }
+      80% { transform: translate(var(--tx, 0), 125px) scale(0.65) rotate(-10deg); }
+      100% { transform: translate(var(--tx, 0), 140px) scale(0); opacity: 0; }
+    }
+    .harvesting {
+      animation: harvestFall 0.85s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards !important;
+    }
+
+    /* Tree swaying animation */
+    @keyframes windBreeze {
+      0%, 100% { transform: rotate(0deg); }
+      35% { transform: rotate(1.2deg) skewX(0.8deg); }
+      70% { transform: rotate(-1.2deg) skewX(-0.8deg); }
+    }
+    .sway-tree {
+      transform-origin: bottom center;
+      animation: windBreeze 4.5s ease-in-out infinite;
+    }
+
+    /* Dino happy jump on click */
+    @keyframes dinoJumpJoy {
+      0%, 100% { transform: translateY(0) scale(1); }
+      30% { transform: translateY(-16px) scale(1.08, 0.92); }
+      60% { transform: translateY(-8px) scale(0.96, 1.04); }
+    }
+    .dino-joy {
+      animation: dinoJumpJoy 0.65s ease-out;
+    }
+
+    /* ======================================================== */
+    /* BRIGHT MODE (FULL CLEAN WHITE THEME MATCHING SCREEN 2)   */
+    /* ======================================================== */
+    body.bright-mode {
+      background-color: #F1F5F9;
+      color: #0F172A;
+    }
+
+    body.bright-mode #modalCard {
+      background-color: #FFFFFF;
+      border-color: #E2E8F0;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(226, 232, 240, 0.8);
+    }
+
+    body.bright-mode #modalBackdrop {
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.85) 0%, rgba(241, 245, 249, 0.95) 100%);
+      backdrop-filter: blur(14px);
+    }
+
+    body.bright-mode #simulatedAppBg {
+      opacity: 0.12;
+      filter: blur(4px) grayscale(20%);
+    }
+
+    body.bright-mode #streakBadge {
+      background-color: #ECFDF5;
+      border-color: #A7F3D0;
+      color: #047857;
+      box-shadow: 0 1px 2px 0 rgba(16, 185, 129, 0.08);
+    }
+
+    body.bright-mode #streakBadge span.material-symbols-outlined {
+      color: #059669;
+    }
+
+    body.bright-mode #themeToggleBtn {
+      background-color: #F8FAFC;
+      border-color: #CBD5E1;
+      color: #334155;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    body.bright-mode #themeToggleBtn:hover {
+      background-color: #EDF2F7;
+      color: #0F172A;
+    }
+
+    body.bright-mode #greetingTitle {
+      color: #0F172A;
+    }
+
+    body.bright-mode #greetingSubtitle {
+      color: #475569;
+    }
+
+    body.bright-mode #tooltipPill {
+      background-color: rgba(255, 255, 255, 0.96);
+      border-color: #A7F3D0;
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.15), 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    body.bright-mode #tooltipText {
+      color: #065F46;
+    }
+
+    body.bright-mode #tooltipBadge {
+      background-color: #D1FAE5;
+      color: #047857;
+    }
+
+    body.bright-mode #treeAura {
+      background-color: rgba(16, 185, 129, 0.14);
+    }
+
+    body.bright-mode #dinoChatBubble {
+      background-color: #FFFFFF;
+      border-color: #6EE7B7;
+      color: #065F46;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    body.bright-mode #dinoChatBubble .bubble-pointer {
+      background-color: #FFFFFF;
+      border-color: #6EE7B7;
+    }
+
+    body.bright-mode #yesterdayTasksCard {
+      background-color: #FFFFFF;
+      border-color: #E2E8F0;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    }
+
+    body.bright-mode #yesterdayHeader {
+      color: #64748B;
+    }
+
+    body.bright-mode #yesterdayTasksCard .task-title {
+      color: #1E293B;
+    }
+
+    body.bright-mode #weeklyFeastCard {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);
+      border-color: #A7F3D0;
+      box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    body.bright-mode #feastIconWrap {
+      background-color: #DCFCE7;
+      border-color: #86EFAC;
+      color: #059669;
+    }
+
+    body.bright-mode #feastCardTitle {
+      color: #0F172A;
+    }
+
+    body.bright-mode #stashSubtitle {
+      color: #475569;
+    }
+
+    body.bright-mode #stashSubtitle strong {
+      color: #0F172A;
+    }
+
+    body.bright-mode #progressPercentage {
+      color: #059669;
+    }
+
+    body.bright-mode #progressRatio {
+      color: #64748B;
+    }
+
+    body.bright-mode #progressTrack {
+      background-color: #E2E8F0;
+      border-color: #CBD5E1;
+    }
+
+    body.bright-mode #milestoneFooter span {
+      color: #64748B;
+    }
+
+    body.bright-mode #milestoneFooter .milestone-mid {
+      color: #B45309;
+    }
+
+    body.bright-mode #milestoneFooter .milestone-goal {
+      color: #047857;
+    }
+
+    body.bright-mode #launchBtn {
+      background-color: #F8FAFC;
+      border-color: #E2E8F0;
+      color: #0F172A;
+    }
+    body.bright-mode #launchBtn:hover {
+      background-color: #F1F5F9;
+      border-color: #CBD5E1;
+    }
+
+    body.bright-mode #skipFooterBtn {
+      color: #64748B;
+    }
+    body.bright-mode #skipFooterBtn:hover {
+      color: #0F172A;
+    }
+
+    body.bright-mode #harvestToast {
+      background-color: #064E3B;
+      border-color: #10B981;
+      color: #ECFDF5;
+      box-shadow: 0 16px 32px rgba(6, 78, 59, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-[#0A0C0C] text-slate-100 antialiased flex items-center justify-center min-h-screen p-0 m-0 select-none overflow-hidden font-sans transition-colors duration-300">
+<!-- Mobile Frame Container 390x844 -->
+<div class="relative w-[390px] h-[844px] bg-[#101212] overflow-hidden flex flex-col justify-between shadow-2xl border border-white/5 transition-all duration-300" id="modalCard">
+<!-- Background Simulated App Dashboard (Blurred Backdrop) -->
+<div class="absolute inset-0 pointer-events-none opacity-25 filter blur-md scale-105 transition-all duration-300" id="simulatedAppBg">
+<!-- Simulated Header -->
+<div class="h-16 px-5 border-b border-white/10 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-emerald-500/30"></div>
+<div class="h-4 w-24 bg-white/20 rounded"></div>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/10"></div>
+</div>
+<!-- Simulated Calendar Carousel -->
+<div class="p-4 grid grid-cols-7 gap-2">
+<div class="h-14 bg-white/5 rounded-xl"></div>
+<div class="h-14 bg-white/5 rounded-xl"></div>
+<div class="h-14 bg-emerald-500/40 rounded-xl"></div>
+<div class="h-14 bg-white/5 rounded-xl"></div>
+<div class="h-14 bg-white/5 rounded-xl"></div>
+<div class="h-14 bg-white/5 rounded-xl"></div>
+<div class="h-14 bg-white/5 rounded-xl"></div>
+</div>
+<!-- Simulated Cards -->
+<div class="px-4 space-y-3">
+<div class="h-28 bg-white/10 rounded-2xl"></div>
+<div class="h-24 bg-white/10 rounded-2xl"></div>
+<div class="h-24 bg-white/10 rounded-2xl"></div>
+</div>
+</div>
+<!-- Vignette / Dark Modal Backdrop Overlay -->
+<div class="absolute inset-0 bg-black/60 backdrop-blur-[10px] z-10 transition-all duration-300" id="modalBackdrop"></div>
+<!-- Floating Ambient Starlight / Spores in Cozy Garden Night -->
+<div class="absolute inset-0 z-10 pointer-events-none overflow-hidden" id="ambientSpores">
+<div class="absolute top-12 left-8 w-1.5 h-1.5 rounded-full bg-brand-green/40 animate-pulse"></div>
+<div class="absolute top-28 right-12 w-2 h-2 rounded-full bg-amber-400/40 animate-ping" style="animation-duration: 3s;"></div>
+<div class="absolute top-72 left-6 w-1.5 h-1.5 rounded-full bg-emerald-400/30 animate-pulse" style="animation-delay: 1s;"></div>
+<div class="absolute top-96 right-8 w-1 h-1 rounded-full bg-brand-green/50 animate-pulse" style="animation-delay: 1.5s;"></div>
+</div>
+<!-- MAIN POP-UP DIALOG MODAL (z-20) -->
+<main class="relative z-20 flex-1 min-h-0 overflow-y-auto flex flex-col justify-between px-6 pt-10 pb-7" style="scrollbar-width: thin;">
+<!-- TOP SECTION: Cheerful Morning Greeting -->
+<header class="text-center flex flex-col items-center pt-2">
+<!-- Header Top Bar: Streak Badge + Live Night / Bright Theme Toggle -->
+<div class="w-full flex items-center justify-between mb-2 relative">
+<div class="w-8"></div>
+<!-- Daily Streak Badge / Pill -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-brand-green font-mono text-[11px] tracking-wide shadow-inner transition-colors duration-200" id="streakBadge">
+<span class="material-symbols-outlined text-[14px] text-brand-green" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+<span>MORNING HARVEST • DAY 4</span>
+</div>
+<!-- Night / Bright Mode Interactive Toggle Button -->
+<button aria-label="Toggle Night/Bright Theme" class="w-8 h-8 rounded-full bg-[#181D1C] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-md hover:scale-105" id="themeToggleBtn" onclick="toggleTheme()" title="Switch to Bright Mode">
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200" id="themeToggleIcon">light_mode</span>
+</button>
+</div>
+<h1 class="text-[23px] leading-tight font-extrabold text-white tracking-tight transition-colors duration-200" id="greetingTitle">
+          Good Morning, Maya!
+        </h1>
+<p class="text-[14px] text-slate-300/90 mt-1 font-medium transition-colors duration-200" id="greetingSubtitle">
+          Look what grew overnight on your tree.
+        </p>
+</header>
+<!-- CENTRAL VISUAL INTERACTION AREA: Apple Tree & Demching Dino -->
+<section aria-label="Interactive Apple Tree" class="relative flex-1 flex flex-col items-center justify-center my-1">
+<!-- Explanatory Floating Tooltip -->
+<div class="absolute top-2 z-30 animate-float">
+<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#181D1C]/90 border border-brand-green/40 shadow-xl backdrop-blur-md transition-colors duration-200" id="tooltipPill">
+<span class="w-2 h-2 rounded-full bg-[#FF3B30] shadow-[0_0_8px_#FF3B30]"></span>
+<span class="text-[12px] font-semibold text-emerald-300 font-sans tracking-tight transition-colors duration-200" id="tooltipText">
+              1 Apple = 1 Task completed yesterday
+            </span>
+<span class="text-[10px] font-mono text-emerald-400/80 bg-emerald-950/60 px-1.5 py-0.5 rounded ml-0.5 font-bold transition-colors duration-200" id="tooltipBadge">+4</span>
+</div>
+</div>
+<!-- Ambient Glow under tree crown -->
+<div class="absolute top-14 w-48 h-48 rounded-full bg-emerald-500/10 filter blur-2xl pointer-events-none transition-colors duration-300" id="treeAura"></div>
+<!-- TREE CONTAINER (Pixel-Art SVG Tree & Hanging Interactive Apples) -->
+<div class="relative w-full flex flex-col items-center mt-6">
+<div class="relative w-[210px] h-[220px] flex items-center justify-center sway-tree">
+<!-- Custom High-Fidelity Retro 8-Bit Pixel Tree -->
+<svg class="w-full h-full pixelated drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]" fill="none" viewbox="0 0 72 76" xmlns="http://www.w3.org/2000/svg">
+<!-- Pixelated Tree Trunk & Roots -->
+<rect fill="#3D2314" height="4" width="20" x="26" y="68"></rect>
+<rect fill="#2E190C" height="3" width="26" x="23" y="70"></rect>
+<rect fill="#4E2E1B" height="12" width="14" x="29" y="56"></rect>
+<rect fill="#5A351F" height="16" width="10" x="33" y="44"></rect>
+<!-- Trunk shadow & wood grain texture -->
+<rect fill="#381F12" height="18" width="3" x="30" y="48"></rect>
+<rect fill="#6A3F25" height="12" width="2" x="37" y="52"></rect>
+<rect fill="#381F12" height="14" width="2" x="40" y="48"></rect>
+<!-- Foliage Canopy / Crown (Layered 8-bit clouds) -->
+<rect fill="#13471E" height="32" rx="4" width="44" x="14" y="14"></rect>
+<rect fill="#13471E" height="24" rx="4" width="52" x="10" y="18"></rect>
+<!-- Main Green Foliage -->
+<rect fill="#1E7B34" height="34" rx="2" width="40" x="16" y="10"></rect>
+<rect fill="#1E7B34" height="24" rx="2" width="48" x="12" y="16"></rect>
+<rect fill="#1E7B34" height="16" rx="2" width="56" x="8" y="20"></rect>
+<!-- Mid-tone Highlights -->
+<rect fill="#2BAC4A" height="10" width="34" x="18" y="8"></rect>
+<rect fill="#2BAC4A" height="14" width="18" x="14" y="14"></rect>
+<rect fill="#2BAC4A" height="12" width="16" x="40" y="14"></rect>
+<rect fill="#2BAC4A" height="8" width="10" x="10" y="24"></rect>
+<rect fill="#2BAC4A" height="10" width="12" x="50" y="22"></rect>
+<!-- Sunlit Pixel Highlights -->
+<rect fill="#46D869" height="5" width="22" x="22" y="6"></rect>
+<rect fill="#46D869" height="4" width="10" x="18" y="10"></rect>
+<rect fill="#46D869" height="3" width="8" x="38" y="10"></rect>
+<rect fill="#46D869" height="4" width="5" x="14" y="16"></rect>
+<rect fill="#46D869" height="4" width="5" x="48" y="18"></rect>
+</svg>
+<!-- HANGING APPLES (Interactive, Scaled Pixel Art with Twinkle) -->
+<!-- Apple 1 (Upper Left) -->
+<div class="absolute top-[34px] left-[42px] cursor-pointer group animate-apple-grow transition-transform hover:scale-125" id="apple-1" style="--tx: 18px;" title="Task: Organic Chem Lab Report">
+<div class="relative">
+<div class="w-6 h-6 rounded-full bg-[#FF2A2A] border border-[#B30E0E] shadow-[0_3px_8px_rgba(255,42,42,0.6)] flex items-center justify-center relative">
+<!-- Stem & leaf -->
+<div class="absolute -top-1 left-2.5 w-1 h-1.5 bg-[#4A260F] rounded-t"></div>
+<div class="absolute -top-1.5 left-3.5 w-1.5 h-1 bg-[#46D869] rounded-full"></div>
+<!-- Apple highlight -->
+<div class="absolute top-1 left-1.5 w-1.5 h-1.5 rounded-full bg-white/70"></div>
+</div>
+<!-- Sparkle particle -->
+<span class="absolute -top-1 -right-1 text-[9px] text-amber-300 opacity-80 group-hover:opacity-100 animate-pulse">✦</span>
+</div>
+</div>
+<!-- Apple 2 (Upper Right) -->
+<div class="absolute top-[30px] right-[46px] cursor-pointer group animate-apple-grow transition-transform hover:scale-125" id="apple-2" style="--tx: -12px;" title="Task: Calculus Problem Set #4">
+<div class="relative">
+<div class="w-6 h-6 rounded-full bg-[#FF2A2A] border border-[#B30E0E] shadow-[0_3px_8px_rgba(255,42,42,0.6)] flex items-center justify-center relative">
+<div class="absolute -top-1 left-2.5 w-1 h-1.5 bg-[#4A260F] rounded-t"></div>
+<div class="absolute -top-1.5 left-3.5 w-1.5 h-1 bg-[#46D869] rounded-full"></div>
+<div class="absolute top-1 left-1.5 w-1.5 h-1.5 rounded-full bg-white/70"></div>
+</div>
+<span class="absolute -top-1 -left-1 text-[9px] text-amber-300 opacity-80 group-hover:opacity-100 animate-pulse">✦</span>
+</div>
+</div>
+<!-- Apple 3 (Center Left) -->
+<div class="absolute top-[72px] left-[32px] cursor-pointer group animate-apple-grow transition-transform hover:scale-125" id="apple-3" style="--tx: 30px;" title="Task: Campus Bookstore Shift">
+<div class="relative">
+<div class="w-6 h-6 rounded-full bg-[#FF2A2A] border border-[#B30E0E] shadow-[0_3px_8px_rgba(255,42,42,0.6)] flex items-center justify-center relative">
+<div class="absolute -top-1 left-2.5 w-1 h-1.5 bg-[#4A260F] rounded-t"></div>
+<div class="absolute -top-1.5 left-3.5 w-1.5 h-1 bg-[#46D869] rounded-full"></div>
+<div class="absolute top-1 left-1.5 w-1.5 h-1.5 rounded-full bg-white/70"></div>
+</div>
+<span class="absolute -bottom-1 -right-1 text-[9px] text-amber-300 opacity-80 animate-pulse">✦</span>
+</div>
+</div>
+<!-- Apple 4 (Center Right) -->
+<div class="absolute top-[68px] right-[36px] cursor-pointer group animate-apple-grow transition-transform hover:scale-125" id="apple-4" style="--tx: -24px;" title="Task: CS 101 Lecture Review">
+<div class="relative">
+<div class="w-6 h-6 rounded-full bg-[#FF2A2A] border border-[#B30E0E] shadow-[0_3px_8px_rgba(255,42,42,0.6)] flex items-center justify-center relative">
+<div class="absolute -top-1 left-2.5 w-1 h-1.5 bg-[#4A260F] rounded-t"></div>
+<div class="absolute -top-1.5 left-3.5 w-1.5 h-1 bg-[#46D869] rounded-full"></div>
+<div class="absolute top-1 left-1.5 w-1.5 h-1.5 rounded-full bg-white/70"></div>
+</div>
+<span class="absolute -top-1 -right-1 text-[9px] text-amber-300 opacity-80 animate-pulse">✦</span>
+</div>
+</div>
+</div>
+<!-- GROUND & MASCOT INTERACTION LINE -->
+<div class="relative w-full max-w-[280px] flex items-end justify-between px-2 -mt-4 z-20">
+<!-- Lush Pixel Grass Sod Ground -->
+<div class="absolute -bottom-2 left-0 right-0 h-3 bg-[#13311A] border-t-2 border-[#1E7B34] rounded-full filter blur-[0.5px]"></div>
+<!-- Demching Dino Mascot Looking Up Excitingly -->
+<div class="relative flex items-center gap-2 -mb-1 cursor-pointer group" id="dinoMascotWrapper" onclick="cheerDino()">
+<!-- Chat Bubble from Dino -->
+<div class="absolute -top-10 left-1 bg-[#1A221E] border border-emerald-500/40 text-emerald-300 text-[11px] font-mono font-bold px-2.5 py-1 rounded-xl shadow-lg flex items-center gap-1 whitespace-nowrap animate-bounce-subtle z-30 transition-colors duration-200" id="dinoChatBubble">
+<span>"4 ripe apples! Yum!"</span>
+<span class="material-symbols-outlined text-[12px] text-amber-400" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<!-- Bubble pointer -->
+<div class="bubble-pointer absolute -bottom-1 left-5 w-2 h-2 bg-[#1A221E] border-r border-b border-emerald-500/40 rotate-45 transition-colors duration-200"></div>
+</div>
+<!-- Pixel Art Dino Standing -->
+<div class="relative w-16 h-16 flex items-center justify-center" id="dinoSprite">
+<img alt="Demching Dino mascot looking up excitedly" class="w-14 h-14 pixelated object-contain transform -scale-x-100 filter drop-shadow-[0_4px_10px_rgba(0,230,118,0.25)] transition-transform duration-200 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgqynCttVgoqeje54gTe5v5KboyhQO-4M0VF7uKGe1LXEHrRU6mHH8G4_oNfuJwNQkY2_mzr9VmqWenlgQZCkOr8zfovBnllv-Herp-CJpmc1YbPyEAlZqTSZhJGbX8GadmLxzVizUmrLgXu7CAYy-aYJNPa6znknTpv2pc9FJWt4trwM2w2fGuA6Ofnc3cSS7Yc0TI2L4eFnSVC7YRnYEgqt9aZTfuLAq9lRvrUFKv4BBeho5xMQPYzbTCN1-vRSv4g"/>
+</div>
+<!-- Woven Harvest Basket in Dino's Hand / Beside Dino -->
+<div class="relative -ml-2 mb-1 flex flex-col items-center" id="harvestBasket">
+<div class="relative w-10 h-9 bg-gradient-to-b from-[#8B5A2B] to-[#5C3818] rounded-b-xl rounded-t-sm border border-[#A66E38] shadow-md flex items-center justify-center overflow-visible">
+<!-- Basket Handle -->
+<div class="absolute -top-3 left-1 right-1 h-4 border-2 border-[#A66E38] rounded-t-full pointer-events-none"></div>
+<!-- Weave Grid Texture -->
+<div class="w-full h-full opacity-30 flex flex-col justify-around py-1">
+<div class="w-full h-[1px] bg-black"></div>
+<div class="w-full h-[1px] bg-black"></div>
+</div>
+<!-- Apples already inside basket indicator -->
+<div class="absolute -top-2 flex items-center justify-center -space-x-1 transition-all" id="basketApplesCount">
+<span class="w-3.5 h-3.5 rounded-full bg-red-600 border border-red-900 shadow-sm block"></span>
+<span class="w-3.5 h-3.5 rounded-full bg-red-500 border border-red-900 shadow-sm block"></span>
+</div>
+<!-- Apples inside count badge -->
+<span class="font-mono text-[9px] font-bold text-amber-200 z-10" id="basketLabel">12</span>
+</div>
+</div>
+</div>
+<!-- Yesterday's completed tasks quick pill list -->
+<div class="bg-[#141918]/90 border border-white/10 rounded-xl p-2.5 shadow-xl flex flex-col gap-1 w-[130px] -mb-1 transition-colors duration-200" id="yesterdayTasksCard">
+<div class="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-bold flex items-center justify-between transition-colors duration-200" id="yesterdayHeader">
+<span>Yesterday</span>
+<span class="text-brand-green font-bold">100%</span>
+</div>
+<div class="flex items-center gap-1.5 text-[11px] text-slate-200 font-medium">
+<span class="material-symbols-outlined text-[13px] text-emerald-500" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="task-title truncate transition-colors duration-200">CS101 Lab</span>
+</div>
+<div class="flex items-center gap-1.5 text-[11px] text-slate-200 font-medium">
+<span class="material-symbols-outlined text-[13px] text-emerald-500" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="task-title truncate transition-colors duration-200">4h Café Shift</span>
+</div>
+<div class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400/80 mt-0.5">
+                +2 more logged
+              </div>
+</div>
+</div>
+</div>
+</section>
+<!-- BOTTOM SECTION: Weekly Feast Progress Tracker & Action Buttons -->
+<footer class="flex flex-col space-y-3">
+<!-- Weekly Feast Card -->
+<div class="bg-gradient-to-r from-[#171C1B] via-[#1A2220] to-[#171C1B] border border-emerald-500/25 rounded-2xl p-3.5 shadow-xl relative overflow-hidden transition-all duration-300" id="weeklyFeastCard">
+<!-- Top row: Feast Day & Current Stash -->
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-brand-green transition-colors duration-200" id="feastIconWrap">
+<span class="material-symbols-outlined text-[18px]">restaurant</span>
+</div>
+<div>
+<h2 class="text-[13px] font-bold text-white tracking-tight flex items-center gap-1.5 transition-colors duration-200" id="feastCardTitle">
+                  Weekly Feast Tracker
+                  <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-500 dark:text-amber-300 font-semibold border border-amber-500/30">SUNDAY</span>
+</h2>
+<p class="text-[11px] text-slate-400 transition-colors duration-200" id="stashSubtitle">
+                  Current Stash: <strong class="text-white font-mono transition-colors duration-200" id="currentStashCount">12 Apples</strong>. Feast day is Sunday!
+                </p>
+</div>
+</div>
+<!-- Target goal indicator -->
+<div class="text-right">
+<span class="text-[14px] font-mono font-bold text-brand-green transition-colors duration-200" id="progressPercentage">60%</span>
+<span class="block text-[9px] font-mono text-slate-400 transition-colors duration-200" id="progressRatio">12 / 20</span>
+</div>
+</div>
+<!-- Progress Bar showing Dino Basket fill status -->
+<div class="w-full bg-[#101413] h-2.5 rounded-full overflow-hidden p-[2px] border border-white/10 transition-colors duration-200" id="progressTrack">
+<div class="h-full bg-gradient-to-r from-emerald-500 via-brand-green to-teal-300 rounded-full w-[60%] transition-all duration-700 animate-shimmer shadow-sm" id="feastProgressBar"></div>
+</div>
+<!-- Milestones Footer -->
+<div class="flex items-center justify-between text-[10px] font-mono text-slate-400 mt-2 px-0.5 transition-colors duration-200" id="milestoneFooter">
+<span>0 Mon</span>
+<span class="milestone-mid text-amber-300/90 flex items-center gap-0.5">
+<span>Midweek 10 🍎</span>
+</span>
+<span class="milestone-goal text-brand-green font-bold flex items-center gap-0.5">
+<span>Goal: 20 🦖</span>
+</span>
+</div>
+</div>
+<!-- Primary Call To Action Buttons -->
+<div class="pt-1 flex flex-col items-center gap-2">
+<button class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-[#00E676] to-[#00C853] hover:from-[#15F586] hover:to-[#00E676] active:scale-[0.98] text-[#0A1A0F] font-extrabold text-[15px] shadow-[0_8px_24px_rgba(0,230,118,0.35)] flex items-center justify-center gap-2 transition-all cursor-pointer" id="collectBtn" onclick="triggerHarvest()">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">shopping_basket</span>
+<span id="btnText">Collect 4 Apples</span>
+</button>
+<button class="w-full py-2.5 px-5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 active:scale-[0.98] text-white font-bold text-[14px] flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm" id="launchBtn" onclick="skipHarvest()">
+<span class="material-symbols-outlined text-[18px] text-emerald-500">rocket_launch</span>
+<span>Launch Dashboard</span>
+</button>
+<button class="text-[12px] font-medium text-slate-400 hover:text-white transition-colors cursor-pointer pt-0.5" id="skipFooterBtn" onclick="skipHarvest()">
+            Skip for now
+          </button>
+</div>
+</footer>
+</main>
+<!-- Interactive Toast Notification when Apples are harvested -->
+<div class="absolute bottom-24 left-6 right-6 z-50 bg-[#16231C] border border-brand-green/60 text-emerald-200 px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none" id="harvestToast">
+<div class="flex items-center gap-2.5">
+<span class="text-xl">🧺</span>
+<div>
+<p class="text-[12px] font-bold text-white">4 Apples Stashed in Basket!</p>
+<p class="text-[10px] text-emerald-400 font-mono">Dino excitement +100% • 16 total</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-brand-green text-[18px]">check</span>
+</div>
+</div>
+<!-- Interactive Logic for Daily Harvest Collection & Night/Bright Mode Toggle -->
+<script>
+    let isCollected = false;
+
+    function triggerHarvest() {
+      if (isCollected) {
+        const btn = document.getElementById('collectBtn');
+        btn.innerHTML = `<span class="material-symbols-outlined text-[20px] animate-spin">sync</span> Launching Dashboard...`;
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 600);
+        return;
+      }
+
+      isCollected = true;
+
+      // Animate apples falling down towards the basket
+      const apples = [
+        document.getElementById('apple-1'),
+        document.getElementById('apple-2'),
+        document.getElementById('apple-3'),
+        document.getElementById('apple-4')
+      ];
+
+      apples.forEach((apple, idx) => {
+        setTimeout(() => {
+          if (apple) {
+            apple.classList.add('harvesting');
+          }
+        }, idx * 120);
+      });
+
+      // Joyous Dino bounce
+      setTimeout(() => {
+        const sprite = document.getElementById('dinoSprite');
+        if (sprite) {
+          sprite.classList.add('dino-joy');
+        }
+      }, 400);
+
+      // Update basket & feast stats
+      setTimeout(() => {
+        const basketLabel = document.getElementById('basketLabel');
+        const stashCount = document.getElementById('currentStashCount');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const progressRatio = document.getElementById('progressRatio');
+        const feastProgressBar = document.getElementById('feastProgressBar');
+        const btnText = document.getElementById('btnText');
+        const toast = document.getElementById('harvestToast');
+
+        if (basketLabel) basketLabel.textContent = "16";
+        if (stashCount) stashCount.innerHTML = '<strong class="text-emerald-600 dark:text-brand-green font-mono">16 Apples</strong>';
+        if (progressPercentage) progressPercentage.textContent = "80%";
+        if (progressRatio) progressRatio.textContent = "16 / 20";
+        if (feastProgressBar) feastProgressBar.style.width = "80%";
+
+        if (btnText) {
+          btnText.textContent = "Start Maya's Day 🚀";
+        }
+
+        // Show Toast
+        if (toast) {
+          toast.classList.remove('translate-y-24', 'opacity-0');
+          toast.classList.add('translate-y-0', 'opacity-100');
+          setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-24', 'opacity-0');
+          }, 2400);
+        }
+      }, 800);
+    }
+
+    function cheerDino() {
+      const sprite = document.getElementById('dinoSprite');
+      if (sprite) {
+        sprite.classList.remove('dino-joy');
+        void sprite.offsetWidth; // trigger reflow
+        sprite.classList.add('dino-joy');
+      }
+    }
+
+    function skipHarvest() {
+      const confirmSkip = confirm("Skip collecting your overnight harvest for now?");
+      if (confirmSkip) {
+        window.location.href = 'dashboard.html';
+      }
+    }
+
+    function toggleTheme() {
+      const isBright = document.body.classList.toggle('bright-mode');
+      const toggleBtn = document.getElementById('themeToggleBtn');
+      const icon = document.getElementById('themeToggleIcon');
+
+      if (icon && toggleBtn) {
+        if (isBright) {
+          icon.textContent = 'dark_mode';
+          toggleBtn.title = 'Switch to Night Mode';
+        } else {
+          icon.textContent = 'light_mode';
+          toggleBtn.title = 'Switch to Bright Mode';
+        }
+      }
+    }
+  </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Keep the Daily Harvest controls owned by the page's own functions.
+  const collect = document.getElementById('collectBtn');
+  const launch = document.getElementById('launchBtn');
+  const skip = document.getElementById('skipFooterBtn');
+  if (collect) { collect.onclick = triggerHarvest; collect.setAttribute('type','button'); }
+  if (launch) { launch.onclick = skipHarvest; launch.setAttribute('type','button'); }
+  if (skip) { skip.onclick = skipHarvest; skip.setAttribute('type','button'); }
+});
+</script></body></html>
