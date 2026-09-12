@@ -68,7 +68,8 @@ Existing market solutions like *MyPossibleSelf* or standard calendar apps fail t
 
 ### **3\. Design & Prototype**
 
-**UI Prototype:** https://allpurposecapcoach.netlify.app (Please click on this link to view the prototype, encouraged to view on phone since it's prepared in mobile view)
+**UI Prototype:** https://allpurposecapcoach.netlify.app 
+(Please click on the above link to view the prototype, encouraged to view on phone since it's prepared in mobile view.)
 
 Design System:  
 fonts (Plus Jakarta Sans, Inter), colors (Primary Blue \#1D70B8, Green \#107C41, Red \#D83B01, Background \#121820). Global App Bar features the Sun/Moon toggle. Bottom Nav is unified into \[Home\], \[+ Add\], \[Settings\].
