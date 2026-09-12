@@ -68,8 +68,7 @@ Existing market solutions like *MyPossibleSelf* or standard calendar apps fail t
 
 ### **3\. Design & Prototype**
 
-**UI Prototype:** \[Public Figma Link \- *Ensure it opens in incognito*\]  
-*Our UI was drafted in Figma using customized pre-existing mobile templates to accelerate the design phase, allowing us to focus on UX logic.*
+**UI Prototype:** Please view our prototype through ``index.html`` on phone for best experience. 
 
 Design System:  
 fonts (Plus Jakarta Sans, Inter), colors (Primary Blue \#1D70B8, Green \#107C41, Red \#D83B01, Background \#121820). Global App Bar features the Sun/Moon toggle. Bottom Nav is unified into \[Home\], \[+ Add\], \[Settings\].
