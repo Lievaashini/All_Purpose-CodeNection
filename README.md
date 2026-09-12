@@ -49,10 +49,10 @@ Existing market solutions like *MyPossibleSelf* or standard calendar apps fail t
 *Reviewer Note: We utilized google stitch  to rapidly map our logic and user flows.*
 
 - **Ideation diagram:**
-<br>![Ideation diagram](images\mindmap\Ideation_diagram.png)
+<br>![Ideation diagram](./images/mindmap/Ideation_diagram.png)
 
 - **User flow diagram:** 
-<br>![User flow diagram](images\mindmap\User_Flow.png)
+<br>![User flow diagram](./images/mindmap/User_Flow.png)
 
 
 #### **2.3 Mentor Consultation**
@@ -74,22 +74,22 @@ Design System:
 fonts (Plus Jakarta Sans, Inter), colors (Primary Blue \#1D70B8, Green \#107C41, Red \#D83B01, Background \#121820). Global App Bar features the Sun/Moon toggle. Bottom Nav is unified into \[Home\], \[+ Add\], \[Settings\].
 
 <br>Screen 1: Baseline Onboarding
-<br>![Onboarding](images\ui\01-onboarding.png)  ![Setting hard limits](images\ui\02-hard-limits.png)
+<br>![Onboarding](./images/ui/01-onboarding.png)  ![Setting hard limits](./images/ui/02-hard-limits.png)
 
 <br>Screen 2: Unified "Home" Dashboard: 
-<br>![Dashboard](images\ui\03-dashboard.png)  ![Dashboard-Light version](images\ui\03-dashboard-bright.png)  
+<br>![Dashboard](./images/ui/03-dashboard.png)  ![Dashboard-Light version](./images/ui/03-dashboard-bright.png)  
 
 <br>Screen 3: Add Activity Modal
-<br>![Add Activity Modal](images\ui\04-add-task.png) 
+<br>![Add Activity Modal](./images/ui/04-add-task.png) 
 
 <br>Screen 4: Crisis/Warning widget
-<br>![Biometric crisis alert](images\ui\05-crisis-alert.png)   
+<br>![Biometric crisis alert](./images/ui/05-crisis-alert.png)   
 
 <br>Screen 5: Burnout Intervention Pop-up 
-<br>![Burnt out Intervention Popup](images\ui\08-rebalance-pop-up.png)
+<br>![Burnt out Intervention Popup](./images/ui/08-rebalance-pop-up.png)
 
 <br>Screen 6: Interactivity : End-of-week "Feast Modal." The Dino is surrounded by golden apples representing the tasks successfully completed that week, which the Dino consumes. 
-<br>![Daily harvest](images\ui\06-daily-harvest.png)  ![Weekly Dino Feast](images\ui\07-dino-feast.png) 
+<br>![Daily harvest](./images/ui/06-daily-harvest.png)  ![Weekly Dino Feast](./images/ui/07-dino-feast.png) 
 
 ### **4\. What Makes It Different**
 
@@ -121,7 +121,7 @@ fonts (Plus Jakarta Sans, Inter), colors (Primary Blue \#1D70B8, Green \#107C41,
 
 #### **System Architecture Diagram**
 
-<br>![System Architecture Diagram](images\mindmap\System_Architecture_Diagram.png)
+<br>![System Architecture Diagram](./images/mindmap/System_Architecture_Diagram.png)
 
 #### **Build Plan & Scope (Sept 21 – Oct 11\)**
 
