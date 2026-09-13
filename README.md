@@ -2,8 +2,8 @@
 
 **Team:** Lievaashini Thanasegaran, Dhanya Gotami, Lee Jian Cheng, Wong Yan Wen  
 **Problem Statement:** Lifestyle Track: Beating the Burnout (Stress & Workload Manager)  
-**Video Presentation:** \[Unlisted Youtube Link\]  
-**Presentation Slides:** https://canva.link/af67hfyhan5ktfx
+**Video Presentation:** https://youtu.be/cX_QuVTY19g?si=78LXkAYxkxL6Fqsv 
+<br>**Presentation Slides:** https://canva.link/af67hfyhan5ktfx
 
 ### **1\. Project Overview**
 
