@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            background: "#121414",
+            surface: "#121414",
+            "surface-container-lowest": "#0d0e0f",
+            "surface-container-low": "#1a1c1c",
+            "surface-container": "#1e2020",
+            "surface-container-high": "#292a2a",
+            "surface-container-highest": "#343535",
+            "surface-bright": "#383939",
+            "on-surface": "#e3e2e2",
+            "on-surface-variant": "#bacbb9",
+            outline: "#859585",
+            "outline-variant": "#3b4a3d",
+            primary: "#00e676",
+            "primary-container": "#00612e",
+            "on-primary": "#003918",
+            "on-primary-container": "#75ff9e",
+            secondary: "#2979ff",
+            "secondary-container": "#0047bb",
+            "on-secondary": "#ffffff",
+            "on-secondary-container": "#d9e2ff",
+            error: "#ffb4ab",
+            "error-container": "#93000a"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            "2xl": "1rem",
+            "3xl": "1.5rem",
+            full: "9999px"
+          },
+          spacing: {
+            "gutter-mobile": "1rem",
+            "touch-target-min": "3rem"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["Space Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      min-height: 100dvh;
+      overscroll-behavior: none;
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .material-symbols-filled {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* Bright Mode Specific Theme Styles */
+    html.bright-mode,
+    body.bright-mode {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+
+    /* Bright Mode Modal & Surface Overrides */
+    .bright-mode #bottom-sheet-modal {
+      background-color: #ffffff !important;
+      border-top-color: #e2e8f0 !important;
+      box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.15);
+    }
+    .bright-mode #sheet-drag-handle {
+      background-color: #cbd5e1 !important;
+    }
+    .bright-mode #modal-header-container,
+    .bright-mode #modal-footer-container {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+    }
+    .bright-mode .theme-header-title {
+      color: #0f172a !important;
+    }
+    .bright-mode .theme-label-mono {
+      color: #64748b !important;
+    }
+    .bright-mode #context-info {
+      color: #64748b !important;
+    }
+
+    /* Input & Selection Cards in Bright Mode */
+    .bright-mode input,
+    .bright-mode select {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    .bright-mode input::placeholder {
+      color: #94a3b8 !important;
+    }
+    .bright-mode #datetime-card,
+    .bright-mode .theme-time-card {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    .bright-mode .theme-time-label {
+      color: #64748b !important;
+    }
+
+    /* Toggle & Close Icon Buttons in Bright Mode */
+    .bright-mode .theme-nav-btn {
+      background-color: #f1f5f9 !important;
+      color: #334155 !important;
+    }
+    .bright-mode .theme-nav-btn:hover {
+      background-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+
+    /* Unselected Classification Card in Bright Mode */
+    .bright-mode .theme-card-inactive {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    .bright-mode .theme-card-inactive .theme-card-title {
+      color: #1e293b !important;
+    }
+    .bright-mode .theme-card-inactive .theme-card-desc {
+      color: #64748b !important;
+    }
+    .bright-mode .theme-card-inactive .theme-card-tag {
+      background-color: #e2e8f0 !important;
+      color: #475569 !important;
+    }
+    .bright-mode .theme-card-inactive .theme-card-icon {
+      background-color: #e2e8f0 !important;
+      color: #64748b !important;
+    }
+    .bright-mode .theme-card-inactive .theme-card-check {
+      background-color: #e2e8f0 !important;
+      color: #94a3b8 !important;
+    }
+
+    /* Dino Coach Dialogue Widget in Bright Mode */
+    .bright-mode #dino-box {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    .bright-mode #dino-box img {
+      filter: contrast(1.1);
+    }
+    .bright-mode #dino-message {
+      color: #334155 !important;
+    }
+    .bright-mode #cancel-btn {
+      color: #64748b !important;
+    }
+    .bright-mode #cancel-btn:hover {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-sans antialiased h-screen w-screen overflow-hidden flex flex-col justify-end transition-colors duration-200" data-mode="connect">
+<!-- Background App Preview (Dimmed Behind Bottom Sheet) -->
+<div class="absolute inset-0 z-0 bg-background pointer-events-none select-none filter blur-[2px] opacity-25 p-4 flex flex-col gap-3">
+<!-- Mock Top Nav -->
+<div class="flex items-center justify-between py-2 border-b border-surface-container-highest">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-mono text-xs font-bold">CC</div>
+<span class="font-bold text-sm">CapCoach Studio</span>
+</div>
+<div class="w-7 h-7 rounded-full bg-surface-container-high"></div>
+</div>
+<!-- Mock Dashboard Cards -->
+<div class="p-4 rounded-xl bg-surface-container border border-surface-container-high space-y-2">
+<div class="h-3 w-1/3 bg-surface-container-highest rounded"></div>
+<div class="h-6 w-2/3 bg-surface-container-high rounded"></div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full"></div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container border border-surface-container-high space-y-3">
+<div class="flex justify-between items-center">
+<div class="h-4 w-28 bg-surface-container-highest rounded"></div>
+<div class="h-4 w-12 bg-surface-container-highest rounded"></div>
+</div>
+<div class="h-12 w-full bg-surface-container-lowest rounded-lg"></div>
+</div>
+</div>
+<!-- Dimmed Modal Backdrop -->
+<div class="fixed inset-0 bg-black/75 backdrop-blur-sm z-20" onclick="history.back()"></div>
+<!-- Bottom Sheet Modal (Interactive Screen 4) -->
+<div class="relative z-30 w-full max-h-[92dvh] bg-surface-container rounded-t-[28px] border-t border-surface-bright/20 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300 transition-colors" id="bottom-sheet-modal">
+<!-- Drag Bar Handle -->
+<div class="w-full pt-3 pb-2 flex items-center justify-center shrink-0">
+<div class="w-12 h-1.5 rounded-full bg-surface-bright/60 transition-colors" id="sheet-drag-handle"></div>
+</div>
+<!-- Modal Header -->
+<div class="flex items-center justify-between px-4 pb-2 shrink-0 border-b border-surface-container-high/60 transition-colors" id="modal-header-container"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-[#00e676]/15 flex items-center justify-center text-[#00c853] dark:text-[#00e676] transition-colors duration-200" id="modal-badge-icon"><span class="material-symbols-outlined text-[19px]">school</span></div><div><h2 class="text-base font-bold text-on-surface leading-tight theme-header-title">Add Activity</h2><p class="text-[11px] font-mono text-[#00a844] dark:text-[#00e676] font-semibold transition-colors duration-200" id="modal-subtitle">Flexible Academic</p></div></div><div class="flex items-center gap-2"><button aria-label="Toggle night/bright theme" class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant transition-colors theme-nav-btn cursor-pointer" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Night / Bright Theme" type="button"><span class="material-symbols-outlined text-[18px]" id="theme-toggle-icon">light_mode</span></button><button aria-label="Close modal" class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant transition-colors theme-nav-btn cursor-pointer" onclick="history.back()"><span class="material-symbols-outlined text-[18px]">close</span></button></div></div>
+<!-- Scrollable Modal Content -->
+<div class="flex-1 overflow-y-auto px-4 py-3 space-y-3.5">
+<!-- Classification Architecture (Dual Selectable Cards) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="font-mono text-[11px] uppercase tracking-wider text-on-surface-variant font-semibold theme-label-mono">Classification Architecture</label>
+<span class="text-[10px] font-mono text-on-surface-variant/70 theme-label-mono" id="mode-hint-chip">Selectable Mode</span>
+</div>
+<div class="grid grid-cols-1 gap-2.5">
+<!-- Option 1: Inflexible Shift (Work) -->
+<div class="relative p-3.5 rounded-xl bg-surface-container-low border-2 border-surface-container-highest cursor-pointer transition-all duration-200 opacity-60 hover:opacity-90 theme-card-inactive select-none" id="card-inflexible" onclick="selectMode('inflexible')">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-start gap-2.5">
+<div class="w-9 h-9 rounded-lg bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0 transition-colors duration-200 theme-card-icon" id="icon-container-inflexible"><span class="material-symbols-outlined text-[20px]">lock</span></div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-sm text-on-surface theme-card-title">Inflexible Shift</span>
+<span class="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-secondary/20 text-secondary font-bold theme-card-tag" id="tag-inflexible">Work</span>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-tight mt-0.5 theme-card-desc" id="desc-inflexible">Fixed work hours. Never deferred.</p>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0 transition-colors duration-200 theme-card-check" id="check-inflexible"><span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span></div>
+</div>
+<!-- Inflexible Shift Badge -->
+<div class="mt-2.5 items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/15 text-secondary text-[11px] font-medium border border-secondary/25 hidden" id="badge-inflexible-guard"><span class="material-symbols-outlined material-symbols-filled text-[13px]">shield</span><span class="">Protected under 20h cap</span></div>
+</div>
+<!-- Option 2: Flexible Deadline (Academic) -->
+<div class="relative p-3.5 rounded-xl bg-[#00e676]/10 border-2 border-[#00e676] cursor-pointer transition-all duration-200 shadow-[0_0_18px_rgba(0,230,118,0.22)] select-none" id="card-flexible" onclick="selectMode('flexible')">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-start gap-2.5">
+<div class="w-9 h-9 rounded-lg bg-[#00e676] text-black font-bold flex items-center justify-center shrink-0 shadow-sm transition-colors duration-200" id="icon-container-flexible"><span class="material-symbols-outlined text-[20px]">swap_horiz</span></div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-sm text-on-surface theme-card-title">Flexible Deadline</span>
+<span class="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-bold theme-card-tag" id="tag-flexible">Academic</span>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-tight mt-0.5 theme-card-desc" id="desc-flexible">Eligible for auto-deferral during crunch.</p>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full bg-[#00e676] text-black flex items-center justify-center shrink-0 transition-colors duration-200 font-bold shadow-sm" id="check-flexible"><span class="material-symbols-outlined text-[16px] font-bold">check</span></div>
+</div>
+<!-- Flexible Badge -->
+<div class="mt-2.5 items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#00e676]/15 text-[#00e676] text-[11px] font-medium border border-[#00e676]/30 inline-flex" id="badge-flexible-guard"><span class="material-symbols-outlined text-[13px]">auto_fix_high</span><span class="">Auto-deferral active</span></div>
+</div>
+</div>
+<!-- Context Subtitle Info -->
+</div>
+<!-- Task Title Input -->
+<div class="space-y-1">
+<div class="flex justify-between items-center">
+<label class="font-mono text-[11px] uppercase tracking-wider text-on-surface-variant font-semibold theme-label-mono" for="task-name-input">Task Name</label>
+<span class="font-mono text-[10px] text-[#00a844] dark:text-[#00e676] font-semibold transition-colors duration-200" id="title-hint">Auto-Sheddable</span>
+</div>
+<div class="relative flex items-center">
+<input class="w-full h-11 px-3.5 bg-surface-container-lowest border border-surface-container-high rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none transition-all focus:border-[#00e676]" id="task-name-input" placeholder="e.g. Read Ch. 4 Neurobiology or ECON 102 Problem Set" type="text" value="Warehouse Evening Shift"/>
+<button class="absolute right-3 text-on-surface-variant hover:text-on-surface p-1" type="button">
+<span class="material-symbols-outlined text-[18px]">mic</span>
+</button>
+</div>
+</div>
+<!-- Category / Course Selector -->
+<div class="space-y-1">
+<label class="font-mono text-[11px] uppercase tracking-wider text-on-surface-variant font-semibold theme-label-mono" for="task-category-select">Category</label>
+<div class="relative">
+<select class="w-full h-11 pl-3.5 pr-9 bg-surface-container-lowest border border-surface-container-high rounded-xl text-sm text-on-surface appearance-none focus:outline-none transition-all focus:border-[#00e676]" id="task-category-select">
+<option selected="" value="employment">💼 Employment / Logistics Dept</option>
+<option value="neuro201">🧠 NEUR 201 · Neurobiology</option>
+<option value="cs101">📚 CS 101 - Algorithms</option>
+<option value="econ102">📊 ECON 102 - Macroeconomics</option>
+<option value="phys210">⚡ PHYS 210 - Electromagnetism</option>
+<option value="personal">🌱 Personal Recovery &amp; Health</option>
+</select>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Date & Time Pickers -->
+<div class="p-3 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 space-y-3 transition-colors" id="datetime-card">
+<!-- Date Selector Row -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-on-surface-variant theme-time-label"><span class="material-symbols-outlined text-[17px]">calendar_today</span><span class="text-xs font-medium">Date</span></div>
+<input class="bg-surface-container px-2.5 py-1 rounded-lg text-xs font-mono text-on-surface border border-surface-container-highest focus:outline-none transition-colors" id="scheduled-date-input" type="date" value="2025-10-24"/>
+</div>
+<!-- Start / End Split -->
+<div class="grid grid-cols-2 gap-2">
+<div class="p-2 rounded-lg bg-surface-container border border-surface-container-high transition-colors theme-time-card">
+<div class="font-mono text-[10px] uppercase text-on-surface-variant mb-1 theme-time-label">Start Time</div>
+<input class="w-full bg-transparent text-sm font-semibold font-mono text-on-surface focus:outline-none" id="start-time" type="time" value="17:00"/>
+</div>
+<div class="p-2 rounded-lg bg-surface-container border border-surface-container-high transition-colors theme-time-card">
+<div class="flex justify-between items-center font-mono text-[10px] uppercase text-on-surface-variant mb-1 theme-time-label">
+<span class="">End Time</span>
+<span class="text-[#00a844] dark:text-[#00e676] font-bold transition-colors duration-200" id="duration-pill">4.0 hrs</span>
+</div>
+<input class="w-full bg-transparent text-sm font-semibold font-mono text-[#00a844] dark:text-[#00e676] focus:outline-none transition-colors duration-200" id="end-time" type="time" value="21:00"/>
+</div>
+</div>
+<!-- Dynamic Panel 1: Inflexible Weekly Student Work Cap Meter -->
+<div class="pt-1 space-y-1.5 hidden" id="panel-work-cap">
+<div class="flex items-center justify-between text-[11px] font-mono"><span class="text-on-surface-variant theme-time-label">Weekly Cap:</span><span class="text-secondary font-bold">16h / 20h</span></div>
+<!-- Gauge Bar -->
+<div class="w-full h-2.5 bg-surface-container-highest rounded-full overflow-hidden flex p-[1.5px]">
+<div class="h-full bg-secondary-container rounded-l-full w-[80%] transition-all duration-300"></div>
+<div class="h-full bg-secondary rounded-r-full w-[20%] transition-all duration-300 animate-pulse"></div>
+</div>
+<div class="flex items-center gap-1.5 text-secondary text-[11px] font-mono">
+<span class="material-symbols-outlined text-[13px]">verified_user</span>
+<span class="">Protected Shift — Never deferred by algorithm.</span>
+</div>
+</div>
+<!-- Dynamic Panel 2: Flexible Cognitive Load Impact / Shedding Buffer (Initially Hidden) -->
+<div class="pt-1 space-y-2" id="panel-cognitive-buffer">
+<div class="flex items-center justify-between text-[11px] font-mono">
+<span class="text-on-surface-variant uppercase tracking-wider theme-time-label">Cognitive Load &amp; Buffer</span>
+<span class="text-[#00e676] font-bold inline-flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#00e676] animate-ping"></span>
+Eligible for Auto-Shed
+</span>
+</div>
+<div class="grid grid-cols-3 gap-2 p-2 rounded-lg bg-surface-container border border-surface-container-high text-center theme-time-card"><div class="space-y-0.5"><div class="text-[9px] font-mono uppercase text-on-surface-variant theme-time-label">Deferral</div><div class="text-[11px] font-bold text-on-surface font-mono theme-card-title">48h max</div></div><div class="space-y-0.5 border-x border-surface-container-highest"><div class="text-[9px] font-mono uppercase text-on-surface-variant theme-time-label">Priority</div><div class="text-[11px] font-bold text-[#fcbf01] font-mono">Med</div></div><div class="space-y-0.5"><div class="text-[9px] font-mono uppercase text-on-surface-variant theme-time-label">Effort</div><div class="text-[11px] font-bold text-[#00e676] font-mono">45m</div></div></div>
+</div>
+</div>
+<!-- Demching Dino Coach Dialogue Widget -->
+<div class="p-2.5 rounded-xl bg-surface-container-high border border-surface-bright/20 flex items-center gap-2.5 transition-colors" id="dino-box">
+<div class="w-9 h-9 rounded-lg bg-surface-container-lowest flex items-center justify-center shrink-0 border border-surface-container-highest">
+<img alt="CapCoach Dino Logo" class="w-7 h-7 object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1U7G2FTMLjYGZ34DluHVFVLG1iHDVMn8sTR6_R1JZNUXfMhiuF2yIDNppAHzA_Vl9FGiKap7QT4OfzqlFq1l2wuPp0RC5L2QQDyjVg61z1KBajExDbLaXeqWIiADVLmtOxL1O21ygUwUmmz86ctQaj-BIPUQAD4S7CETv_i3yKQX5jqCqF43LXMI3d8KT4wQ6Bih2MsG_mRV2o7R73zThMBAAaIKRXTpsN0yFwjgDb8KYz0qhU29F0nUQ"/>
+</div>
+<div class="min-w-0">
+<div class="font-mono text-[10px] uppercase font-bold text-[#00a844] dark:text-primary" id="dino-title">CapCoach ML Scheduler</div>
+<p class="text-xs text-on-surface truncate" id="dino-message">"Shedding buffer allocated: 48h elasticity active for neuro exam prep."</p>
+</div>
+</div>
+</div>
+<!-- Action Buttons (Footer CTAs) -->
+<div class="p-4 pt-2 border-t border-surface-container-high/60 bg-surface-container flex flex-col gap-2 shrink-0 transition-colors" id="modal-footer-container">
+<button class="w-full h-12 rounded-xl bg-[#00c853] dark:bg-[#00e676] text-black hover:bg-[#00b048] dark:hover:bg-[#00e676]/90 active:scale-[0.99] font-mono font-bold text-sm tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_16px_rgba(0,200,83,0.3)] cursor-pointer" id="btn-save-task" type="button">
+<span class="material-symbols-outlined material-symbols-filled text-[18px]" id="save-btn-icon"><span class="material-symbols-outlined text-[18px]">event_available</span></span>
+<span class="" id="save-btn-text">Save Task</span>
+</button>
+<button class="w-full h-9 rounded-lg bg-transparent hover:bg-surface-container-high text-on-surface-variant font-mono text-xs font-medium flex items-center justify-center transition-colors cursor-pointer" id="cancel-btn" onclick="history.back()" type="button">
+        Cancel
+      </button>
+</div>
+</div>
+<!-- Interactive JavaScript -->
+<script>
+    let currentMode = 'inflexible';
+
+    function isBrightMode() {
+      return document.documentElement.classList.contains('bright-mode') || document.body.classList.contains('bright-mode');
+    }
+
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      const bodyEl = document.body;
+      const iconEl = document.getElementById('theme-toggle-icon');
+      const isCurrentlyBright = htmlEl.classList.contains('bright-mode') || bodyEl.classList.contains('bright-mode');
+
+      if (isCurrentlyBright) {
+        // Switch to Dark / Night Mode
+        htmlEl.classList.remove('bright-mode');
+        bodyEl.classList.remove('bright-mode');
+        htmlEl.classList.add('dark');
+        if (iconEl) iconEl.textContent = 'light_mode';
+      } else {
+        // Switch to Bright / Light Mode
+        htmlEl.classList.remove('dark');
+        htmlEl.classList.add('bright-mode');
+        bodyEl.classList.add('bright-mode');
+        if (iconEl) iconEl.textContent = 'dark_mode';
+      }
+
+      // Re-apply card active state styles with refreshed mode context
+      selectMode(currentMode);
+    }
+
+    function selectMode(mode) {
+      currentMode = mode;
+      const isBright = isBrightMode();
+
+      const cardInflexible = document.getElementById('card-inflexible');
+      const cardFlexible = document.getElementById('card-flexible');
+      
+      const iconInflexible = document.getElementById('icon-container-inflexible');
+      const iconFlexible = document.getElementById('icon-container-flexible');
+      
+      const checkInflexible = document.getElementById('check-inflexible');
+      const checkFlexible = document.getElementById('check-flexible');
+      
+      const badgeInflexible = document.getElementById('badge-inflexible-guard');
+      const badgeFlexible = document.getElementById('badge-flexible-guard');
+
+      const modalBadgeIcon = document.getElementById('modal-badge-icon');
+      const modalSubtitle = document.getElementById('modal-subtitle');
+      const contextInfo = document.getElementById('context-info');
+      const titleHint = document.getElementById('title-hint');
+      const taskInput = document.getElementById('task-name-input');
+      const categorySelect = document.getElementById('task-category-select');
+
+      const panelWorkCap = document.getElementById('panel-work-cap');
+      const panelCognitiveBuffer = document.getElementById('panel-cognitive-buffer');
+
+      const dinoTitle = document.getElementById('dino-title');
+      const dinoMessage = document.getElementById('dino-message');
+
+      const saveBtn = document.getElementById('btn-save-task');
+      const saveBtnText = document.getElementById('save-btn-text');
+      const saveBtnIcon = document.getElementById('save-btn-icon');
+      const durationPill = document.getElementById('duration-pill');
+      const endTimeInput = document.getElementById('end-time');
+
+      if (mode === 'flexible') {
+        // ==================== MODE: FLEXIBLE (Academic) ====================
+        
+        // Flexible Card: Active (Emerald Green)
+        if (isBright) {
+          cardFlexible.className = 'relative p-3.5 rounded-xl bg-emerald-50/70 border-2 border-[#00c853] cursor-pointer transition-all duration-200 shadow-[0_4px_16px_rgba(0,200,83,0.18)] select-none';
+        } else {
+          cardFlexible.className = 'relative p-3.5 rounded-xl bg-[#00e676]/10 border-2 border-[#00e676] cursor-pointer transition-all duration-200 shadow-[0_0_18px_rgba(0,230,118,0.22)] select-none';
+        }
+        cardFlexible.classList.remove('theme-card-inactive');
+
+        iconFlexible.className = 'w-9 h-9 rounded-lg bg-[#00e676] text-black font-bold flex items-center justify-center shrink-0 shadow-sm transition-colors duration-200';
+        iconFlexible.innerHTML = '<span class="material-symbols-outlined text-[20px]">swap_horiz</span>';
+
+        checkFlexible.className = 'w-6 h-6 rounded-full bg-[#00e676] text-black flex items-center justify-center shrink-0 transition-colors duration-200 font-bold shadow-sm';
+        checkFlexible.innerHTML = '<span class="material-symbols-outlined text-[16px] font-bold">check</span>';
+
+        badgeFlexible.classList.remove('hidden');
+        badgeFlexible.classList.add('inline-flex');
+
+        // Inflexible Card: Inactive
+        if (isBright) {
+          cardInflexible.className = 'relative p-3.5 rounded-xl bg-[#f8fafc] border-2 border-slate-200 cursor-pointer transition-all duration-200 opacity-80 hover:opacity-100 theme-card-inactive select-none';
+        } else {
+          cardInflexible.className = 'relative p-3.5 rounded-xl bg-surface-container-low border-2 border-surface-container-highest cursor-pointer transition-all duration-200 opacity-60 hover:opacity-90 theme-card-inactive select-none';
+        }
+
+        iconInflexible.className = 'w-9 h-9 rounded-lg bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0 transition-colors duration-200 theme-card-icon';
+        iconInflexible.innerHTML = '<span class="material-symbols-outlined text-[20px]">lock</span>';
+
+        checkInflexible.className = 'w-6 h-6 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0 transition-colors duration-200 theme-card-check';
+        checkInflexible.innerHTML = '<span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span>';
+
+        badgeInflexible.classList.add('hidden');
+        badgeInflexible.classList.remove('inline-flex');
+
+        // Header status pill
+        modalBadgeIcon.className = 'w-8 h-8 rounded-lg bg-[#00e676]/15 flex items-center justify-center text-[#00c853] dark:text-[#00e676] transition-colors duration-200';
+        modalBadgeIcon.innerHTML = '<span class="material-symbols-outlined text-[19px]">school</span>';
+        modalSubtitle.textContent = 'Flexible Academic Mode Active';
+        modalSubtitle.className = 'text-[11px] font-mono text-[#00a844] dark:text-[#00e676] font-semibold transition-colors duration-200';
+
+        // Context Subtitle
+        contextInfo.textContent = 'Algorithm can defer or rebalance this task when cognitive debt spikes past 80%.';
+
+        // Task name input values & focus state
+        if (taskInput.value === 'Warehouse Evening Shift' || taskInput.value === '') {
+          taskInput.value = 'Read Ch. 4 Neurobiology';
+        }
+        taskInput.placeholder = 'e.g. Read Ch. 4 Neurobiology or ECON 102 Problem Set';
+        taskInput.classList.remove('focus:border-secondary');
+        taskInput.classList.add('focus:border-[#00e676]');
+        titleHint.textContent = 'Auto-Sheddable';
+        titleHint.className = 'font-mono text-[10px] text-[#00a844] dark:text-[#00e676] font-semibold transition-colors duration-200';
+
+        // Category dropdown
+        categorySelect.value = 'neuro201';
+        categorySelect.classList.remove('focus:border-secondary');
+        categorySelect.classList.add('focus:border-[#00e676]');
+
+        // Panels
+        panelWorkCap.classList.add('hidden');
+        panelCognitiveBuffer.classList.remove('hidden');
+
+        durationPill.className = 'text-[#00a844] dark:text-[#00e676] font-bold transition-colors duration-200';
+        endTimeInput.className = 'w-full bg-transparent text-sm font-semibold font-mono text-[#00a844] dark:text-[#00e676] focus:outline-none transition-colors duration-200';
+
+        // Dino Widget
+        dinoTitle.textContent = 'CapCoach ML Scheduler';
+        dinoTitle.className = 'font-mono text-[10px] uppercase font-bold text-[#00a844] dark:text-primary';
+        dinoMessage.textContent = '"Shedding buffer allocated: 48h elasticity active for neuro exam prep."';
+
+        // CTA Button
+        saveBtn.className = 'w-full h-12 rounded-xl bg-[#00c853] dark:bg-[#00e676] text-black hover:bg-[#00b048] dark:hover:bg-[#00e676]/90 active:scale-[0.99] font-mono font-bold text-sm tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_16px_rgba(0,200,83,0.3)] cursor-pointer';
+        saveBtnText.textContent = 'Save Academic Task';
+        saveBtnIcon.innerHTML = '<span class="material-symbols-outlined text-[18px]">event_available</span>';
+
+      } else {
+        // ==================== MODE: INFLEXIBLE (Work Shift) ====================
+        
+        // Inflexible Card: Active (Electric Blue)
+        if (isBright) {
+          cardInflexible.className = 'relative p-3.5 rounded-xl bg-blue-50/70 border-2 border-secondary cursor-pointer transition-all duration-200 shadow-[0_4px_16px_rgba(41,121,255,0.18)] select-none';
+        } else {
+          cardInflexible.className = 'relative p-3.5 rounded-xl bg-surface-container-high border-2 border-secondary cursor-pointer transition-all duration-200 shadow-[0_0_16px_rgba(41,121,255,0.18)] select-none';
+        }
+        cardInflexible.classList.remove('theme-card-inactive');
+
+        iconInflexible.className = 'w-9 h-9 rounded-lg bg-secondary text-white flex items-center justify-center shrink-0 shadow-sm transition-colors duration-200';
+        iconInflexible.innerHTML = '<span class="material-symbols-outlined material-symbols-filled text-[20px]">lock</span>';
+
+        checkInflexible.className = 'w-6 h-6 rounded-full bg-secondary text-white flex items-center justify-center shrink-0 transition-colors duration-200 font-bold shadow-sm';
+        checkInflexible.innerHTML = '<span class="material-symbols-outlined text-[16px] font-bold">check</span>';
+
+        badgeInflexible.classList.remove('hidden');
+        badgeInflexible.classList.add('inline-flex');
+
+        // Flexible Card: Inactive
+        if (isBright) {
+          cardFlexible.className = 'relative p-3.5 rounded-xl bg-[#f8fafc] border-2 border-slate-200 cursor-pointer transition-all duration-200 opacity-80 hover:opacity-100 theme-card-inactive select-none';
+        } else {
+          cardFlexible.className = 'relative p-3.5 rounded-xl bg-surface-container-low border-2 border-surface-container-highest cursor-pointer transition-all duration-200 opacity-80 hover:opacity-100 theme-card-inactive select-none';
+        }
+
+        iconFlexible.className = 'w-9 h-9 rounded-lg bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0 transition-colors duration-200 theme-card-icon';
+        iconFlexible.innerHTML = '<span class="material-symbols-outlined text-[20px]">swap_horiz</span>';
+
+        checkFlexible.className = 'w-6 h-6 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0 transition-colors duration-200 theme-card-check';
+        checkFlexible.innerHTML = '<span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span>';
+
+        badgeFlexible.classList.add('hidden');
+        badgeFlexible.classList.remove('inline-flex');
+
+        // Header status pill
+        modalBadgeIcon.className = 'w-8 h-8 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary transition-colors duration-200';
+        modalBadgeIcon.innerHTML = '<span class="material-symbols-outlined text-[19px]">work</span>';
+        modalSubtitle.textContent = 'Inflexible Work Mode Active';
+        modalSubtitle.className = 'text-[11px] font-mono text-secondary transition-colors duration-200';
+
+        // Context Subtitle
+        contextInfo.textContent = 'Protected shift hours are guaranteed and preserved across all schedule optimizations.';
+
+        // Task name input values & focus state
+        if (taskInput.value === 'Read Ch. 4 Neurobiology' || taskInput.value === '') {
+          taskInput.value = 'Warehouse Evening Shift';
+        }
+        taskInput.placeholder = 'e.g., Read Chapter 4 or Café Barista Shift';
+        taskInput.classList.remove('focus:border-[#00e676]');
+        taskInput.classList.add('focus:border-secondary');
+        titleHint.textContent = 'Work Shift Auto-Locked';
+        titleHint.className = 'font-mono text-[10px] text-secondary font-semibold transition-colors duration-200';
+
+        // Category dropdown
+        categorySelect.value = 'employment';
+        categorySelect.classList.remove('focus:border-[#00e676]');
+        categorySelect.classList.add('focus:border-secondary');
+
+        // Panels
+        panelWorkCap.classList.remove('hidden');
+        panelCognitiveBuffer.classList.add('hidden');
+
+        durationPill.className = 'text-secondary font-bold transition-colors duration-200';
+        endTimeInput.className = 'w-full bg-transparent text-sm font-semibold font-mono text-secondary focus:outline-none transition-colors duration-200';
+
+        // Dino Widget
+        dinoTitle.textContent = 'CapCoach Dino Guard';
+        dinoTitle.className = 'font-mono text-[10px] uppercase font-bold text-primary';
+        dinoMessage.textContent = '"Locking shift. 0% chance of study-hall collisions."';
+
+        // CTA Button
+        saveBtn.className = 'w-full h-12 rounded-xl bg-secondary text-white hover:bg-secondary/90 active:scale-[0.99] font-mono font-bold text-sm tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_16px_rgba(41,121,255,0.35)] cursor-pointer';
+        saveBtnText.textContent = 'Save & Shield Shift';
+        saveBtnIcon.innerHTML = '<span class="material-symbols-outlined material-symbols-filled text-[18px]">shield</span>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wire up card listeners for maximum reliability
+      const cardInflexible = document.getElementById('card-inflexible');
+      const cardFlexible = document.getElementById('card-flexible');
+      
+      if (cardInflexible) {
+        cardInflexible.addEventListener('click', (e) => {
+          e.preventDefault();
+          selectMode('inflexible');
+        });
+      }
+      
+      if (cardFlexible) {
+        cardFlexible.addEventListener('click', (e) => {
+          e.preventDefault();
+          selectMode('flexible');
+        });
+      }
+
+      // Theme toggle button click listener
+      const themeBtn = document.getElementById('theme-toggle-btn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          toggleTheme();
+        });
+      }
+
+      // Live duration calculation
+      const startTimeInput = document.getElementById('start-time');
+      const endTimeInput = document.getElementById('end-time');
+      const durationPill = document.getElementById('duration-pill');
+
+      function updateDuration() {
+        if (!startTimeInput || !endTimeInput || !durationPill) return;
+        const start = startTimeInput.value.split(':');
+        const end = endTimeInput.value.split(':');
+        if (start.length === 2 && end.length === 2) {
+          const sMinutes = parseInt(start[0], 10) * 60 + parseInt(start[1], 10);
+          const eMinutes = parseInt(end[0], 10) * 60 + parseInt(end[1], 10);
+          let diff = (eMinutes - sMinutes) / 60;
+          if (diff < 0) diff += 24;
+          durationPill.textContent = diff.toFixed(1) + ' hrs';
+        }
+      }
+
+      if (startTimeInput) startTimeInput.addEventListener('change', updateDuration);
+      if (endTimeInput) endTimeInput.addEventListener('change', updateDuration);
+
+      // Save CTA response
+      const saveBtn = document.getElementById('btn-save-task');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+          saveBtn.classList.add('scale-95');
+          setTimeout(() => {
+            saveBtn.classList.remove('scale-95');
+            alert(currentMode === 'inflexible' ? 'Work shift saved and locked against auto-cancellation!' : 'Flexible academic task saved and queued for triage!');
+          }, 120);
+        });
+      }
+    });
+  </script>
+<script>document.addEventListener('DOMContentLoaded', () => {
+  const go = (p) => { window.location.href = p; };
+  const buttons = [...document.querySelectorAll('button, a')];
+  const find = (needle) => buttons.find(el => (el.innerText || '').replace(/\s+/g,' ').trim().toLowerCase().includes(needle));
+  const set = (needle, p) => { const el=find(needle); if(el){ el.onclick=()=>go(p); if(el.tagName==='A') el.href=p; } };
+  set('continue to hard limits','hard-limits.html');
+  set('save & launch','dashboard.html');
+  set('launch dashboard','dashboard.html');
+  set('done for now','dashboard.html');
+  set('feast all apples','dashboard.html');
+  set('collect 4 apples','feast.html');
+  set('weekly pop-up','feast.html');
+  set('daily pop-up','daily-harvest.html');
+  set('add task','add-task.html');
+  set('home','dashboard.html');
+  set('biometrics','biometrics.html');
+  set('settings','settings.html');
+  // Keep the browser from trying to navigate to Stitch preview anchors.
+  document.querySelectorAll('a[href="#"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
+});</script></body></html>
