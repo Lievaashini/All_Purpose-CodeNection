@@ -9,11 +9,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.ui.widget.ObservableScrollView;
 import com.google.android.material.button.MaterialButton;
@@ -168,11 +170,37 @@ public class HardLimitsFragment extends Fragment {
         });
     }
 
+    /**
+     * Seeds the Dino guard with the neutral sprite. {@link #refreshAll()} runs
+     * immediately afterwards and overwrites it with the sprite for the restored load
+     * band, so this only prevents a blank frame on first paint.
+     */
     private void wireThemePreview(@NonNull View view) {
-        // Keeps the Dino vector tinted correctly when the palette flips.
         if (dinoGuardAvatar != null) {
-            dinoGuardAvatar.setImageResource(R.drawable.dino_happy);
+            loadDinoSprite(dinoGuardAvatar, R.drawable.dino_happy);
         }
+    }
+
+    /**
+     * Loads a Dino sprite through Glide so an animated GIF actually plays.
+     *
+     * <p><b>Why not {@code setImageResource()}:</b> that decodes through
+     * {@code BitmapDrawable}, which shows only the <i>first frame</i> of an animated
+     * GIF. An animated sprite would silently sit still, looking like the animation
+     * was never added. Glide decodes and plays the whole frame sequence.
+     *
+     * <p><b>Why not {@code asGif()}:</b> that forces the GIF decoder and <i>fails</i>
+     * for any static PNG/WebP sprite. The default Drawable path animates a GIF when
+     * the file is one, and renders a static frame when it is not - so the sprite set
+     * can be swapped between formats without editing this method.
+     */
+    private void loadDinoSprite(@NonNull ImageView target, @DrawableRes int resId) {
+        if (!isAdded() || getContext() == null) {
+            return;
+        }
+        Glide.with(this)
+                .load(resId)
+                .into(target);
     }
 
     private void wireSaveButton(@NonNull View view) {
@@ -285,7 +313,7 @@ public class HardLimitsFragment extends Fragment {
                     : getString(band.dinoSpeechRes));
         }
         if (dinoGuardAvatar != null) {
-            dinoGuardAvatar.setImageResource(avatarFor(band));
+            loadDinoSprite(dinoGuardAvatar, avatarFor(band));
         }
         if (dinoStatusDot != null) {
             dinoStatusDot.setBackgroundResource(dotFor(band));

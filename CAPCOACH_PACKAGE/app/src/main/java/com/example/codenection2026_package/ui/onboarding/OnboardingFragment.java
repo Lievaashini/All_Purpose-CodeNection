@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.model.ToneType;
 import com.google.android.material.card.MaterialCardView;
@@ -63,6 +64,17 @@ public class OnboardingFragment extends Fragment {
         dinoDialogue = view.findViewById(R.id.dinoDialogue);
         healthStatusDot = view.findViewById(R.id.healthStatusDot);
         healthStatusText = view.findViewById(R.id.healthStatusText);
+
+        // --- Hero Dino sprite ---
+        // setImageResource() would freeze an animated GIF on its first frame, so the
+        // sprite goes through Glide instead. The layout keeps android:src purely as a
+        // static placeholder so the Android Studio preview pane still renders.
+        ImageView dinoAvatar = view.findViewById(R.id.dinoAvatar);
+        if (dinoAvatar != null) {
+            Glide.with(this)
+                    .load(R.drawable.dino_happy)
+                    .into(dinoAvatar);
+        }
 
         // --- Theme toggle (same helper is used on Screen 2) ---
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
