@@ -1,3 +1,112 @@
 <resources>
+    <!-- Kept from this project's scaffold - do not rename to CapCoach. -->
     <string name="app_name">CODENECTION2026_PACKAGE</string>
+
+    <!-- ==================== Onboarding (Screen 1) ==================== -->
+    <string name="onboarding_phase_badge">PHASE 01 / SETUP</string>
+    <string name="onboarding_title">Meet CapCoach</string>
+    <string name="onboarding_subtitle">Choose your companion tone.</string>
+    <string name="onboarding_talk_to_me">TALK TO ME</string>
+    <string name="onboarding_synced">SYNCED</string>
+    <string name="dino_description">CapCoach pixel dinosaur mascot</string>
+    <string name="dino_dialogue_default">"Ready to protect your schedule!"</string>
+
+    <string name="tone_section_label">Choose Dino Coaching Tone</string>
+    <string name="tone_section_hint">SELECT 1</string>
+
+    <string name="tone_hype_title">Hype</string>
+    <string name="tone_hype_tag">Energetic</string>
+    <string name="tone_hype_desc">Energetic sleep protector</string>
+    <string name="tone_hype_speech">"Energetic sleep protector ready!"</string>
+
+    <string name="tone_chill_title">Chill</string>
+    <string name="tone_chill_tag">Gentle</string>
+    <string name="tone_chill_desc">Gentle mindful pacing</string>
+    <string name="tone_chill_speech">"Smooth pacing, calm focus."</string>
+
+    <string name="tone_plain_title">Plain</string>
+    <string name="tone_plain_tag">Facts Only</string>
+    <string name="tone_plain_desc">Direct data analytics</string>
+    <string name="tone_plain_speech">"Telemetry active. Zero fluff."</string>
+
+    <string name="health_connect_title">Connect Android Health</string>
+    <string name="health_connect_subtitle">Sync Sleep &amp; HRV</string>
+    <string name="health_connect_status_link">LINK</string>
+    <string name="health_connect_status_ready">READY</string>
+
+    <string name="onboarding_cta">Continue to Hard Limits</string>
+    <string name="onboarding_footnote">Offline &amp; encrypted</string>
+
+    <!-- ==================== Hard limits (Screen 2) ==================== -->
+    <string name="limits_phase_badge">PHASE 02: BOUNDARIES</string>
+    <string name="limits_title">Set Limits</string>
+    <string name="limits_subtitle">Protect your non-negotiable time.</string>
+    <string name="dino_guard_label">DEMCHING DINO</string>
+    <string name="dino_guard_suffix">- GUARDIAN AI</string>
+    <string name="dino_guard_speech_default">"20h cap locked."</string>
+    <!-- Dino dialogue on the limits screen, by work-hour band.
+         The "safe" variant is formatted with the slider value. -->
+    <string name="dino_work_safe_speech">"%1$dh cap locked. I\'ll auto-deflect exam week overruns!"</string>
+    <string name="dino_work_caution_speech">"Careful! We are eating into deep recovery windows."</string>
+    <string name="dino_work_risk_speech">"Red Alert! Demching Dino initiating emergency offloading!"</string>
+
+    <string name="profile_label">STUDENT PROFILE</string>
+    <string name="profile_value">Full-Time Undergrad</string>
+
+    <string name="total_load_label">Total Committed Load</string>
+    <string name="total_load_unit">HRS / WEEK</string>
+    <string name="zone_safe">SAFE ZONE / BALANCED</string>
+    <string name="zone_elevated">ELEVATED CAPACITY</string>
+    <string name="zone_overload">OVERLOAD WARNING</string>
+
+    <!-- Study slider -->
+    <string name="study_title">Study &amp; Classes</string>
+    <string name="study_subtitle">Academics</string>
+    <string name="study_min_label">10 hrs</string>
+    <string name="study_max_label">Max: 30 hrs</string>
+    <string name="study_hard_max_label">50 hrs</string>
+    <string name="hours_per_week_short">h/wk</string>
+
+    <!-- Work slider -->
+    <string name="work_title">Weekly Shift Ceiling</string>
+    <string name="work_subtitle">Work &amp; gigs</string>
+    <string name="work_locked_cap">LOCKED CAP</string>
+    <string name="work_badge_prefix">Protected:\n</string>
+    <string name="work_min_label">0 hrs</string>
+    <string name="work_limit_label">20h Limit</string>
+    <string name="work_max_label">40 hrs</string>
+    <string name="hours_per_week">HRS / WEEK</string>
+
+    <!-- Co-curricular slider -->
+    <string name="cocurricular_title">Co-curricular</string>
+    <string name="cocurricular_subtitle">Clubs &amp; athletics</string>
+    <string name="cocurricular_min_label">0 hrs</string>
+    <string name="cocurricular_target_label">Target: 5-10 hrs</string>
+    <string name="cocurricular_max_label">20 hrs</string>
+
+    <!-- Work status messages -->
+    <string name="work_status_safe">Safe Labor Cap</string>
+    <string name="work_status_caution">Fatigue Warning</string>
+    <string name="work_status_risk">Burnout Risk &gt; 20h</string>
+    <string name="work_warning_safe">Shielded up to 20h. Overages trigger alert.</string>
+    <string name="work_warning_caution">Caution: Beyond 20 weekly hours, sleep buffers and academic grades face risk.</string>
+    <string name="work_warning_risk">Severe risk of academic collision. Shift shedding will trigger on deadlines.</string>
+
+    <!-- Integration toggles -->
+    <string name="calendar_section_label">CALENDAR INTEGRATION</string>
+    <string name="sync_calendar_title">Sync Calendar</string>
+    <string name="sync_calendar_badge">ACTIVE</string>
+
+    <string name="limits_cta">Save &amp; Launch</string>
+    <string name="limits_footnote">Editable anytime from triage.</string>
+
+    <!-- Accessibility -->
+    <string name="cd_theme_toggle">Toggle night and bright theme</string>
+    <string name="cd_mic_button">Talk to CapCoach</string>
+    <string name="cd_tone_selected">Selected</string>
+    <string name="cd_tone_unselected">Not selected</string>
+    <string name="cd_work_slider">Weekly shift labour limit in hours</string>
+    <string name="cd_study_slider">Study and classes hours per week</string>
+    <string name="cd_cocurricular_slider">Co-curricular hours per week</string>
+    <string name="cd_sync_calendar_switch">Enable calendar sync</string>
 </resources>

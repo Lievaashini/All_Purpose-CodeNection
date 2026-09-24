@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pill behind the zone label: "SAFE ZONE / BALANCED" -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/surface_container_lowest" />
+    <corners android:radius="@dimen/radius_pill" />
+</shape>

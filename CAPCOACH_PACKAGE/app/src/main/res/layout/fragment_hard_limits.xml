@@ -1,0 +1,843 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCREEN 2 - SET LIMITS / HARD LIMITS  (port of prototype/hard-limits.html)
+
+  Three sliders set the student's weekly commitment baseline:
+      Study & Classes   10-50 h/wk   (default 24, recommended max 30)
+      Weekly Shift      0-40 h/wk    (default 20 = the validated "20-hour wall")
+      Co-curricular     0-20 h/wk    (default 6,  target 5-10)
+
+  The banner at the top shows study + work + cocurricular and grades it:
+      <= 52  SAFE ZONE / BALANCED
+      <= 60  ELEVATED CAPACITY
+      >  60  OVERLOAD WARNING
+
+  All of that recalculation happens in HardLimitsFragment.java - this file only
+  provides the views and their starting values.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    tools:context=".ui.onboarding.HardLimitsFragment">
+
+    <!-- Thin scroll progress bar pinned to the very top -->
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/scrollProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:max="100"
+        app:indicatorColor="@color/brand_mint"
+        app:trackColor="@color/surface_container_highest"
+        app:trackThickness="4dp" />
+
+    <com.example.codenection2026_package.ui.widget.ObservableScrollView
+        android:id="@+id/limitsScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/gutter"
+            android:paddingTop="@dimen/space_lg"
+            android:paddingBottom="@dimen/space_xl">
+
+            <!-- ==================== Header ==================== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/phaseBadge"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_pill_badge"
+                    android:paddingHorizontal="@dimen/space_md"
+                    android:paddingVertical="@dimen/space_xs"
+                    android:text="@string/limits_phase_badge"
+                    android:textColor="@color/text_muted_dark"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <FrameLayout
+                    android:id="@+id/themeToggleButton"
+                    android:layout_width="@dimen/touch_target_min"
+                    android:layout_height="@dimen/touch_target_min"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/cd_theme_toggle"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/themeToggleIcon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_light_mode"
+                        app:tint="@color/brand_mint" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/Text.Display"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:text="@string/limits_title" />
+
+            <TextView
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xs"
+                android:text="@string/limits_subtitle" />
+
+            <!-- ==================== Dino guardian card ==================== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg"
+                android:background="@drawable/bg_surface_low"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_md">
+
+                <FrameLayout
+                    android:layout_width="@dimen/dino_small"
+                    android:layout_height="@dimen/dino_small"
+                    android:background="@drawable/bg_circle_surface">
+
+                    <ImageView
+                        android:id="@+id/dinoGuardAvatar"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/dino_description"
+                        android:src="@drawable/dino_happy" />
+
+                    <!-- Live status dot. Java swaps green/amber/red. -->
+                    <View
+                        android:id="@+id/dinoStatusDot"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="2dp"
+                        android:background="@drawable/dot_mint" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_md"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dino_guard_label"
+                            android:textColor="@color/brand_mint"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xs"
+                            android:text="@string/dino_guard_suffix" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/dinoGuardSpeech"
+                        style="@style/Text.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/dino_guard_speech_default"
+                        android:textColor="@color/text_primary_dark" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ==================== Student profile chip ==================== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:background="@drawable/bg_surface_low"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_md">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_school"
+                    app:tint="@color/secondary_blue" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_md"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_label" />
+
+                    <TextView
+                        style="@style/Text.Title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_value" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_verified"
+                    app:tint="@color/text_dim_dark" />
+            </LinearLayout>
+
+            <!-- ==================== Total committed load banner ==================== -->
+            <LinearLayout
+                android:id="@+id/totalCapacityBanner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:background="@drawable/bg_zone_banner"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_md">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_surface_lowest">
+
+                    <ImageView
+                        android:id="@+id/totalCapacityIcon"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_speed"
+                        app:tint="@color/brand_mint" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_md"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/total_load_label"
+                        android:textAllCaps="true" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="bottom"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/totalHoursValue"
+                            style="@style/Text.Metric"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50"
+                            tools:text="50" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xs"
+                            android:layout_marginBottom="4dp"
+                            android:text="@string/total_load_unit" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Zone pill -->
+                <LinearLayout
+                    android:id="@+id/zonePill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_zone_pill"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/space_sm"
+                    android:paddingVertical="@dimen/space_xxs">
+
+                    <View
+                        android:id="@+id/zoneDot"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/dot_mint" />
+
+                    <TextView
+                        android:id="@+id/zoneLabel"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xxs"
+                        android:maxWidth="120dp"
+                        android:text="@string/zone_safe"
+                        android:textColor="@color/status_green"
+                        android:textStyle="bold"
+                        tools:text="SAFE ZONE / BALANCED" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ==================== Slider 1: Study & Classes ==================== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:background="@drawable/bg_surface_low"
+                android:orientation="vertical"
+                android:padding="@dimen/space_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_circle_mint"
+                        android:contentDescription="@null"
+                        android:padding="@dimen/space_sm"
+                        android:src="@drawable/ic_school"
+                        app:tint="@color/brand_mint" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_md"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Text.Title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/study_title" />
+
+                        <TextView
+                            style="@style/Text.Body"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/study_subtitle" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_zone_pill"
+                        android:gravity="bottom"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/space_sm"
+                        android:paddingVertical="@dimen/space_xxs">
+
+                        <TextView
+                            android:id="@+id/studyHoursValue"
+                            style="@style/Text.Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="24"
+                            android:textColor="@color/brand_mint"
+                            tools:text="24" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="2dp"
+                            android:text="@string/hours_per_week_short" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/study_min_label" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/study_max_label"
+                        android:textColor="@color/brand_mint" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="@string/study_hard_max_label" />
+                </LinearLayout>
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/studySlider"
+                    style="@style/Slider.Threshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/cd_study_slider"
+                    android:stepSize="1"
+                    android:value="24"
+                    android:valueFrom="10"
+                    android:valueTo="50"
+                    app:labelBehavior="gone"
+                    tools:value="24" />
+            </LinearLayout>
+
+            <!-- ==================== Slider 2: Weekly Shift Ceiling ==================== -->
+            <LinearLayout
+                android:id="@+id/thresholdCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:background="@drawable/bg_surface_low"
+                android:orientation="vertical"
+                android:padding="@dimen/space_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_circle_surface"
+                        android:contentDescription="@null"
+                        android:padding="@dimen/space_sm"
+                        android:src="@drawable/ic_work"
+                        app:tint="@color/secondary_blue" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_md"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                style="@style/Text.Title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/work_title" />
+
+                            <TextView
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/space_sm"
+                                android:background="@drawable/bg_tone_tag"
+                                android:paddingHorizontal="@dimen/space_sm"
+                                android:paddingVertical="2dp"
+                                android:text="@string/work_locked_cap"
+                                android:textColor="@color/brand_mint"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            style="@style/Text.Body"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/work_subtitle" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/workBadge"
+                        style="@style/Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_zone_pill"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/space_sm"
+                        android:paddingVertical="@dimen/space_xxs"
+                        android:text="Protected: 20h"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold"
+                        tools:text="Protected: 20h" />
+                </LinearLayout>
+
+                <!-- Big metric + status -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="bottom"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/workHoursValue"
+                            style="@style/Text.Metric"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="20"
+                            android:textSize="@dimen/text_metric_lg"
+                            tools:text="20" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_sm"
+                            android:layout_marginBottom="6dp"
+                            android:text="@string/hours_per_week" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:id="@+id/workStatusDot"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/dot_mint" />
+
+                        <TextView
+                            android:id="@+id/workStatusLabel"
+                            style="@style/Text.Label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xs"
+                            android:text="@string/work_status_safe"
+                            android:textColor="@color/status_green"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/work_min_label" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/work_limit_label"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="@string/work_max_label" />
+                </LinearLayout>
+
+                <!--
+                  The 20-hour safety marker sits exactly at 50% because the range is 0-40
+                  and 20 is the midpoint. Set on the Slider itself, so it tracks the thumb.
+                  If the range ever changes, recompute this value.
+                -->
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/workSlider"
+                    style="@style/Slider.Threshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/cd_work_slider"
+                    android:stepSize="1"
+                    android:value="20"
+                    android:valueFrom="0"
+                    android:valueTo="40"
+                    app:labelBehavior="gone"
+                    app:tickVisible="false"
+                    app:trackColorActive="@color/brand_mint"
+                    app:trackColorInactive="@color/surface_container_highest"
+                    tools:value="20" />
+
+                <!-- Warning callout. Text + colour swap with the zone. -->
+                <LinearLayout
+                    android:id="@+id/workWarningBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:background="@drawable/bg_surface_high"
+                    android:gravity="top"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/space_sm">
+
+                    <ImageView
+                        android:id="@+id/workWarningIcon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_shield_user"
+                        app:tint="@color/brand_mint" />
+
+                    <TextView
+                        android:id="@+id/workWarningText"
+                        style="@style/Text.Body"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:layout_weight="1"
+                        android:text="@string/work_warning_safe"
+                        android:textSize="@dimen/text_label" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ==================== Slider 3: Co-curricular ==================== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:background="@drawable/bg_surface_low"
+                android:orientation="vertical"
+                android:padding="@dimen/space_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_circle_surface"
+                        android:contentDescription="@null"
+                        android:padding="@dimen/space_sm"
+                        android:src="@drawable/ic_sports"
+                        app:tint="@color/tertiary_gold_container" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_md"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Text.Title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cocurricular_title" />
+
+                        <TextView
+                            style="@style/Text.Body"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cocurricular_subtitle" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_zone_pill"
+                        android:gravity="bottom"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/space_sm"
+                        android:paddingVertical="@dimen/space_xxs">
+
+                        <TextView
+                            android:id="@+id/cocurricularHoursValue"
+                            style="@style/Text.Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="6"
+                            android:textColor="@color/brand_mint"
+                            tools:text="6" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="2dp"
+                            android:text="@string/hours_per_week_short" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/cocurricular_min_label" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cocurricular_target_label" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:text="@string/cocurricular_max_label" />
+                </LinearLayout>
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/cocurricularSlider"
+                    style="@style/Slider.Threshold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/cd_cocurricular_slider"
+                    android:stepSize="1"
+                    android:value="6"
+                    android:valueFrom="0"
+                    android:valueTo="20"
+                    app:labelBehavior="gone"
+                    android:layout_marginTop="@dimen/space_sm"
+                    tools:value="6" />
+            </LinearLayout>
+
+            <!-- ==================== Calendar integration ==================== -->
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg"
+                android:text="@string/calendar_section_label" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:background="@drawable/bg_surface_low"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_md">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circle_surface"
+                    android:contentDescription="@null"
+                    android:padding="@dimen/space_sm"
+                    android:src="@drawable/ic_calendar"
+                    app:tint="@color/secondary_blue" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_md"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Text.Title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sync_calendar_title" />
+                </LinearLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/calendarSyncSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:contentDescription="@string/cd_sync_calendar_switch" />
+            </LinearLayout>
+
+            <!-- ==================== Primary CTA ==================== -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveAndLaunchButton"
+                style="@style/Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg"
+                android:text="@string/limits_cta"
+                app:icon="@drawable/ic_arrow_forward"
+                app:iconGravity="textEnd"
+                app:iconTint="@color/bg_dark" />
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:gravity="center"
+                android:text="@string/limits_footnote" />
+
+        </LinearLayout>
+    </com.example.codenection2026_package.ui.widget.ObservableScrollView>
+</FrameLayout>

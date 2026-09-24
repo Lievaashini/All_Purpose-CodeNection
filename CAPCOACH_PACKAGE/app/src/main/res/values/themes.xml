@@ -1,9 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  LIGHT-SIDE VALUES  (res/values/)
+
+  See res/values-night/themes.xml for the dark variant, and the long note in
+  res/values-night/colors.xml about why the -night naming is inverted for this app.
+
+  Structure preserved from the repo's existing scaffold so nothing else breaks:
+      Theme.CODENECTION2026_PACKAGE  ->  Base.Theme.CODENECTION2026_PACKAGE
+  The manifest keeps pointing at Theme.CODENECTION2026_PACKAGE.
+-->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
     <style name="Base.Theme.CODENECTION2026_PACKAGE" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- ===== CapCoach palette ===== -->
+        <item name="colorPrimary">@color/brand_mint</item>
+        <item name="colorOnPrimary">@color/bg_dark</item>
+        <item name="colorPrimaryContainer">@color/surface_container_high</item>
+        <item name="colorSecondary">@color/brand_blue</item>
+        <item name="colorOnSecondary">@color/bg_dark</item>
+        <item name="colorTertiary">@color/brand_gold_container</item>
+        <item name="colorError">@color/brand_coral</item>
+
+        <item name="android:colorBackground">@color/bg_dark</item>
+        <item name="colorSurface">@color/surface_container</item>
+        <item name="colorOnSurface">@color/text_on_dark</item>
+        <item name="colorOnSurfaceVariant">@color/text_muted_dark</item>
+        <item name="colorOutline">@color/outline_dark</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="Theme.CODENECTION2026_PACKAGE" parent="Base.Theme.CODENECTION2026_PACKAGE" />
+
+    <!-- ==================== Reusable text styles ==================== -->
+
+    <style name="Text.Display" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">@dimen/text_display</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="Text.Heading" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">@dimen/text_heading</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Text.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Text.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">@color/text_muted_dark</item>
+    </style>
+
+    <style name="Text.Label" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">@dimen/text_label</item>
+        <item name="android:textColor">@color/text_dim_dark</item>
+        <item name="android:letterSpacing">0.06</item>
+    </style>
+
+    <style name="Text.MicroLabel" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">@dimen/text_micro</item>
+        <item name="android:textColor">@color/text_outline_dark</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
+    <style name="Text.Metric" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">@dimen/text_metric</item>
+        <item name="android:textColor">@color/brand_mint</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- ==================== Reusable component styles ==================== -->
+
+    <style name="Card.Base" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/surface_container</item>
+        <item name="cardCornerRadius">@dimen/radius_lg</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="strokeColor">@color/divider_dark</item>
+        <item name="strokeWidth">@dimen/stroke_thin</item>
+    </style>
+
+    <style name="Button.Primary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/brand_mint</item>
+        <item name="android:textColor">@color/bg_dark</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="cornerRadius">@dimen/radius_sm</item>
+        <item name="android:minHeight">@dimen/touch_target_min</item>
+    </style>
+
+    <style name="Slider.Threshold" parent="Widget.Material3.Slider">
+        <item name="thumbColor">@color/brand_mint</item>
+        <item name="trackColorActive">@color/brand_mint</item>
+        <item name="trackColorInactive">@color/surface_container_highest</item>
+        <item name="haloColor">@color/brand_mint_glow</item>
+        <item name="android:minHeight">@dimen/touch_target_min</item>
+    </style>
+
 </resources>

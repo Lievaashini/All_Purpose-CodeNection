@@ -1,5 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  DARK PALETTE  =  this file  (res/values/)
+  BRIGHT PALETTE =  res/values-night/
+
+  SOURCE OF TRUTH: Prototype/onboarding.html in the GitHub repo.
+
+  The prototype defines its dark colours in the Tailwind config block, and its
+  bright colours in the `body.bright-mode` CSS overrides. On Android those two
+  sets map onto values/ and values-night/ - see that file for the note on the
+  inverted -night naming.
+
+  DARK values below are copied verbatim from onboarding.html's tailwind.config.
+-->
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- ============ Brand ============ -->
+    <!-- Tailwind: primary-container -->
+    <color name="brand_mint">#FF00E676</color>
+    <!-- Tailwind: primary  (lighter mint, used for text/icons on dark) -->
+    <color name="brand_mint_light">#FF75FF9E</color>
+    <color name="brand_mint_dark">#FF00C853</color>
+    <color name="brand_mint_glow">#2E00E676</color>
+
+    <!-- Tailwind: secondary / secondary-container -->
+    <color name="brand_blue">#FFB0C6FF</color>
+    <color name="brand_blue_container">#FF0068ED</color>
+
+    <!-- Tailwind: tertiary / tertiary-container -->
+    <color name="brand_gold">#FFFFE1A6</color>
+    <color name="brand_gold_container">#FFFCBF01</color>
+
+    <!-- Tailwind: error -->
+    <color name="brand_coral">#FFFFB4AB</color>
+    <color name="brand_error_container">#FF93000A</color>
+
+    <!-- ============ Dark surfaces (verbatim from tailwind.config) ============ -->
+    <color name="bg_dark">#FF121414</color>                      <!-- background / surface -->
+    <color name="surface_container_lowest">#FF0D0E0F</color>
+    <color name="surface_container_low">#FF1A1C1C</color>
+    <color name="surface_container">#FF1E2020</color>
+    <color name="surface_container_high">#FF292A2A</color>
+    <color name="surface_container_highest">#FF343535</color>
+    <color name="surface_bright">#FF383939</color>
+    <color name="divider_dark">#FF343535</color>                 <!-- surface-variant -->
+    <color name="outline_dark">#FF3B4A3D</color>                 <!-- outline-variant -->
+    <color name="outline_muted">#FF859585</color>                <!-- outline -->
+
+    <!-- ============ Dark text (verbatim from tailwind.config) ============ -->
+    <color name="text_on_dark">#FFE3E2E2</color>                 <!-- on-surface -->
+    <color name="text_primary_dark">#FFE3E2E2</color>
+    <color name="text_muted_dark">#FFBACBB9</color>              <!-- on-surface-variant -->
+    <color name="text_dim_dark">#FF859585</color>                <!-- outline -->
+    <color name="text_outline_dark">#FF859585</color>
+
+    <!-- ============ Semantic aliases used by the layouts ============ -->
+    <color name="secondary_blue">@color/brand_blue</color>
+    <color name="tertiary_gold_container">@color/brand_gold_container</color>
+
+    <color name="status_green">#FF00E676</color>
+    <color name="status_amber">#FFFCBF01</color>
+    <color name="status_red">#FFFFB4AB</color>
+
+    <!-- Load-zone tints (low alpha) for banner backgrounds -->
+    <color name="zone_safe_bg">#1F00E676</color>
+    <color name="zone_elevated_bg">#1FFCBF01</color>
+    <color name="zone_overload_bg">#1FFFB4AB</color>
+
+    <!-- ============ Transparent helpers ============ -->
+    <color name="transparent">#00000000</color>
+    <color name="scrim">#99000000</color>
 </resources>

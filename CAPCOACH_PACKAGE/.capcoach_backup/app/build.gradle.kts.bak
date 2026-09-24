@@ -41,8 +41,6 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.material)
-    // CapCoach hosts every screen as a Fragment inside MainActivity.
-    implementation(libs.fragment)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
