@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  BRIGHT PALETTE  =  this file  (res/values-night/)
+
+  THE -night NAMING IS INVERTED, READ THIS
+
+  Android's `-night` qualifier means "use these values when the app is in NIGHT mode."
+  But the prototype behaves the opposite way round:
+
+      Prototype/onboarding.html ships in DARK mode by default
+      The Sun/Moon toggle switches it TO bright
+
+  So in Android terms the app's normal state is night, and the toggle turns night off.
+  That means the BRIGHT values belong in this -night folder, and the DARK values belong
+  in res/values/colors.xml.
+
+  ThemeController.bind() calls AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES/NO),
+  and Android then loads whichever file matches. No manual view recolouring.
+
+  ==========================================================================
+  SOURCE OF TRUTH: the `body.bright-mode` CSS block in Prototype/onboarding.html.
+
+  Exact values from the prototype:
+      body.bright-mode              background #F8FAFC   text #0F172A
+      h1 / .theme-text-heading      #0F172A
+      p  / .theme-text-sub          #475569
+      .header-phase-badge           bg #E2E8F0          text #047857
+      #theme-toggle-btn             bg #FFFFFF          text #0F172A
+      .bubble-container             bg #FFFFFF          border #E2E8F0
+      .dino-habitat-card            bg #FFFFFF          border #E2E8F0
+      .habitat-ambient              rgba(16,185,129,0.18)
+      .synced-badge                 #047857
+      .tone-card                    bg #FFFFFF          border #E2E8F0
+      .tone-card[aria-checked=true] bg #F0FDF4          border #22C55E
+      .tone-card title              #0F172A
+      .tone-card desc               #475569
+      .radio-indicator (unchecked)  bg #F1F5F9          text #94A3B8
+      .health-card                  bg #FFFFFF          border #E2E8F0
+      .health-title                 #0F172A
+      .health-sub                   #2563EB
+      .health-pill                  bg #F1F5F9
+      .bottom-subtext               #64748B
+  ==========================================================================
+
+  BRAND COLOURS ARE DELIBERATELY UNCHANGED
+
+  The prototype does NOT redefine its Tailwind palette in bright mode. It only
+  overrides surfaces, text and borders. So the mint stays #00E676 in BOTH themes.
+  That is intentional and is reproduced here. See the migration notes for the
+  contrast trade-off this creates.
+-->
+<resources>
+    <!-- ============ Bright surfaces (from body.bright-mode) ============ -->
+    <color name="bg_dark">#FFF8FAFC</color>                      <!-- body.bright-mode background -->
+    <color name="surface_container_lowest">#FFF1F5F9</color>     <!-- .health-pill / .radio-indicator -->
+    <color name="surface_container_low">#FFFFFFFF</color>        <!-- .tone-card -->
+    <color name="surface_container">#FFFFFFFF</color>            <!-- cards -->
+    <color name="surface_container_high">#FFE2E8F0</color>       <!-- .header-phase-badge -->
+    <color name="surface_container_highest">#FFF1F5F9</color>
+    <color name="surface_bright">#FFFFFFFF</color>
+    <color name="divider_dark">#FFE2E8F0</color>                 <!-- border colour used everywhere -->
+    <color name="outline_dark">#FFCBD5E1</color>                 <!-- #theme-toggle-btn border -->
+    <color name="outline_muted">#FF94A3B8</color>                <!-- unchecked indicator glyph -->
+
+    <!-- ============ Bright text ============ -->
+    <color name="text_on_dark">#FF0F172A</color>
+    <color name="text_primary_dark">#FF0F172A</color>            <!-- h1 / .theme-text-heading -->
+    <color name="text_muted_dark">#FF475569</color>              <!-- p / .theme-text-sub -->
+    <color name="text_dim_dark">#FF64748B</color>                <!-- .bottom-subtext -->
+    <color name="text_outline_dark">#FF64748B</color>
+
+    <!-- ============ Brand, UNCHANGED from the dark palette ============ -->
+    <!-- The prototype keeps its Tailwind colours in bright mode. Do not darken these. -->
+    <color name="brand_mint">#FF00E676</color>
+    <color name="brand_mint_light">#FF75FF9E</color>
+    <color name="brand_mint_dark">#FF00C853</color>
+    <color name="brand_mint_glow">#2E00E676</color>
+
+    <color name="brand_blue">#FFB0C6FF</color>
+    <color name="brand_blue_container">#FF0068ED</color>
+    <color name="brand_gold">#FFFFE1A6</color>
+    <color name="brand_gold_container">#FFFCBF01</color>
+
+    <color name="brand_coral">#FFFFB4AB</color>
+    <color name="brand_error_container">#FF93000A</color>
+
+    <!-- ============ Semantic aliases ============ -->
+    <!--
+      .health-sub is #2563EB in bright mode (its own override), and the phase badge
+      text is #047857. Those two are the only brand-family colours the prototype
+      actually redefines, so they are aliased here.
+    -->
+    <color name="secondary_blue">#FF2563EB</color>
+    <color name="tertiary_gold_container">#FFB45309</color>
+
+    <!--
+      Status colours: the prototype has no bright overrides for these, so the values
+      are darkened for legibility on the white card.
+    -->
+    <color name="status_green">#FF047857</color>
+    <color name="status_amber">#FFB45309</color>
+    <color name="status_red">#FFD83B01</color>
+
+    <color name="zone_safe_bg">#1F00E676</color>
+    <color name="zone_elevated_bg">#1FFCBF01</color>
+    <color name="zone_overload_bg">#1FFFB4AB</color>
+
+    <!-- ============ Transparent helpers ============ -->
+    <color name="transparent">#00000000</color>
+    <color name="scrim">#99000000</color>
+</resources>

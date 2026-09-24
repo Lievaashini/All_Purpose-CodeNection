@@ -1,7 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DARK-SIDE VALUES  (res/values-night/)
+
+  ⚠️ This file holds the DARK theme, despite the -night suffix meaning "night".
+  That is correct and intentional here: the CapCoach prototype ships in DARK mode
+  by default, and the Sun/Moon toggle switches it to bright.
+
+  Long explanation in res/values-night/colors.xml.
+
+  This file must redefine Base.Theme.CODENECTION2026_PACKAGE because resource
+  qualifiers work per-file - a style in values/ is replaced wholesale by the same
+  style name in values-night/.
+-->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
     <style name="Base.Theme.CODENECTION2026_PACKAGE" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Same palette references as values/ - the COLOURS swap, not the theme. -->
+        <item name="colorPrimary">@color/brand_mint</item>
+        <item name="colorOnPrimary">@color/bg_dark</item>
+        <item name="colorPrimaryContainer">@color/surface_container_high</item>
+        <item name="colorSecondary">@color/brand_blue</item>
+        <item name="colorOnSecondary">@color/bg_dark</item>
+        <item name="colorTertiary">@color/brand_gold_container</item>
+        <item name="colorError">@color/brand_coral</item>
+
+        <item name="android:colorBackground">@color/bg_dark</item>
+        <item name="colorSurface">@color/surface_container</item>
+        <item name="colorOnSurface">@color/text_on_dark</item>
+        <item name="colorOnSurfaceVariant">@color/text_muted_dark</item>
+        <item name="colorOutline">@color/outline_dark</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
+
 </resources>

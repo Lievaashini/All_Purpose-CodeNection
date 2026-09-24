@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCREEN 1 - ONBOARDING  (port of prototype/onboarding.html)
+
+  Structure (all mapped 1:1 from the HTML):
+    header row      -> phase badge + theme toggle
+    title block     -> "Meet CapCoach" headline + subtitle
+    dino stage      -> TALK TO ME button, mascot card, mic button
+    speech bubble   -> dino dialogue
+    tone selector   -> 3 checkable MaterialCardViews
+    health card     -> Connect Android Health + LINK/READY pill
+    CTA             -> Continue to Hard Limits
+
+  Everything is inside a ScrollView so it survives small screens and large font sizes.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/onboardingRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:fillViewport="true"
+    android:scrollbars="none"
+    tools:context=".ui.onboarding.OnboardingFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/gutter"
+        android:paddingTop="@dimen/space_md"
+        android:paddingBottom="@dimen/space_xl">
+
+        <!-- ==================== Header row ==================== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/phaseBadge"
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_pill_badge"
+                android:paddingHorizontal="@dimen/space_md"
+                android:paddingVertical="@dimen/space_xs"
+                android:text="@string/onboarding_phase_badge"
+                android:textColor="@color/brand_mint"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- Theme toggle. Calls AppCompatDelegate.setDefaultNightMode in Java. -->
+            <FrameLayout
+                android:id="@+id/themeToggleButton"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/cd_theme_toggle"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/themeToggleIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_light_mode"
+                    app:tint="@color/brand_mint" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- ==================== Title block ==================== -->
+        <TextView
+            style="@style/Text.Display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:text="@string/onboarding_title" />
+
+        <TextView
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            android:text="@string/onboarding_subtitle" />
+
+        <!-- ==================== Dino stage ==================== -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/talkToMeButton"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/space_lg"
+            android:text="@string/onboarding_talk_to_me"
+            android:textColor="@color/bg_dark"
+            android:textSize="@dimen/text_label"
+            android:textStyle="bold"
+            app:backgroundTint="@color/brand_mint"
+            app:cornerRadius="@dimen/radius_pill"
+            app:icon="@drawable/ic_play_arrow"
+            app:iconGravity="textEnd"
+            app:iconTint="@color/bg_dark" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/space_md"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Mascot card. The ambient glow behind it replaces the HTML's CSS blur(). -->
+            <FrameLayout
+                android:id="@+id/dinoCard"
+                android:layout_width="@dimen/dino_hero"
+                android:layout_height="@dimen/dino_hero">
+
+                <!-- Ambient glow: a translucent mint oval behind the mascot -->
+                <View
+                    android:layout_width="112dp"
+                    android:layout_height="112dp"
+                    android:layout_gravity="center"
+                    android:alpha="0.18"
+                    android:background="@drawable/bg_circle_mint" />
+
+                <ImageView
+                    android:id="@+id/dinoAvatar"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/dino_description"
+                    android:src="@drawable/dino_happy" />
+
+                <!-- "SYNCED" footer inside the card -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="@dimen/space_sm"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:background="@drawable/dot_mint" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xxs"
+                        android:text="@string/onboarding_synced"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Mic button. Opens the voice companion (Role 4 wires SpeechRecognizer). -->
+            <FrameLayout
+                android:id="@+id/micButton"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="@dimen/space_lg"
+                android:background="@drawable/bg_circle_mint"
+                android:clickable="true"
+                android:contentDescription="@string/cd_mic_button"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_mic"
+                    app:tint="@color/bg_dark" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- ==================== Dino speech bubble ==================== -->
+        <TextView
+            android:id="@+id/dinoDialogue"
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg"
+            android:background="@drawable/bg_speech_bubble"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/space_md"
+            android:paddingVertical="@dimen/space_md"
+            android:text="@string/dino_dialogue_default"
+            android:textColor="@color/text_primary_dark"
+            android:textStyle="italic" />
+
+        <!-- ==================== Tone selector ==================== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.Label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/tone_section_label"
+                android:textAllCaps="true"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tone_section_hint" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/toneSelectorGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:orientation="vertical">
+
+            <include
+                android:id="@+id/toneCardHype"
+                layout="@layout/item_tone_hype" />
+
+            <include
+                android:id="@+id/toneCardChill"
+                layout="@layout/item_tone_chill"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" />
+
+            <include
+                android:id="@+id/toneCardPlain"
+                layout="@layout/item_tone_plain"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" />
+        </LinearLayout>
+
+        <!-- ==================== Health Connect card ==================== -->
+        <LinearLayout
+            android:id="@+id/healthConnectCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg"
+            android:background="@drawable/bg_surface_low"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:minHeight="@dimen/touch_target_min"
+            android:orientation="horizontal"
+            android:padding="@dimen/space_md">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle_surface"
+                android:contentDescription="@null"
+                android:padding="@dimen/space_sm"
+                android:src="@drawable/ic_health"
+                app:tint="@color/secondary_blue" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_md"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Text.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/health_connect_title" />
+
+                <TextView
+                    style="@style/Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/health_connect_subtitle"
+                    android:textColor="@color/secondary_blue" />
+            </LinearLayout>
+
+            <!-- Status pill: LINK -> READY. Java swaps the dot drawable and text. -->
+            <LinearLayout
+                android:id="@+id/healthStatusPill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_zone_pill"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/space_sm"
+                android:paddingVertical="@dimen/space_xxs">
+
+                <View
+                    android:id="@+id/healthStatusDot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/dot_idle" />
+
+                <TextView
+                    android:id="@+id/healthStatusText"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:text="@string/health_connect_status_link"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ==================== Primary CTA ==================== -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/continueButton"
+            style="@style/Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg"
+            android:text="@string/onboarding_cta"
+            app:icon="@drawable/ic_arrow_forward"
+            app:iconGravity="textEnd"
+            app:iconTint="@color/bg_dark" />
+
+        <TextView
+            style="@style/Text.MicroLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:gravity="center"
+            android:text="@string/onboarding_footnote" />
+
+    </LinearLayout>
+</ScrollView>

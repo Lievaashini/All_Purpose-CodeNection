@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MaterialCardView stroke colour by selection state.
+     Set on the tone cards with app:strokeColor="@color/selector_tone_stroke". -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/brand_mint" android:state_checked="true" />
+    <item android:color="@color/divider_dark" />
+</selector>
