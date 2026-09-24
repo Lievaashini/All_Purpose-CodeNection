@@ -1,4 +1,4 @@
-package com.example.codenection2026_package;
+package com.example.codenection2026_package.api;
 
 import android.content.Context;
 import androidx.health.connect.client.HealthConnectClient;

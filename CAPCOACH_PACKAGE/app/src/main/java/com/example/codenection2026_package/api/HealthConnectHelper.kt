@@ -1,4 +1,4 @@
-package com.example.codenection2026_package
+package com.example.codenection2026_package.api
 
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.records.SleepSessionRecord
