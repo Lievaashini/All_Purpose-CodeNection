@@ -1,0 +1,41 @@
+# Built-in Gradle & Android Studio files
+*.iml
+.gradle/
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local machine configurations (SDK paths, etc.)
+**/local.properties
+local.properties
+
+# Android Studio / IntelliJ user settings
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetSelector.xml
+.idea/deviceStateProfile.xml
+.idea/shelf/
+.idea/androidTestResultsUserPreferences.xml
+
+# Compiled outputs and release signing keys
+*.apk
+*.aab
+*.ap_
+*.jks
+*.keystore
+
+# Java crash / debug logs
+*.log
+hs_err_pid*
+replay_pid*
+
+# OS-specific metadata
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
