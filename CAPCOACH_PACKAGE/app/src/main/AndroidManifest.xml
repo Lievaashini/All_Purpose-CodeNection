@@ -2,17 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Health Connect read permissions.
-         Role 4 owns the runtime request; declaring them lets Screen 1's health card be honest. -->
+    <!-- Member 4 & UI Teammate Merged Permissions -->
     <uses-permission android:name="android.permission.health.READ_SLEEP" />
+    <uses-permission android:name="android.permission.health.WRITE_SLEEP" />
     <uses-permission android:name="android.permission.health.READ_HEART_RATE_VARIABILITY" />
-
-    <!-- Voice task entry, wired by Role 4 on the Add Activity screen. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
-    <!-- CapCoach is local-first. No INTERNET permission on purpose: the app must work
-         fully in airplane mode. Do NOT add it unless the team formally adopts the
-         Firebase telemetry stretch goal AND updates the privacy story. -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
     <application
         android:allowBackup="true"
@@ -23,19 +19,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CODENECTION2026_PACKAGE">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Member 4: CRITICAL for Health Connect pop-up to avoid crashing -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
         </activity>
 
-        <!-- Required by Health Connect: lets the system show the user which data this app
-             reads. Role 4 should repoint targetActivity at the real permissions screen. -->
+        <!-- UI Teammate: System Permission Usage Screen -->
         <activity-alias
             android:name="ViewPermissionUsageActivity"
             android:exported="true"

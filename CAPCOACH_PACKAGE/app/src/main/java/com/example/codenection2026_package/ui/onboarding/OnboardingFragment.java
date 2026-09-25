@@ -1,6 +1,8 @@
 package com.example.codenection2026_package.ui.onboarding;
 
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.SpeechRecognizer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,23 +15,16 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.api.HealthConnectManager;
+import com.example.codenection2026_package.api.VoiceManager;
 import com.example.codenection2026_package.model.ToneType;
 import com.google.android.material.card.MaterialCardView;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 /**
  * SCREEN 1 - Onboarding. Port of {@code prototype/onboarding.html}.
- *
- * <p>Responsibilities:
- * <ul>
- *   <li>Coaching tone selection (3 cards, exactly one active)</li>
- *   <li>Dino dialogue updates when the tone changes</li>
- *   <li>Health Connect "LINK / READY" toggle - UI only, see note below</li>
- *   <li>Theme toggle, and navigation to Screen 2</li>
- * </ul>
- *
- * <p><b>Handoff note:</b> the health card is a <i>visual</i> toggle here. Role 4 owns the
- * real Health Connect permission flow and should call
- * {@link #setHealthConnectState(boolean)} when the permission result arrives.
  */
 public class OnboardingFragment extends Fragment {
 
@@ -43,6 +38,54 @@ public class OnboardingFragment extends Fragment {
     private View healthStatusDot;
     private TextView healthStatusText;
     private boolean healthConnectGranted = false;
+
+    // --- API INJECTIONS ---
+    private VoiceManager voiceManager;
+    private HealthConnectManager healthManager;
+
+    private final androidx.activity.result.ActivityResultLauncher<java.util.Set<String>> requestHealthPermissionLauncher =
+            registerForActivityResult(
+                    androidx.health.connect.client.PermissionController.createRequestPermissionResultContract(),
+                    grantedPermissions -> {
+                        if (grantedPermissions != null && healthManager != null && grantedPermissions.containsAll(healthManager.getRequiredPermissions())) {
+
+                            // 1. Update your UI teammate's card visually
+                            setHealthConnectState(true);
+                            android.util.Log.d("CapCoachAPI", "1. Health Connect Permissions Granted via UI!");
+
+                            // 2. Run your Automated Read/Write Database Test
+                            try {
+                                androidx.health.connect.client.HealthConnectClient client =
+                                        androidx.health.connect.client.HealthConnectClient.getOrCreate(requireContext());
+
+                                // Write the mock 4-hour sleep data
+                                androidx.health.connect.client.records.SleepSessionRecord mockSleep = healthManager.createMockBurnoutSleep();
+                                com.example.codenection2026_package.api.HealthConnectHelper.writeSleepDataSync(
+                                        client, java.util.Collections.singletonList(mockSleep));
+                                android.util.Log.d("CapCoachAPI", "2. Mock 4-hour sleep successfully written!");
+
+                                // Read the data back
+                                java.time.Instant start = java.time.Instant.parse("2026-09-23T00:00:00.000Z");
+                                java.time.Instant end = java.time.Instant.parse("2026-09-24T23:59:59.000Z");
+                                java.util.List<androidx.health.connect.client.records.SleepSessionRecord> records =
+                                        com.example.codenection2026_package.api.HealthConnectHelper.readSleepDataSync(client, start, end);
+
+                                android.util.Log.d("CapCoachAPI", "3. SUCCESS! Read " + records.size() + " sleep record(s) from Health Connect.");
+
+                            } catch (Exception e) {
+                                android.util.Log.e("CapCoachAPI", "Health Test failed: " + e.getMessage());
+                            }
+                        }
+                    }
+            );
+
+    private final androidx.activity.result.ActivityResultLauncher<String> requestMicPermissionLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (Boolean.TRUE.equals(isGranted) && voiceManager != null) {
+                    voiceManager.startListening();
+                }
+            });
+    // -------------------------------
 
     public OnboardingFragment() {
         super(R.layout.fragment_onboarding);
@@ -60,11 +103,38 @@ public class OnboardingFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // CRITICAL FIX: Initialize views FIRST before initializing managers/listeners that reference them
         dinoDialogue = view.findViewById(R.id.dinoDialogue);
         healthStatusDot = view.findViewById(R.id.healthStatusDot);
         healthStatusText = view.findViewById(R.id.healthStatusText);
 
-        // --- Theme toggle (same helper is used on Screen 2) ---
+        healthManager = new HealthConnectManager(requireContext());
+
+        voiceManager = new VoiceManager(requireContext(), new RecognitionListener() {
+            @Override public void onReadyForSpeech(Bundle params) {
+                if (dinoDialogue != null) dinoDialogue.setText("Listening...");
+            }
+            @Override public void onBeginningOfSpeech() {}
+            @Override public void onRmsChanged(float rmsdB) {}
+            @Override public void onBufferReceived(byte[] buffer) {}
+            @Override public void onEndOfSpeech() {}
+            @Override public void onError(int error) {
+                if (dinoDialogue != null) dinoDialogue.setText("I didn't quite catch that.");
+            }
+            @Override public void onResults(Bundle results) {
+                if (results != null) {
+                    ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                    if (matches != null && !matches.isEmpty() && dinoDialogue != null) {
+                        String spokenText = matches.get(0);
+                        dinoDialogue.setText("You said: " + spokenText);
+                    }
+                }
+            }
+            @Override public void onPartialResults(Bundle partialResults) {}
+            @Override public void onEvent(int eventType, Bundle params) {}
+        });
+
+        // --- Theme toggle ---
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
 
         // --- Tone cards ---
@@ -78,24 +148,32 @@ public class OnboardingFragment extends Fragment {
 
         selectTone(ToneType.HYPE, false);
 
-        // --- Health Connect card (visual toggle until Role 4 wires the real flow) ---
+        // --- Health Connect card ---
         View healthCard = view.findViewById(R.id.healthConnectCard);
         if (healthCard != null) {
-            healthCard.setOnClickListener(v -> setHealthConnectState(!healthConnectGranted));
+            healthCard.setOnClickListener(v -> {
+                if (healthManager.isClientAvailable()) {
+                    requestHealthPermissionLauncher.launch(healthManager.getRequiredPermissions());
+                } else {
+                    toast("Health Connect is not installed on this device.");
+                }
+            });
         }
 
-        // --- Mic button - Role 4 replaces this with the SpeechRecognizer entry point ---
+        // --- Mic button ---
+        View.OnClickListener micTrigger = v -> {
+            if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                if (voiceManager != null) voiceManager.startListening();
+            } else {
+                requestMicPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO);
+            }
+        };
+
         View micButton = view.findViewById(R.id.micButton);
-        if (micButton != null) {
-            micButton.setOnClickListener(v ->
-                    toast(getString(R.string.cd_mic_button)));
-        }
+        if (micButton != null) micButton.setOnClickListener(micTrigger);
 
         View talkButton = view.findViewById(R.id.talkToMeButton);
-        if (talkButton != null) {
-            talkButton.setOnClickListener(v ->
-                    toast(getString(R.string.cd_mic_button)));
-        }
+        if (talkButton != null) talkButton.setOnClickListener(micTrigger);
 
         // --- Continue to Screen 2 ---
         View continueButton = view.findViewById(R.id.continueButton);
@@ -112,10 +190,6 @@ public class OnboardingFragment extends Fragment {
         }
     }
 
-    // ==================================================================
-    //  Tone selection
-    // ==================================================================
-
     private void bindToneCard(@Nullable MaterialCardView card, @NonNull ToneType tone) {
         if (card == null) {
             return;
@@ -124,14 +198,6 @@ public class OnboardingFragment extends Fragment {
         card.setOnClickListener(v -> selectTone(tone, true));
     }
 
-    /**
-     * Applies the selection state to all three cards.
-     *
-     * <p>The card fill and stroke swap automatically through
-     * {@code @color/selector_tone_stroke} and {@code @color/selector_tone_fill}.
-     * What needs Java is the radio indicator glyph and the icon tick colour, because
-     * {@code <include>} prevents those from being addressed as separate view ids.
-     */
     private void selectTone(@NonNull ToneType tone, boolean animateDialogue) {
         selectedTone = tone;
 
@@ -174,22 +240,12 @@ public class OnboardingFragment extends Fragment {
         }
     }
 
-    /** @return the tone the student has selected. Persist this on the User entity. */
+    @SuppressWarnings("unused")
     @NonNull
     public ToneType getSelectedTone() {
         return selectedTone;
     }
 
-    // ==================================================================
-    //  Health Connect state (UI only)
-    // ==================================================================
-
-    /**
-     * Switches the health card pill between LINK (idle) and READY (granted).
-     *
-     * <p><b>Role 4:</b> call this from the Health Connect permission callback. Do not
-     * duplicate the visual logic.
-     */
     public void setHealthConnectState(boolean granted) {
         healthConnectGranted = granted;
         if (healthStatusText != null) {
@@ -205,6 +261,7 @@ public class OnboardingFragment extends Fragment {
         }
     }
 
+    @SuppressWarnings("unused")
     public boolean isHealthConnectGranted() {
         return healthConnectGranted;
     }
@@ -214,5 +271,11 @@ public class OnboardingFragment extends Fragment {
             android.widget.Toast.makeText(getContext(), message,
                     android.widget.Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (voiceManager != null) voiceManager.destroy();
     }
 }
