@@ -30,9 +30,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // CRITICAL: Prevents Android from compressing your ML model
+    // CRITICAL: Prevents Android from compressing ML model
     androidResources {
         noCompress += "tflite"
+    }
+
+    buildFeatures {
+        mlModelBinding = false
     }
 }
 
@@ -47,7 +51,7 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
 
-    // 1. Android Room (Using annotationProcessor because you are writing Java)
+    // 1. Android Room (Using annotationProcessor because of Java usage)
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
