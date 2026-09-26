@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One card in the dashboard task feed (prototype: article.task-item in
+  dashboard.html).
+
+  Inflated by DashboardFragment for every Task the TaskSource returns. The
+  fragment fills the title, the time range and the tag, and picks the accent
+  colour from the classification: INFLEXIBLE (a protected work shift) gets blue,
+  FLEXIBLE (sheddable academic work) gets mint.
+
+  Tapping @id/taskCheck toggles the done state: the row drops to 65% alpha, the
+  box swaps bg_task_check for bg_task_check_done, the tick appears and the title
+  is struck through.
+
+  @id/taskCheck also carries the row's classification via setTag(R.id.taskAccent,
+  classification) so the filter chips can show and hide rows without a second
+  lookup.
+-->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/taskRow"
+    style="@style/Card.Base"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/space_sm"
+    app:cardCornerRadius="@dimen/radius_md">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/space_md">
+
+        <!-- Classification accent stripe down the leading edge -->
+        <View
+            android:id="@+id/taskAccent"
+            android:layout_width="@dimen/task_accent_width"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_accent_mint" />
+
+        <FrameLayout
+            android:id="@+id/taskCheck"
+            android:layout_width="@dimen/touch_target_min"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_marginStart="@dimen/space_xs"
+            android:clickable="true"
+            android:contentDescription="@string/cd_mark_task_done"
+            android:focusable="true">
+
+            <View
+                android:id="@+id/taskCheckBox"
+                android:layout_width="@dimen/task_check_size"
+                android:layout_height="@dimen/task_check_size"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_task_check" />
+
+            <ImageView
+                android:id="@+id/taskCheckIcon"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_check"
+                android:visibility="invisible"
+                app:tint="@color/on_brand" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_sm"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/taskTitle"
+                    style="@style/Text.Body"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/text_primary_dark"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/taskTag"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:background="@drawable/bg_task_tag"
+                    android:paddingHorizontal="@dimen/space_sm"
+                    android:paddingVertical="2dp"
+                    android:textColor="@color/text_muted_dark" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xxs"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_calendar"
+                    app:tint="@color/text_dim_dark" />
+
+                <TextView
+                    android:id="@+id/taskTime"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:textColor="@color/text_muted_dark" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
+

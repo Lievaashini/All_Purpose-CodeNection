@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Blank apple tree for the Daily Harvest screen.
+
+  Converted from the 22-rect SVG in Prototype/daily-harvest.html (viewBox 0 0 72 76). Each
+  SVG rect becomes one axis-aligned path, the same technique used for the Feast Dino.
+
+  This tree is deliberately EMPTY and deliberately STATIC:
+    - Empty, because the apples on it are the tasks completed yesterday, added at runtime
+      by DailyHarvestFragment. A tree that already had fruit drawn on it would contradict
+      the screen's whole idea.
+    - Static, because it is a fixed backdrop. The earlier version used the
+      apple_tree_full.gif animation, which showed a pre-loaded crop that then had to be
+      explained away.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="210dp"
+    android:height="222dp"
+    android:viewportWidth="72"
+    android:viewportHeight="76">
+
+    <!-- Roots -->
+    <path android:fillColor="@color/tree_root" android:pathData="M26,68 h20 v4 h-20 Z" />
+    <path android:fillColor="@color/tree_root_dark" android:pathData="M23,70 h26 v3 h-26 Z" />
+
+    <!-- Trunk -->
+    <path android:fillColor="@color/tree_trunk_mid" android:pathData="M29,56 h14 v12 h-14 Z" />
+    <path android:fillColor="@color/tree_trunk" android:pathData="M33,44 h10 v16 h-10 Z" />
+
+    <!-- Wood grain and trunk shadow -->
+    <path android:fillColor="@color/tree_trunk_dark" android:pathData="M30,48 h3 v18 h-3 Z" />
+    <path android:fillColor="@color/tree_trunk_light" android:pathData="M37,52 h2 v12 h-2 Z" />
+    <path android:fillColor="@color/tree_trunk_dark" android:pathData="M40,48 h2 v14 h-2 Z" />
+
+    <!-- Canopy, darkest layer first -->
+    <path android:fillColor="@color/tree_leaf_dark" android:pathData="M8,18 h44 a4,4 0 0 1 4,4 v24 a4,4 0 0 1 -4,4 h-44 a4,4 0 0 1 -4,-4 v-24 a4,4 0 0 1 4,-4 Z" />
+    <path android:fillColor="@color/tree_leaf_dark" android:pathData="M6,22 h52 a4,4 0 0 1 4,4 v16 a4,4 0 0 1 -4,4 h-52 a4,4 0 0 1 -4,-4 v-16 a4,4 0 0 1 4,-4 Z" />
+
+    <!-- Main green foliage -->
+    <path android:fillColor="@color/tree_leaf_mid" android:pathData="M4,12 h40 a2,2 0 0 1 2,2 v30 a2,2 0 0 1 -2,2 h-40 a2,2 0 0 1 -2,-2 v-30 a2,2 0 0 1 2,-2 Z" />
+    <path android:fillColor="@color/tree_leaf_mid" android:pathData="M4,18 h48 a2,2 0 0 1 2,2 v20 a2,2 0 0 1 -2,2 h-48 a2,2 0 0 1 -2,-2 v-20 a2,2 0 0 1 2,-2 Z" />
+    <path android:fillColor="@color/tree_leaf_mid" android:pathData="M4,22 h56 a2,2 0 0 1 2,2 v12 a2,2 0 0 1 -2,2 h-56 a2,2 0 0 1 -2,-2 v-12 a2,2 0 0 1 2,-2 Z" />
+
+    <!-- Mid-tone highlights -->
+    <path android:fillColor="@color/tree_leaf" android:pathData="M18,8 h34 v10 h-34 Z" />
+    <path android:fillColor="@color/tree_leaf" android:pathData="M14,14 h18 v14 h-18 Z" />
+    <path android:fillColor="@color/tree_leaf" android:pathData="M40,14 h16 v12 h-16 Z" />
+    <path android:fillColor="@color/tree_leaf" android:pathData="M10,24 h10 v8 h-10 Z" />
+    <path android:fillColor="@color/tree_leaf" android:pathData="M50,22 h12 v10 h-12 Z" />
+
+    <!-- Sunlit pixel highlights -->
+    <path android:fillColor="@color/tree_leaf_light" android:pathData="M22,6 h22 v5 h-22 Z" />
+    <path android:fillColor="@color/tree_leaf_light" android:pathData="M18,10 h10 v4 h-10 Z" />
+    <path android:fillColor="@color/tree_leaf_light" android:pathData="M38,10 h8 v3 h-8 Z" />
+    <path android:fillColor="@color/tree_leaf_light" android:pathData="M14,16 h5 v4 h-5 Z" />
+    <path android:fillColor="@color/tree_leaf_light" android:pathData="M48,18 h5 v4 h-5 Z" />
+</vector>

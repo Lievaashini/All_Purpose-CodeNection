@@ -1,0 +1,943 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCREEN 4 - ADD TASK bottom sheet (port of Prototype/add-task.html)
+
+  Two classifications, and the whole sheet repaints when the user flips between
+  them (AddTaskSheetFragment.selectMode):
+
+    INFLEXIBLE  protected work shift. Blue. Never deferred. Shows the weekly
+                20h cap meter (@id/panelWorkCap).
+    FLEXIBLE    sheddable academic task. Mint. Shows the cognitive buffer panel
+                (@id/panelCognitiveBuffer).
+
+  Both mode cards are present in the layout at all times; Java only swaps their
+  backgrounds, icon plates, checks and badges, exactly like the prototype's
+  className rewrites.
+
+  Two controls the prototype showed as static text are real inputs here:
+
+    @id/priorityGroup   High / Med / Low. Always visible - a work shift carries a
+                        priority too - and the scheduler protects a HIGH task.
+    @id/deferralSpinner How late the scheduler may push the task. Lives in the
+                        buffer panel, which only sheddable tasks can see, because a
+                        protected shift can never be deferred.
+-->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/addTaskSheetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/gutter"
+        android:paddingTop="@dimen/space_sm"
+        android:paddingBottom="@dimen/space_lg">
+
+        <!-- Drag handle -->
+        <View
+            android:layout_width="48dp"
+            android:layout_height="6dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bg_drag_handle" />
+
+        <!-- ============ Header ============ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/modalBadgeIcon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_mode_icon_idle">
+
+                <ImageView
+                    android:id="@+id/modalBadgeGlyph"
+                    android:layout_width="19dp"
+                    android:layout_height="19dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_school"
+                    app:tint="@color/brand_mint" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_sm"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Text.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/addtask_title" />
+
+                <TextView
+                    android:id="@+id/modalSubtitle"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/addtask_subtitle_academic"
+                    android:textColor="@color/brand_mint"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/themeToggleButton"
+                android:layout_width="@dimen/icon_button_size"
+                android:layout_height="@dimen/icon_button_size"
+                android:background="@drawable/bg_surface_low"
+                android:clickable="true"
+                android:contentDescription="@string/cd_theme_toggle"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/themeToggleIcon"
+                    android:layout_width="19dp"
+                    android:layout_height="19dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_light_mode"
+                    app:tint="@color/accent_amber" />
+            </FrameLayout>
+
+            <ImageView
+                android:id="@+id/sheetClose"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/cd_close_modal"
+                android:focusable="true"
+                android:padding="@dimen/space_md"
+                android:src="@drawable/ic_close"
+                app:tint="@color/text_muted_dark" />
+        </LinearLayout>
+
+        <!-- ============ Classification ============ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/addtask_classification_label"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/addtask_mode_hint" />
+        </LinearLayout>
+
+        <!-- Mode card 1: Inflexible shift (work) -->
+        <LinearLayout
+            android:id="@+id/cardInflexible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:background="@drawable/bg_mode_card_idle"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="@dimen/space_md">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:id="@+id/iconContainerInflexible"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_mode_icon_idle">
+
+                    <ImageView
+                        android:id="@+id/iconInflexible"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_lock"
+                        app:tint="@color/text_muted_dark" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/addtask_mode_work_title"
+                            android:textColor="@color/text_primary_dark"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tagInflexible"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xs"
+                            android:background="@drawable/bg_tag_blue"
+                            android:paddingHorizontal="@dimen/space_sm"
+                            android:paddingVertical="2dp"
+                            android:text="@string/addtask_mode_work_tag"
+                            android:textColor="@color/secondary_blue"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/addtask_mode_work_desc" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/checkInflexible"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:background="@drawable/bg_mode_icon_idle">
+
+                    <ImageView
+                        android:id="@+id/checkIconInflexible"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_radio_unchecked"
+                        app:tint="@color/text_muted_dark" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/badgeInflexibleGuard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:background="@drawable/bg_tag_blue"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/space_sm"
+                android:paddingVertical="@dimen/space_xxs"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_shield_check"
+                    app:tint="@color/secondary_blue" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:text="@string/addtask_mode_work_badge"
+                    android:textColor="@color/secondary_blue" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Mode card 2: Flexible deadline (academic) -->
+        <LinearLayout
+            android:id="@+id/cardFlexible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:background="@drawable/bg_mode_card_acad"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="@dimen/space_md">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:id="@+id/iconContainerFlexible"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_mode_icon_acad">
+
+                    <ImageView
+                        android:id="@+id/iconFlexible"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_swap_horiz"
+                        app:tint="@color/on_brand" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/addtask_mode_academic_title"
+                            android:textColor="@color/text_primary_dark"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tagFlexible"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xs"
+                            android:background="@drawable/bg_task_tag"
+                            android:paddingHorizontal="@dimen/space_sm"
+                            android:paddingVertical="2dp"
+                            android:text="@string/addtask_mode_academic_tag"
+                            android:textColor="@color/text_muted_dark"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/addtask_mode_academic_desc" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/checkFlexible"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:background="@drawable/bg_mode_icon_acad">
+
+                    <ImageView
+                        android:id="@+id/checkIconFlexible"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_check"
+                        app:tint="@color/on_brand" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/badgeFlexibleGuard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:background="@drawable/bg_tag_mint"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/space_sm"
+                android:paddingVertical="@dimen/space_xxs">
+
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_auto_fix"
+                    app:tint="@color/brand_mint" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:text="@string/addtask_mode_academic_badge"
+                    android:textColor="@color/brand_mint" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ============ Task name ============ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/addtask_name_label"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/titleHint"
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/addtask_hint_sheddable"
+                android:textColor="@color/brand_mint"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs">
+
+            <EditText
+                android:id="@+id/taskNameInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="@drawable/bg_input"
+                android:hint="@string/addtask_name_hint_academic"
+                android:importantForAutofill="no"
+                android:inputType="textCapSentences"
+                android:maxLines="1"
+                android:paddingStart="@dimen/space_md"
+                android:paddingEnd="44dp"
+                android:textColor="@color/text_primary_dark"
+                android:textColorHint="@color/text_dim_dark"
+                android:textSize="@dimen/text_body" />
+
+            <ImageView
+                android:id="@+id/dictateButton"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
+                android:layout_gravity="end"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/cd_dictate_task"
+                android:focusable="true"
+                android:padding="@dimen/space_md"
+                android:src="@drawable/ic_mic"
+                app:tint="@color/text_muted_dark" />
+        </FrameLayout>
+
+        <!-- ============ Category ============ -->
+        <TextView
+            style="@style/Text.MicroLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:text="@string/addtask_category_label"
+            android:textStyle="bold" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs">
+
+            <Spinner
+                android:id="@+id/categorySpinner"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="@drawable/bg_input"
+                android:paddingEnd="40dp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="@dimen/space_md"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_expand_more"
+                app:tint="@color/text_muted_dark" />
+        </FrameLayout>
+
+        <!-- ============ Priority ============
+             Always visible, whatever the classification: a work shift and a study
+             task both carry the user's own priority, and the scheduler protects a
+             HIGH task from auto-shedding rather than guessing from the category. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/addtask_priority_label"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/addtask_priority_hint"
+                android:textColor="@color/text_muted_dark" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/priorityGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            android:contentDescription="@string/cd_priority_group"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/priorityHigh"
+                style="@style/PrioritySegment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/addtask_priority_high" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/priorityMed"
+                style="@style/PrioritySegment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_xs"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="@string/addtask_priority_med" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/priorityLow"
+                style="@style/PrioritySegment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_xs"
+                android:layout_weight="1"
+                android:text="@string/addtask_priority_low" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <!-- ============ Date and time ============ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:background="@drawable/bg_datetime_card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_md">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="17dp"
+                    android:layout_height="17dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_calendar_today"
+                    app:tint="@color/text_muted_dark" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xs"
+                    android:layout_weight="1"
+                    android:text="@string/addtask_date_label"
+                    android:textColor="@color/text_muted_dark" />
+
+                <TextView
+                    android:id="@+id/dateButton"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_surface_low"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingHorizontal="@dimen/space_sm"
+                    android:paddingVertical="@dimen/space_xxs"
+                    android:textColor="@color/text_primary_dark"
+                    tools:text="2025-10-24" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_time_card"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_sm">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/addtask_start_label"
+                        android:textColor="@color/text_muted_dark" />
+
+                    <TextView
+                        android:id="@+id/startTimeButton"
+                        style="@style/Text.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/text_primary_dark"
+                        android:textStyle="bold"
+                        tools:text="17:00" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_time_card"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_sm">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/addtask_end_label"
+                            android:textColor="@color/text_muted_dark" />
+
+                        <TextView
+                            android:id="@+id/durationPill"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/brand_mint"
+                            android:textStyle="bold"
+                            tools:text="4.0 hrs" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/endTimeButton"
+                        style="@style/Text.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold"
+                        tools:text="21:00" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ============ Panel 1: weekly work cap (work mode only) ============ -->
+        <LinearLayout
+            android:id="@+id/panelWorkCap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/addtask_cap_label"
+                    android:textColor="@color/text_muted_dark" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/addtask_cap_value"
+                    android:textColor="@color/secondary_blue"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/capProgress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:max="100"
+                android:progress="80"
+                app:indicatorColor="@color/secondary_blue"
+                app:trackColor="@color/surface_container_highest"
+                app:trackCornerRadius="@dimen/radius_pill"
+                app:trackThickness="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_shield_check"
+                    app:tint="@color/secondary_blue" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:layout_weight="1"
+                    android:text="@string/addtask_cap_footnote"
+                    android:textColor="@color/secondary_blue" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ============ Panel 2: cognitive buffer (sheddable modes only) ============ -->
+        <LinearLayout
+            android:id="@+id/panelCognitiveBuffer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/addtask_buffer_label"
+                    android:textColor="@color/text_muted_dark" />
+
+                <View
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/dot_mint" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:text="@string/addtask_buffer_eligible"
+                    android:textColor="@color/brand_mint"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:background="@drawable/bg_time_card"
+                android:orientation="vertical"
+                android:padding="@dimen/space_sm">
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/addtask_buffer_deferral"
+                    android:textColor="@color/text_muted_dark" />
+
+                <!-- How late the scheduler may push this task, chosen by the user. -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xs">
+
+                    <Spinner
+                        android:id="@+id/deferralSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:background="@drawable/bg_input"
+                        android:paddingEnd="40dp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="@dimen/space_md"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_expand_more"
+                        app:tint="@color/text_muted_dark" />
+                </FrameLayout>
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xs"
+                    android:text="@string/addtask_deferral_hint"
+                    android:textColor="@color/text_dim_dark" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/stroke_thin"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:background="@color/divider_dark" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/addtask_buffer_effort"
+                        android:textColor="@color/text_muted_dark" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/addtask_buffer_effort_value"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ============ Dino coach widget ============ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:background="@drawable/bg_surface_high"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/space_sm">
+
+            <FrameLayout
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_surface_lowest">
+
+                <ImageView
+                    android:id="@+id/dinoCoachAvatar"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/dino_description" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_sm"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/dinoTitle"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/addtask_dino_scheduler_label"
+                    android:textColor="@color/brand_mint"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/dinoMessage"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="@string/addtask_dino_scheduler_speech"
+                    android:textColor="@color/text_muted_dark" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ============ Footer ============ -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveTaskButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="@dimen/space_md"
+            android:text="@string/addtask_save_academic"
+            android:textColor="@color/on_brand"
+            android:textStyle="bold"
+            app:backgroundTint="@color/brand_mint"
+            app:cornerRadius="@dimen/radius_md"
+            app:icon="@drawable/ic_event_available"
+            app:iconTint="@color/on_brand" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/cancelButton"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            android:text="@string/addtask_cancel"
+            android:textColor="@color/text_muted_dark" />
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
+
+
+

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   Tone card: HYPE (default selected - android:checked="true")
 
@@ -103,7 +103,8 @@
                 android:layout_gravity="center"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_check"
-                app:tint="@color/bg_dark" />
+                app:tint="@color/on_brand" />
         </FrameLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+

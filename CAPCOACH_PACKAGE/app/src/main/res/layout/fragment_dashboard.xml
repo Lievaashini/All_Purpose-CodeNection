@@ -1,0 +1,685 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCREEN 3 - DASHBOARD  (port of Prototype/dashboard.html)
+
+  Layer order, bottom to top:
+    1. ObservableScrollView  the scrolling feed (capacity card, week strip,
+                             weekly load chart, simulation banner, filter chips,
+                             schedule, sync strip)
+    2. header                fixed 64dp bar pinned to the top
+    3. rebalanceToast        fixed notice pinned below the header
+    4. addTaskFab            floating "Add Task" button above the bottom nav
+    5. bottomNavInclude      fixed 64dp nav bar pinned to the bottom
+
+  Java (DashboardFragment) inflates item_day_pill.xml into @id/weekStrip and
+  item_task_row.xml into @id/tasksList, and repaints the capacity card from the
+  selected day's load value.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dashboardRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    tools:context=".ui.dashboard.DashboardFragment">
+
+    <!-- ==================== Scrolling content ==================== -->
+    <com.example.codenection2026_package.ui.widget.ObservableScrollView
+        android:id="@+id/dashboardScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/gutter"
+            android:paddingTop="@dimen/content_top_inset"
+            android:paddingBottom="@dimen/content_bottom_inset">
+
+            <!-- ============ Capacity summary card ============ -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Card.Base"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/space_md">
+
+                    <!-- Mascot plate. The GIF is animated, so DashboardFragment
+                         loads it with Glide rather than setImageResource. -->
+                    <FrameLayout
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:background="@drawable/bg_zone_pill">
+
+                        <ImageView
+                            android:id="@+id/heroMascot"
+                            android:layout_width="@dimen/dino_small"
+                            android:layout_height="@dimen/dino_small"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/dino_description" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_md"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:id="@+id/statePill"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_zone_pill"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="@dimen/space_sm"
+                                android:paddingVertical="2dp">
+
+                                <View
+                                    android:id="@+id/stateDot"
+                                    android:layout_width="6dp"
+                                    android:layout_height="6dp"
+                                    android:background="@drawable/dot_mint" />
+
+                                <TextView
+                                    android:id="@+id/stateLabel"
+                                    style="@style/Text.MicroLabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="@dimen/space_xxs"
+                                    android:text="@string/dash_state_optimal"
+                                    android:textColor="@color/brand_mint"
+                                    android:textStyle="bold"
+                                    tools:text="OPTIMAL" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/loadPercent"
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/space_sm"
+                                android:layout_weight="1"
+                                android:gravity="end"
+                                android:textColor="@color/brand_mint"
+                                android:textStyle="bold"
+                                tools:text="40% LOAD" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/headline"
+                            style="@style/Text.Body"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/dash_headline_balanced"
+                            android:textColor="@color/text_primary_dark"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/telemetry"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            tools:text="Sleep 7.8h | Work 16/20h" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ============ Week strip ============ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/monthLabel"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dash_month"
+                    android:textColor="@color/text_primary_dark"
+                    android:textStyle="bold"
+                    tools:text="September 2026" />
+
+                <TextView
+                    android:id="@+id/weekLabel"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:layout_weight="1"
+                    tools:text="Week 42" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/weekStrip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:weightSum="7" />
+
+            <!-- ============ Weekly load chart ============ -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Card.Base"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_md">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dash_weekly_load"
+                            android:textColor="@color/text_primary_dark"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_tag_amber"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="@dimen/space_sm"
+                            android:paddingVertical="2dp">
+
+                            <View
+                                android:layout_width="6dp"
+                                android:layout_height="6dp"
+                                android:background="@drawable/dot_amber" />
+
+                            <TextView
+                                android:id="@+id/capLabel"
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/space_xxs"
+                                android:textColor="@color/accent_amber"
+                                tools:text="Cap: 90%" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <com.example.codenection2026_package.ui.widget.LoadChartView
+                        android:id="@+id/loadChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/load_chart_height"
+                        android:layout_marginTop="@dimen/space_sm" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ============ Simulation banner ============ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:background="@drawable/bg_sim_banner"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_sm">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_auto_awesome"
+                    app:tint="@color/brand_mint" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:text="@string/dash_simulation"
+                    android:textColor="@color/text_primary_dark"
+                    android:textStyle="bold" />
+
+                <HorizontalScrollView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:layout_weight="1"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/rebalanceButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:insetBottom="0dp"
+                            android:insetTop="0dp"
+                            android:minHeight="36dp"
+                            android:text="@string/dash_btn_rebalance"
+                            android:textColor="@color/on_brand"
+                            android:textSize="@dimen/text_micro"
+                            app:backgroundTint="@color/brand_mint"
+                            app:cornerRadius="@dimen/radius_sm"
+                            app:icon="@drawable/ic_bolt"
+                            app:iconTint="@color/on_brand" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/dailyPopupButton"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_sm"
+                            android:insetBottom="0dp"
+                            android:insetTop="0dp"
+                            android:minHeight="36dp"
+                            android:text="@string/dash_btn_daily_popup"
+                            android:textSize="@dimen/text_micro"
+                            app:icon="@drawable/ic_nutrition"
+                            app:iconTint="@color/brand_mint" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/weeklyPopupButton"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_sm"
+                            android:insetBottom="0dp"
+                            android:insetTop="0dp"
+                            android:minHeight="36dp"
+                            android:text="@string/dash_btn_weekly_popup"
+                            android:textSize="@dimen/text_micro"
+                            app:icon="@drawable/ic_celebration"
+                            app:iconTint="@color/brand_mint" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
+
+            <!-- ============ Filter chips ============ -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/filterPills"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/filterAll"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:background="@drawable/bg_chip_active"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/space_md"
+                        android:textColor="@color/on_brand"
+                        tools:text="All (4)" />
+
+                    <TextView
+                        android:id="@+id/filterWork"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:background="@drawable/bg_chip_idle"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/space_md"
+                        android:text="@string/dash_filter_work"
+                        android:textColor="@color/text_muted_dark" />
+
+                    <TextView
+                        android:id="@+id/filterClasses"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:background="@drawable/bg_chip_idle"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/space_md"
+                        android:text="@string/dash_filter_classes"
+                        android:textColor="@color/text_muted_dark" />
+
+                    <TextView
+                        android:id="@+id/filterStudy"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:background="@drawable/bg_chip_idle"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/space_md"
+                        android:text="@string/dash_filter_study"
+                        android:textColor="@color/text_muted_dark" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- ============ Schedule header ============ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/currentDayTitle"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_primary_dark"
+                    android:textStyle="bold"
+                    tools:text="Schedule (Wed, Oct 16)" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:background="@drawable/bg_tag_mint"
+                    android:paddingHorizontal="@dimen/space_sm"
+                    android:paddingVertical="2dp"
+                    android:text="@string/dash_rebalanced_badge"
+                    android:textColor="@color/brand_mint" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/taskCounter"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="0/4 Done" />
+            </LinearLayout>
+
+            <!-- ============ Task feed ============ -->
+            <LinearLayout
+                android:id="@+id/tasksList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/emptyState"
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:gravity="center"
+                android:text="@string/dash_no_tasks"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- ============ Calendar sync strip ============ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:background="@drawable/bg_surface_low"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_sm">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_cloud_done"
+                    app:tint="@color/brand_mint" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xs"
+                    android:text="@string/dash_synced_title"
+                    android:textColor="@color/text_primary_dark" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xs"
+                    android:layout_weight="1"
+                    android:text="@string/dash_synced_ago" />
+
+                <ImageView
+                    android:id="@+id/syncNowButton"
+                    android:layout_width="@dimen/avatar_size"
+                    android:layout_height="@dimen/avatar_size"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/cd_sync_now"
+                    android:focusable="true"
+                    android:padding="@dimen/space_xs"
+                    android:src="@drawable/ic_sync"
+                    app:tint="@color/text_dim_dark" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.example.codenection2026_package.ui.widget.ObservableScrollView>
+
+    <!-- ==================== Fixed header ==================== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/header_height"
+        android:layout_gravity="top"
+        android:background="@drawable/bg_header"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/gutter">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="@dimen/avatar_size"
+                android:layout_height="@dimen/avatar_size"
+                android:background="@drawable/bg_zone_pill">
+
+                <ImageView
+                    android:id="@+id/headerDino"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/dino_description"
+                    android:src="@drawable/dino_happy" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_sm"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/brand_name"
+                        android:textColor="@color/text_primary_dark"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:layout_marginStart="@dimen/space_xxs"
+                        android:background="@drawable/dot_mint" />
+                </LinearLayout>
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/brand_offline_ml" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/themeToggleButton"
+                android:layout_width="@dimen/icon_button_size"
+                android:layout_height="@dimen/icon_button_size"
+                android:background="@drawable/bg_surface_low"
+                android:clickable="true"
+                android:contentDescription="@string/cd_theme_toggle"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/themeToggleIcon"
+                    android:layout_width="19dp"
+                    android:layout_height="19dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_light_mode"
+                    app:tint="@color/accent_amber" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/avatarBadge"
+                style="@style/Text.MicroLabel"
+                android:layout_width="@dimen/avatar_size"
+                android:layout_height="@dimen/avatar_size"
+                android:layout_marginStart="@dimen/space_sm"
+                android:background="@drawable/bg_circle_mint"
+                android:gravity="center"
+                android:text="@string/avatar_initial"
+                android:textColor="@color/on_brand"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- ==================== Rebalance toast ==================== -->
+    <LinearLayout
+        android:id="@+id/rebalanceToast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginHorizontal="@dimen/space_md"
+        android:layout_marginTop="@dimen/content_top_inset"
+        android:background="@drawable/bg_toast"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/space_md"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_verified"
+            app:tint="@color/brand_mint" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_sm"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/toast_rebalanced_title"
+                android:textColor="@color/text_primary_dark"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/toast_rebalanced_sub"
+                android:textColor="@color/brand_mint" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/toastClose"
+            android:layout_width="@dimen/touch_target_min"
+            android:layout_height="@dimen/touch_target_min"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/cd_close_modal"
+            android:focusable="true"
+            android:padding="@dimen/space_md"
+            android:src="@drawable/ic_close"
+            app:tint="@color/text_muted_dark" />
+    </LinearLayout>
+
+    <!-- ==================== Floating add-task button ==================== -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/addTaskFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="80dp"
+        android:layout_marginEnd="@dimen/space_md"
+        android:contentDescription="@string/cd_add_task"
+        android:text="@string/dash_add_task"
+        android:textColor="@color/on_brand"
+        app:backgroundTint="@color/brand_mint"
+        app:cornerRadius="@dimen/radius_pill"
+        app:icon="@drawable/ic_add"
+        app:iconTint="@color/on_brand" />
+
+    <!-- ==================== Bottom navigation ==================== -->
+    <include
+        android:id="@+id/bottomNavInclude"
+        layout="@layout/include_bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottom_nav_height"
+        android:layout_gravity="bottom" />
+
+</FrameLayout>
+
+
+

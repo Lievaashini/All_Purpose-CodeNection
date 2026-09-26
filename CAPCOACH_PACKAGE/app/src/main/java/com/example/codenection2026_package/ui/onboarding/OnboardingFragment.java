@@ -184,7 +184,14 @@ public class OnboardingFragment extends Fragment {
         }
 
         // --- Mic button ---
+        // Opens the simplified Dino-focused voice popup for a focused exchange, and also
+        // keeps the original in-place listening behaviour so the page's own Dino dialogue
+        // still updates behind the dialog.
         View.OnClickListener micTrigger = v -> {
+            if (isAdded()) {
+                new com.example.codenection2026_package.ui.companion.VoiceDinoDialogFragment()
+                        .show(getParentFragmentManager(), "voice_dino");
+            }
             if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 if (voiceManager != null) voiceManager.startListening();
             } else {

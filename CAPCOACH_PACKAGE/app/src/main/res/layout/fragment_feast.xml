@@ -1,0 +1,453 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCREEN 7 - WEEKLY FEAST  (port of Prototype/feast.html)
+
+  Sunday's reward loop: tap apples one at a time (or all at once) and watch the Dino's
+  satiety meter fill.
+
+  The prototype inlines a hand-drawn 8-bit Dino as ~40 SVG rect elements and animates it
+  by swapping CSS classes. Here the Dino is dino_happy.gif, loaded through Glide, so the
+  character animation is the real animated sprite. apple_tree_sparse.gif supplies the
+  animated backdrop.
+
+  NEW FILE - additive. Nothing existing is modified.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/feastRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/feast_canvas">
+
+    <ScrollView
+        android:id="@+id/feastScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/space_lg"
+            android:paddingTop="@dimen/space_lg"
+            android:paddingBottom="@dimen/space_lg">
+
+            <!-- Pill + controls -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_zone_pill"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/space_md"
+                    android:paddingVertical="@dimen/space_xxs">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/dot_mint" />
+
+                    <TextView
+                        android:id="@+id/feastPill"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xs"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold"
+                        tools:text="SUNDAY FEAST - DAY 7" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/themeToggleButton"
+                    android:layout_width="@dimen/icon_button_size"
+                    android:layout_height="@dimen/icon_button_size"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:background="@drawable/bg_surface_low"
+                    android:clickable="true"
+                    android:contentDescription="@string/cd_theme_toggle"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/themeToggleIcon"
+                        android:layout_width="19dp"
+                        android:layout_height="19dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_light_mode"
+                        app:tint="@color/accent_amber" />
+                </FrameLayout>
+
+                <ImageView
+                    android:id="@+id/closeButton"
+                    android:layout_width="@dimen/icon_button_size"
+                    android:layout_height="@dimen/icon_button_size"
+                    android:layout_marginStart="@dimen/space_xs"
+                    android:background="@drawable/bg_surface_low"
+                    android:contentDescription="@string/cd_close_modal"
+                    android:padding="@dimen/space_sm"
+                    android:src="@drawable/ic_close"
+                    app:tint="@color/text_muted_dark" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/Text.Heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:gravity="center"
+                android:text="@string/feast_title"
+                android:textColor="@color/text_primary_dark" />
+
+            <TextView
+                android:id="@+id/feastSubtitle"
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xxs"
+                android:gravity="center"
+                tools:text="You harvested 16 apples from completing 16 study and shift blocks this week!" />
+
+            <!-- Dino stage -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|center_horizontal"
+                    android:background="@drawable/bg_zone_pill"
+                    android:paddingHorizontal="@dimen/space_md"
+                    android:paddingVertical="@dimen/space_xxs">
+
+                    <TextView
+                        android:id="@+id/dinoBubble"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/feast_bubble_hungry"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/dinoStage"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/tree_size_large"
+                    android:layout_marginTop="@dimen/space_xl">
+
+                    <!--
+                      The Dino, drawn from vector layers rather than the animated
+                      dino_happy GIF. Prototype/feast.html inlines this character as a
+                      28-rect SVG and feeds it by swapping a closed-mouth group for an
+                      open-mouth group; keeping it as vectors here is what makes that
+                      swap possible. Three layers, bottom to top:
+                          dino_feast_body          everything except the mouth
+                          dino_feast_mouth_closed  the smile, shown by default
+                          dino_feast_mouth_open    the wide mouth, shown while feeding
+                    -->
+                    <FrameLayout
+                        android:id="@+id/feastDino"
+                        android:layout_width="@dimen/dino_hero"
+                        android:layout_height="@dimen/dino_hero"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/cd_feast_dino">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:importantForAccessibility="no"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/dino_feast_body" />
+
+                        <ImageView
+                            android:id="@+id/dinoMouthClosed"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:importantForAccessibility="no"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/dino_feast_mouth_closed" />
+
+                        <ImageView
+                            android:id="@+id/dinoMouthOpen"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:importantForAccessibility="no"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/dino_feast_mouth_open"
+                            android:visibility="invisible" />
+                    </FrameLayout>
+                </FrameLayout>
+            </FrameLayout>
+
+            <!-- Basket stash + satiety -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:background="@drawable/bg_surface_low"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/space_md">
+
+                <FrameLayout
+                    android:layout_width="@dimen/basket_size"
+                    android:layout_height="@dimen/basket_size"
+                    android:background="@drawable/bg_basket">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_shopping_basket"
+                        app:tint="@color/brand_gold" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/feast_stash_label"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="bottom"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/applesRemainingCount"
+                            style="@style/Text.Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/brand_mint"
+                            tools:text="16" />
+
+                        <TextView
+                            android:id="@+id/applesTotalLabel"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xxs"
+                            tools:text="/ 16 apples" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/feast_satiety_label"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt"
+                            app:tint="@color/accent_amber" />
+
+                        <TextView
+                            android:id="@+id/satietyPercentage"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xxs"
+                            android:textColor="@color/accent_amber"
+                            android:textStyle="bold"
+                            tools:text="0%" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Feast capacity -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/feast_capacity_label" />
+
+                    <TextView
+                        android:id="@+id/progressText"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold"
+                        tools:text="0 of 16 Eaten" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/space_sm"
+                    android:layout_marginTop="@dimen/space_xs"
+                    android:background="@drawable/bg_progress_track">
+
+                    <View
+                        android:id="@+id/feastProgressBar"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_progress_mint" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- Apple tray -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:background="@drawable/bg_apple_tray"
+                android:orientation="vertical"
+                android:padding="@dimen/space_sm">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:background="@drawable/dot_mint" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xs"
+                        android:text="@string/feast_tray_title"
+                        android:textColor="@color/text_primary_dark" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/feast_tray_subtitle" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/appleGrid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal"
+                    android:weightSum="4" />
+            </LinearLayout>
+
+            <!-- Actions -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/feastAllButton"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="@dimen/space_md"
+                android:textColor="@color/on_brand"
+                android:textStyle="bold"
+                app:backgroundTint="@color/brand_mint"
+                app:cornerRadius="@dimen/radius_md"
+                app:icon="@drawable/ic_restaurant"
+                app:iconGravity="textStart"
+                app:iconTint="@color/on_brand"
+                tools:text="Feast All Apples (16)" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/doneButton"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/feast_done"
+                android:textColor="@color/text_dim_dark" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Toast -->
+    <LinearLayout
+        android:id="@+id/feastToast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="@dimen/space_lg"
+        android:background="@drawable/bg_toast"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/space_md"
+        android:paddingVertical="@dimen/space_sm"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_verified"
+            app:tint="@color/brand_mint" />
+
+        <TextView
+            android:id="@+id/feastToastText"
+            style="@style/Text.MicroLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_sm"
+            android:textColor="@color/text_primary_dark"
+            tools:text="Weekly Feast Complete!" />
+    </LinearLayout>
+
+</FrameLayout>
+
+
+

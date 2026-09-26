@@ -14,10 +14,10 @@
     <style name="Base.Theme.CODENECTION2026_PACKAGE" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- ===== CapCoach palette ===== -->
         <item name="colorPrimary">@color/brand_mint</item>
-        <item name="colorOnPrimary">@color/bg_dark</item>
+        <item name="colorOnPrimary">@color/on_brand</item>
         <item name="colorPrimaryContainer">@color/surface_container_high</item>
         <item name="colorSecondary">@color/brand_blue</item>
-        <item name="colorOnSecondary">@color/bg_dark</item>
+        <item name="colorOnSecondary">@color/on_brand</item>
         <item name="colorTertiary">@color/brand_gold_container</item>
         <item name="colorError">@color/brand_coral</item>
 
@@ -106,4 +106,30 @@
         <item name="android:minHeight">@dimen/touch_target_min</item>
     </style>
 
+    <!--
+      One segment of the priority selector in sheet_add_task.xml.
+
+      Text, fill and outline are all colour state lists so the chosen segment flips
+      to solid mint with dark text while the other two stay quiet outlines. A plain
+      colour would leave all three looking identical and the choice invisible.
+    -->
+    <style name="PrioritySegment" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">@dimen/touch_target_min</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">@dimen/space_xxs</item>
+        <item name="android:paddingEnd">@dimen/space_xxs</item>
+        <item name="android:textSize">@dimen/text_micro</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:textColor">@color/priority_segment_text</item>
+        <item name="backgroundTint">@color/priority_segment_bg</item>
+        <item name="strokeColor">@color/priority_segment_stroke</item>
+        <item name="strokeWidth">@dimen/stroke_thin</item>
+        <item name="cornerRadius">@dimen/radius_sm</item>
+        <item name="iconTint">@color/priority_segment_text</item>
+    </style>
+
 </resources>
+

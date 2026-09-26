@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCREEN 9 - COMPANION / VOICE  (port of Prototype/companion.html)
+
+  The prototype drives the Web Speech API through a page-local script. On Android the
+  equivalent is the team's own VoiceManager (api/VoiceManager.java), which wraps
+  SpeechRecognizer and forces EXTRA_PREFER_OFFLINE for the app's offline-first pitch.
+  This screen reuses that class rather than creating its own recognizer.
+
+  NEW FILE - additive. Nothing existing is modified.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:id="@+id/companionRoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/space_xl"
+        android:paddingTop="@dimen/space_xl"
+        android:paddingBottom="@dimen/space_xl">
+
+        <!-- Top row: back, brand, theme -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/backButton"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/bg_circle_surface"
+                android:clickable="true"
+                android:contentDescription="@string/cd_back"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="@color/text_primary_dark" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:id="@+id/homeBrandButton"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/space_md"
+                android:background="@drawable/bg_brand_pill"
+                android:clickable="true"
+                android:contentDescription="@string/cd_brand_home"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/space_md">
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/brand_mark_cc"
+                    android:textColor="@color/brand_mint_light"
+                    android:textStyle="bold" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xs"
+                    android:text="@string/brand_name"
+                    android:textColor="@color/text_primary_dark"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <FrameLayout
+                android:id="@+id/themeToggleButton"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/bg_circle_surface"
+                android:clickable="true"
+                android:contentDescription="@string/cd_theme_toggle"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/themeToggleIcon"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_light_mode"
+                    app:tint="@color/text_primary_dark" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Command bubble -->
+        <TextView
+            android:id="@+id/commandBubble"
+            style="@style/Text.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:background="@drawable/bg_surface_high"
+            android:gravity="center"
+            android:minWidth="280dp"
+            android:paddingHorizontal="@dimen/space_lg"
+            android:paddingVertical="@dimen/space_md"
+            android:text="@string/voice_command_default"
+            android:textColor="@color/text_primary_dark"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginTop="@dimen/space_lg"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_expand_more"
+            app:tint="@color/text_dim_dark" />
+
+        <!-- Dino card -->
+        <FrameLayout
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:layout_marginTop="48dp"
+            android:background="@drawable/bg_zone_pill">
+
+            <ImageView
+                android:id="@+id/dinoAvatar"
+                android:layout_width="170dp"
+                android:layout_height="170dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/dino_description"
+                android:scaleType="fitCenter" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="@dimen/space_md"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/dinoStatusDot"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/dot_mint" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:text="@string/onboarding_synced"
+                    android:textColor="@color/brand_mint"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Status pill -->
+        <LinearLayout
+            android:id="@+id/voiceStatusPill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xl"
+            android:background="@drawable/bg_zone_pill"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/space_md"
+            android:paddingVertical="@dimen/space_xs">
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/dot_mint" />
+
+            <TextView
+                android:id="@+id/voiceStatus"
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_sm"
+                android:text="@string/voice_status_ready"
+                android:textColor="@color/brand_mint"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Instruction -->
+        <TextView
+            android:id="@+id/voiceInstruction"
+            style="@style/Text.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:gravity="center"
+            android:text="@string/voice_instruction"
+            android:textColor="@color/text_primary_dark"
+            android:textStyle="bold" />
+
+        <!-- Mic -->
+        <FrameLayout
+            android:layout_width="@dimen/mic_ring_size"
+            android:layout_height="@dimen/mic_ring_size"
+            android:layout_marginTop="@dimen/space_sm"
+            android:background="@drawable/bg_mic_ring">
+
+            <FrameLayout
+                android:id="@+id/micButton"
+                android:layout_width="@dimen/mic_button_size"
+                android:layout_height="@dimen/mic_button_size"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_mic_button"
+                android:clickable="true"
+                android:contentDescription="@string/cd_mic_button"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_mic"
+                    app:tint="@color/on_brand" />
+            </FrameLayout>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/readyText"
+            style="@style/Text.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:text="@string/voice_cta"
+            android:textColor="@color/text_primary_dark"
+            android:textStyle="bold" />
+    </LinearLayout>
+</ScrollView>
+
+

@@ -1,5 +1,6 @@
 package com.example.codenection2026_package.model;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
@@ -18,6 +19,14 @@ import androidx.room.PrimaryKey;
         }
 )
 public class Task {
+
+    /** The user's own priority. Urgent work is protected from auto-shedding. */
+    public static final String PRIORITY_HIGH = "HIGH";
+    public static final String PRIORITY_MED = "MED";
+    public static final String PRIORITY_LOW = "LOW";
+
+    /** Default deferral window, in hours, of a sheddable task. */
+    public static final int DEFAULT_DEFERRAL_HOURS = 48;
 
     @PrimaryKey(autoGenerate = true)
     private long id;
@@ -39,6 +48,16 @@ public class Task {
 
     // Format: HH:mm
     private String endTime;
+
+    // "HIGH", "MED" or "LOW". The scheduler refuses to shed a HIGH task while a
+    // recovery window is at risk, so every task carries the user's own priority.
+    @ColumnInfo(name = "priority", defaultValue = "MED")
+    private String priority = PRIORITY_MED;
+
+    // How many hours late the auto-deferral rail may push this task. 0 means the
+    // task may not be deferred at all.
+    @ColumnInfo(name = "deferral_hours", defaultValue = "48")
+    private int deferralHours = DEFAULT_DEFERRAL_HOURS;
 
     public Task(
             String classification,
@@ -124,5 +143,25 @@ public class Task {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    // Priority
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    // Deferral window
+
+    public int getDeferralHours() {
+        return deferralHours;
+    }
+
+    public void setDeferralHours(int deferralHours) {
+        this.deferralHours = deferralHours;
     }
 }
