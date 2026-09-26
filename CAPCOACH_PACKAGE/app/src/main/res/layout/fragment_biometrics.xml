@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCREEN 5 - BIOMETRICS  (port of Prototype/biometrics.html)
+
+  Three stacked layers, exactly like the prototype:
+    1. a scrolling content column (the sleep alarm, the metrics card, the penalty card)
+    2. a fixed header bar pinned to the top
+    3. the shared bottom navigation include pinned to the bottom
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/biometricsRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark">
+
+    <com.example.codenection2026_package.ui.widget.ObservableScrollView
+        android:id="@+id/biometricsScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/gutter"
+            android:paddingTop="@dimen/content_top_inset"
+            android:paddingBottom="@dimen/content_bottom_inset">
+
+            <!-- ============ Status pills: live event + Health Connect ============ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/space_sm"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_pill_dark"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/space_sm"
+                    android:paddingVertical="@dimen/space_xxs">
+
+                    <View
+                        android:id="@+id/eventDot"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/dot_red" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xs"
+                        android:maxLines="2"
+                        android:text="@string/bio_event_pill"
+                        android:textAllCaps="true"
+                        android:textColor="@color/status_red"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_surface_low"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/space_sm"
+                    android:paddingVertical="@dimen/space_xxs">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_sync"
+                        app:tint="@color/brand_mint" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xxs"
+                        android:text="@string/bio_health_connect" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ============ Anomaly alert card ============ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:background="@drawable/bg_anomaly_card"
+                android:clipToOutline="true"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="@drawable/bg_anomaly_stripe" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/space_md">
+
+                    <FrameLayout
+                        android:layout_width="@dimen/anomaly_icon_size"
+                        android:layout_height="@dimen/anomaly_icon_size">
+
+                        <ImageView
+                            android:layout_width="@dimen/anomaly_icon_size"
+                            android:layout_height="@dimen/anomaly_icon_size"
+                            android:background="@drawable/bg_icon_plate_red"
+                            android:contentDescription="@null"
+                            android:padding="@dimen/space_sm"
+                            android:src="@drawable/ic_bedtime_off"
+                            app:tint="@color/status_red" />
+
+                        <TextView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="top|end"
+                            android:background="@drawable/bg_circle_neutral"
+                            android:backgroundTint="@color/status_red"
+                            android:gravity="center"
+                            android:includeFontPadding="false"
+                            android:text="!"
+                            android:textColor="@color/bg_dark"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/bio_anomaly_tag"
+                                android:textColor="@color/status_red"
+                                android:textStyle="bold" />
+
+                            <View
+                                android:layout_width="4dp"
+                                android:layout_height="4dp"
+                                android:layout_marginHorizontal="@dimen/space_xs"
+                                android:background="@drawable/dot_idle" />
+
+                            <TextView
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/bio_anomaly_time" />
+                        </LinearLayout>
+
+                        <TextView
+                            style="@style/Text.Title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/bio_anomaly_title" />
+
+                        <TextView
+                            style="@style/Text.Body"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_xxs"
+                            android:text="@string/bio_anomaly_body" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ============ Sleep debt and stress metrics card ============ -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Card.Base"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_md">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_insights"
+                            app:tint="@color/secondary_blue" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xs"
+                            android:layout_weight="1"
+                            android:text="@string/bio_metrics_title"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_tag_red"
+                            android:paddingHorizontal="@dimen/space_sm"
+                            android:paddingVertical="2dp"
+                            android:text="@string/bio_deficit_badge"
+                            android:textColor="@color/status_red"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Filled in Java: one item_metric_bar per sleep metric. -->
+                    <LinearLayout
+                        android:id="@+id/metricBarsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_sm"
+                        android:background="@drawable/bg_surface_low"
+                        android:orientation="vertical"
+                        android:padding="@dimen/space_sm" />
+
+                    <!-- HRV score row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_sm"
+                        android:background="@drawable/bg_surface_lowest"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/space_sm">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:background="@drawable/bg_surface_high"
+                                android:contentDescription="@null"
+                                android:padding="@dimen/space_sm"
+                                android:src="@drawable/ic_vital_signs"
+                                app:tint="@color/brand_gold_container" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/space_sm"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    style="@style/Text.MicroLabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/bio_hrv_label" />
+
+                                <TextView
+                                    android:id="@+id/hrvValue"
+                                    style="@style/Text.Metric"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/text_primary_dark" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_sm"
+                            android:gravity="end"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_tag_red"
+                                android:paddingHorizontal="@dimen/space_sm"
+                                android:paddingVertical="2dp"
+                                android:text="@string/bio_hrv_state"
+                                android:textColor="@color/status_red"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="@string/bio_hrv_state_sub" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- 7 day sleep trend -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_sm"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/bio_trend_label" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/bio_trend_state"
+                            android:textColor="@color/status_red"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!--
+                      TREND CHART SLOT.
+                      ui/widget/TrendChartView.java does not exist yet, so this is a plain
+                      View standing in for it with the trend track background. Once that
+                      widget lands, replace this element with the TrendChartView and hand it
+                      the seven day sleep series. Keep the id, the height and the margin.
+                    -->
+                    <View
+                        android:id="@+id/sleepTrendChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/trend_chart_height"
+                        android:layout_marginTop="@dimen/space_xxs"
+                        android:background="@drawable/bg_progress_track" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ============ Cognitive penalty card ============ -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Card.Base"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_md">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_neurology"
+                            app:tint="@color/brand_gold_container" />
+
+                        <TextView
+                            style="@style/Text.Title"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xs"
+                            android:layout_weight="1"
+                            android:text="@string/bio_penalty_title" />
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/Text.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/bio_penalty_sub" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_sm"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/bio_penalty_rate"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/penaltyPercent"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/status_red"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/penaltyTrack"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/metric_bar_height"
+                        android:layout_marginTop="@dimen/space_xxs"
+                        android:background="@drawable/bg_progress_track">
+
+                        <View
+                            android:id="@+id/penaltyBar"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_progress_red" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_sm"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:id="@+id/penaltyDot"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/dot_mint" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_sm"
+                            android:layout_weight="1"
+                            android:text="@string/bio_penalty_footnote" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ============ Manual override escape hatch ============ -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/overrideSensorButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:minHeight="@dimen/touch_target_min"
+                android:text="@string/bio_override"
+                android:textColor="@color/text_muted_dark"
+                app:backgroundTint="@color/surface_container_low"
+                app:cornerRadius="@dimen/radius_md"
+                app:icon="@drawable/ic_tune"
+                app:iconTint="@color/text_muted_dark"
+                app:strokeColor="@color/divider_dark"
+                app:strokeWidth="@dimen/stroke_thin" />
+        </LinearLayout>
+    </com.example.codenection2026_package.ui.widget.ObservableScrollView>
+
+    <!-- ============ Fixed header ============ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/header_height"
+        android:layout_gravity="top"
+        android:background="@drawable/bg_header"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/gutter">
+
+        <TextView
+            style="@style/Text.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/nav_biometrics" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <FrameLayout
+            android:id="@+id/themeToggleButton"
+            android:layout_width="@dimen/icon_button_size"
+            android:layout_height="@dimen/icon_button_size"
+            android:background="@drawable/bg_surface_low"
+            android:clickable="true"
+            android:contentDescription="@string/cd_theme_toggle"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/themeToggleIcon"
+                android:layout_width="19dp"
+                android:layout_height="19dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_light_mode"
+                app:tint="@color/accent_amber" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <include
+        android:id="@+id/bottomNavInclude"
+        layout="@layout/include_bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottom_nav_height"
+        android:layout_gravity="bottom" />
+</FrameLayout>

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One quick-feed apple in the feast tray. Inflated four times by FeastFragment.
+  NEW FILE - additive.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/appleButton"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:background="@drawable/bg_surface_high"
+    android:clickable="true"
+    android:contentDescription="@string/cd_feed_apple"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingVertical="@dimen/space_sm">
+
+    <View
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:background="@drawable/bg_apple" />
+
+    <TextView
+        android:id="@+id/appleButtonLabel"
+        style="@style/Text.MicroLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xxs"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/text_muted_dark"
+        tools:text="CS101" />
+
+</LinearLayout>

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- CapCoach shape: bg_tag_red (added for Screens 3-9) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/zone_overload_bg"/><corners android:radius="@dimen/radius_xs"/>
+</shape>

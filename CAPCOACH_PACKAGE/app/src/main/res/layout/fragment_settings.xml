@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCREEN 8 - SETTINGS  (port of Prototype/settings.html)
+
+  The prototype renders only two sections: Appearance and Institutional Data Controls. Its
+  other sections are empty containers whose scripts reference deleted elements, so they are
+  not reproduced here. The runtime tailwind.config rewrite is replaced by a real night mode
+  switch plus a persisted telemetry preference.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settingsRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark">
+
+    <com.example.codenection2026_package.ui.widget.ObservableScrollView
+        android:id="@+id/settingsScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/gutter"
+            android:paddingTop="@dimen/content_top_inset"
+            android:paddingBottom="@dimen/content_bottom_inset">
+
+            <!-- ============ Appearance ============ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/settings_appearance"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_palette"
+                    app:tint="@color/brand_mint" />
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:text="@string/settings_appearance_hint"
+                    android:textColor="@color/brand_mint" />
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Card.Base"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_md">
+
+                    <TextView
+                        style="@style/Text.Title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_theme_mode" />
+
+                    <TextView
+                        style="@style/Text.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/settings_theme_sub" />
+
+                    <!-- Segmented control. Repainted by SettingsFragment.refreshThemeSegment(). -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_sm"
+                        android:background="@drawable/bg_segment_group"
+                        android:orientation="horizontal"
+                        android:padding="4dp">
+
+                        <LinearLayout
+                            android:id="@+id/themeNightButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_segment_on"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:gravity="center"
+                            android:minHeight="@dimen/touch_target_min"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="17dp"
+                                android:layout_height="17dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_dark_mode"
+                                app:tint="@color/brand_mint" />
+
+                            <TextView
+                                android:id="@+id/themeNightLabel"
+                                style="@style/Text.Label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/space_xs"
+                                android:text="@string/settings_theme_night"
+                                android:textColor="@color/brand_mint" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/themeBrightButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xxs"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_surface_low"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:gravity="center"
+                            android:minHeight="@dimen/touch_target_min"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="17dp"
+                                android:layout_height="17dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_light_mode"
+                                app:tint="@color/text_muted_dark" />
+
+                            <TextView
+                                android:id="@+id/themeBrightLabel"
+                                style="@style/Text.Label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/space_xs"
+                                android:text="@string/settings_theme_bright"
+                                android:textColor="@color/text_muted_dark" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ============ Institutional data controls ============ -->
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg"
+                android:text="@string/settings_institutional"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Card.Base"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_md">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/Text.Title"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/settings_share_title" />
+
+                            <TextView
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="@string/settings_share_sub"
+                                android:textAllCaps="true" />
+                        </LinearLayout>
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/telemetrySwitch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_md"
+                            android:contentDescription="@string/cd_telemetry_switch" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_sm"
+                        android:background="@drawable/bg_surface_low"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/space_sm">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_info"
+                            app:tint="@color/text_dim_dark" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_xs"
+                            android:layout_weight="1"
+                            android:text="@string/settings_link_info" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_sm"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.Body"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_link_status" />
+
+                        <LinearLayout
+                            android:id="@+id/linkStatusPill"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_sm"
+                            android:background="@drawable/bg_pill_dark"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="@dimen/space_sm"
+                            android:paddingVertical="@dimen/space_xxs">
+
+                            <View
+                                android:id="@+id/linkStatusDot"
+                                android:layout_width="6dp"
+                                android:layout_height="6dp"
+                                android:background="@drawable/dot_idle" />
+
+                            <TextView
+                                android:id="@+id/linkStatusText"
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/space_xxs"
+                                android:text="@string/settings_link_disconnected"
+                                android:textColor="@color/text_muted_dark" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </com.example.codenection2026_package.ui.widget.ObservableScrollView>
+
+    <!-- ============ Fixed header ============ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/header_height"
+        android:layout_gravity="top"
+        android:background="@drawable/bg_header"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/gutter">
+
+        <ImageView
+            android:id="@+id/headerDino"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_zone_pill"
+            android:contentDescription="@string/dino_description"
+            android:padding="2dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/dino_happy" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_sm"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/brand_name"
+                android:textAllCaps="true"
+                android:textColor="@color/brand_mint"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/Text.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_title" />
+        </LinearLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <FrameLayout
+            android:id="@+id/themeToggleButton"
+            android:layout_width="@dimen/icon_button_size"
+            android:layout_height="@dimen/icon_button_size"
+            android:background="@drawable/bg_surface_low"
+            android:clickable="true"
+            android:contentDescription="@string/cd_theme_toggle"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/themeToggleIcon"
+                android:layout_width="19dp"
+                android:layout_height="19dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_light_mode"
+                app:tint="@color/accent_amber" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_xs"
+            android:background="@drawable/bg_pill_dark"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/space_sm"
+            android:paddingVertical="@dimen/space_xxs">
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:background="@drawable/dot_mint" />
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_xxs"
+                android:text="@string/brand_offline_ml_short"
+                android:textColor="@color/brand_mint" />
+        </LinearLayout>
+
+        <!-- Avatar plate. The person glyph rides on foreground so it stays centred. -->
+        <TextView
+            android:id="@+id/avatarBadge"
+            android:layout_width="@dimen/avatar_size"
+            android:layout_height="@dimen/avatar_size"
+            android:layout_marginStart="@dimen/space_xs"
+            android:background="@drawable/bg_circle_mint"
+            android:contentDescription="@string/cd_brand_avatar"
+            android:foreground="@drawable/ic_person"
+            android:foregroundGravity="center"
+            android:foregroundTint="@color/bg_dark" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/bottomNavInclude"
+        layout="@layout/include_bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottom_nav_height"
+        android:layout_gravity="bottom" />
+</FrameLayout>

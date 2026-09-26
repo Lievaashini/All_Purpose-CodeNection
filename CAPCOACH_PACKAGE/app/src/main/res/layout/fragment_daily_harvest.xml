@@ -1,0 +1,586 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCREEN 6 - DAILY HARVEST  (port of Prototype/daily-harvest.html)
+
+  The morning pop-up: apples that grew overnight from yesterday's completed tasks, a
+  Dino holding a basket, and the weekly feast meter.
+
+  The apple tree is apple_tree_full.gif, the animated form of the pixel-art SVG the
+  prototype inlines. Four tappable apples sit over it in a FrameLayout; tapping one
+  animates it down toward the basket.
+
+  NEW FILE - additive. Nothing existing is modified.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/harvestRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark">
+
+    <ScrollView
+        android:id="@+id/harvestScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/space_lg"
+            android:paddingTop="@dimen/space_lg"
+            android:paddingBottom="@dimen/space_lg">
+
+            <!-- Streak badge + theme toggle -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/streakBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/bg_zone_pill"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/space_md"
+                    android:paddingVertical="@dimen/space_xxs">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_wb_sunny"
+                        app:tint="@color/brand_mint" />
+
+                    <TextView
+                        android:id="@+id/streakText"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xxs"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold"
+                        tools:text="MORNING HARVEST - DAY 4" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/themeToggleButton"
+                    android:layout_width="@dimen/icon_button_size"
+                    android:layout_height="@dimen/icon_button_size"
+                    android:layout_gravity="end"
+                    android:background="@drawable/bg_surface_low"
+                    android:clickable="true"
+                    android:contentDescription="@string/cd_theme_toggle"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/themeToggleIcon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_light_mode"
+                        app:tint="@color/text_primary_dark" />
+                </FrameLayout>
+            </FrameLayout>
+
+            <TextView
+                style="@style/Text.Heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:gravity="center"
+                android:text="@string/harvest_greeting"
+                android:textColor="@color/text_primary_dark" />
+
+            <TextView
+                style="@style/Text.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/harvest_subtitle" />
+
+            <!-- Tree stage -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|center_horizontal"
+                    android:background="@drawable/bg_pill_dark"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/space_md"
+                    android:paddingVertical="@dimen/space_xxs">
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/bg_apple" />
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xs"
+                        android:text="@string/harvest_tooltip"
+                        android:textColor="@color/brand_mint" />
+
+                    <TextView
+                        android:id="@+id/tooltipBadge"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xs"
+                        android:background="@drawable/bg_tag_mint"
+                        android:paddingHorizontal="@dimen/space_xs"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold"
+                        tools:text="+4" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="192dp"
+                    android:layout_height="192dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="56dp"
+                    android:background="@drawable/bg_tree_aura" />
+
+                <FrameLayout
+                    android:id="@+id/treeStage"
+                    android:layout_width="@dimen/tree_size"
+                    android:layout_height="@dimen/tree_size"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/space_lg">
+
+                    <ImageView
+                        android:id="@+id/appleTree"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/cd_apple_tree"
+                        android:scaleType="fitCenter" />
+
+                    <FrameLayout
+                        android:id="@+id/apple1"
+                        android:layout_width="@dimen/touch_target_min"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <View
+                            android:id="@+id/apple1Dot"
+                            android:layout_width="@dimen/apple_size"
+                            android:layout_height="@dimen/apple_size"
+                            android:layout_gravity="center"
+                            android:background="@drawable/bg_apple" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/apple2"
+                        android:layout_width="@dimen/touch_target_min"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:layout_gravity="end"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <View
+                            android:id="@+id/apple2Dot"
+                            android:layout_width="@dimen/apple_size"
+                            android:layout_height="@dimen/apple_size"
+                            android:layout_gravity="center"
+                            android:background="@drawable/bg_apple" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/apple3"
+                        android:layout_width="@dimen/touch_target_min"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:layout_gravity="bottom"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <View
+                            android:id="@+id/apple3Dot"
+                            android:layout_width="@dimen/apple_size"
+                            android:layout_height="@dimen/apple_size"
+                            android:layout_gravity="center"
+                            android:background="@drawable/bg_apple" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/apple4"
+                        android:layout_width="@dimen/touch_target_min"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:layout_gravity="bottom|end"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <View
+                            android:id="@+id/apple4Dot"
+                            android:layout_width="@dimen/apple_size"
+                            android:layout_height="@dimen/apple_size"
+                            android:layout_gravity="center"
+                            android:background="@drawable/bg_apple" />
+                    </FrameLayout>
+                </FrameLayout>
+            </FrameLayout>
+
+            <!-- Dino, basket and yesterday's tasks -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:baselineAligned="false"
+                android:gravity="bottom"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|start"
+                        android:background="@drawable/bg_zone_pill"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/space_sm"
+                        android:paddingVertical="@dimen/space_xxs">
+
+                        <TextView
+                            android:id="@+id/dinoChatBubble"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/harvest_dino_bubble"
+                            android:textColor="@color/brand_mint"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|start"
+                        android:gravity="bottom"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/dinoSprite"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:contentDescription="@string/cd_harvest_dino"
+                            android:scaleType="fitCenter" />
+
+                        <FrameLayout
+                            android:id="@+id/harvestBasket"
+                            android:layout_width="@dimen/basket_size"
+                            android:layout_height="@dimen/basket_size"
+                            android:layout_marginStart="@dimen/space_xs"
+                            android:background="@drawable/bg_basket">
+
+                            <TextView
+                                android:id="@+id/basketLabel"
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:textColor="@color/brand_gold"
+                                android:textStyle="bold"
+                                tools:text="12" />
+                        </FrameLayout>
+                    </LinearLayout>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_surface_low"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_sm">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/harvest_yesterday"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/harvest_yesterday_pct"
+                            android:textColor="@color/brand_mint"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xxs"
+                        android:text="@string/harvest_yesterday_more"
+                        android:textColor="@color/brand_mint" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Weekly feast tracker -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg"
+                android:background="@drawable/bg_feast_card"
+                android:orientation="vertical"
+                android:padding="@dimen/space_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:background="@drawable/bg_zone_pill">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_restaurant"
+                            app:tint="@color/brand_mint" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                style="@style/Text.Body"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/harvest_feast_title"
+                                android:textColor="@color/text_primary_dark"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                style="@style/Text.MicroLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/space_xs"
+                                android:background="@drawable/bg_tag_amber"
+                                android:paddingHorizontal="@dimen/space_xs"
+                                android:text="@string/harvest_feast_day"
+                                android:textColor="@color/accent_amber"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/stashSubtitle"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            tools:text="Current Stash: 12 Apples. Feast day is Sunday!" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/progressPercentage"
+                            style="@style/Text.Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/brand_mint"
+                            android:textStyle="bold"
+                            tools:text="60%" />
+
+                        <TextView
+                            android:id="@+id/progressRatio"
+                            style="@style/Text.MicroLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="12 / 20" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/space_sm"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:background="@drawable/bg_progress_track">
+
+                    <View
+                        android:id="@+id/feastProgressBar"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_progress_mint" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xs"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/harvest_milestone_start" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/milestoneMid"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/accent_amber"
+                        tools:text="Midweek 10" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="@dimen/space_sm"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/milestoneGoal"
+                        style="@style/Text.MicroLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/brand_mint"
+                        android:textStyle="bold"
+                        tools:text="Goal: 20" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Actions -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/collectButton"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="@dimen/space_lg"
+                android:textColor="@color/bg_dark"
+                android:textStyle="bold"
+                app:backgroundTint="@color/brand_mint"
+                app:cornerRadius="@dimen/radius_md"
+                app:icon="@drawable/ic_shopping_basket"
+                app:iconGravity="textStart"
+                app:iconTint="@color/bg_dark"
+                tools:text="Collect 4 Apples" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/launchButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm"
+                android:text="@string/harvest_launch"
+                android:textColor="@color/text_primary_dark"
+                app:icon="@drawable/ic_rocket_launch"
+                app:iconGravity="textStart"
+                app:iconTint="@color/brand_mint"
+                app:strokeColor="@color/divider_dark" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/skipButton"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/harvest_skip"
+                android:textColor="@color/text_dim_dark" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Harvest toast -->
+    <LinearLayout
+        android:id="@+id/harvestToast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="@dimen/space_lg"
+        android:layout_marginBottom="@dimen/space_xl"
+        android:background="@drawable/bg_toast"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/space_md"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_shopping_basket"
+            app:tint="@color/brand_mint" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_sm"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/toastTitle"
+                style="@style/Text.MicroLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary_dark"
+                android:textStyle="bold"
+                tools:text="4 Apples Stashed in Basket!" />
+
+            <TextView
+                android:id="@+id/toastSub"
+                style="@style/Text.MicroLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/brand_mint"
+                tools:text="Dino excitement +100% | 16 total" />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_check"
+            app:tint="@color/brand_mint" />
+    </LinearLayout>
+
+</FrameLayout>

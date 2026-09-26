@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Shared bottom navigation bar, included by the dashboard, biometrics and settings
+  screens.
+
+  The prototype repeats this markup in dashboard.html, biometrics.html and
+  settings.html, changing only which item carries aria-current="page". Here it is one
+  layout that each host fragment includes and then tints via
+  com.example.codenection2026_package.ui.shell.ScreenNav, so the three tabs cannot
+  drift apart.
+
+  NEW FILE - additive. Nothing existing is modified.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottomNav"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/bottom_nav_height"
+    android:background="@drawable/bg_bottom_nav"
+    android:orientation="horizontal"
+    android:weightSum="3">
+
+    <!-- Home / Dashboard -->
+    <LinearLayout
+        android:id="@+id/navHome"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/navHomeIcon"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="@string/nav_home"
+            android:src="@drawable/ic_dashboard"
+            app:tint="@color/brand_mint" />
+
+        <TextView
+            android:id="@+id/navHomeLabel"
+            style="@style/Text.MicroLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/nav_home"
+            android:textColor="@color/brand_mint"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Biometrics -->
+    <LinearLayout
+        android:id="@+id/navBiometrics"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/navBiometricsIcon"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="@string/nav_biometrics"
+            android:src="@drawable/ic_ecg_heart"
+            app:tint="@color/text_dim_dark" />
+
+        <TextView
+            android:id="@+id/navBiometricsLabel"
+            style="@style/Text.MicroLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/nav_biometrics"
+            android:textColor="@color/text_dim_dark" />
+    </LinearLayout>
+
+    <!-- Settings -->
+    <LinearLayout
+        android:id="@+id/navSettings"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/navSettingsIcon"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="@string/nav_settings"
+            android:src="@drawable/ic_settings"
+            app:tint="@color/text_dim_dark" />
+
+        <TextView
+            android:id="@+id/navSettingsLabel"
+            style="@style/Text.MicroLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/nav_settings"
+            android:textColor="@color/text_dim_dark" />
+    </LinearLayout>
+
+</LinearLayout>

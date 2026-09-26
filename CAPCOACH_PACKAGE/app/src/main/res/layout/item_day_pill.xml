@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One day cell of the dashboard week strip (prototype: .day-pill in
+  dashboard.html).
+
+  Inflated seven times by DashboardFragment into @id/weekStrip. The weight of 1
+  inside that weightSum 7 row is what makes the seven cells share the width.
+  The letter, number and dot are all repainted by the fragment: the selected
+  cell swaps bg_day_pill_idle for bg_day_pill_active, drops its text to
+  @color/bg_dark and relabels the letter as "TODAY".
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="@dimen/day_pill_height"
+    android:layout_weight="1"
+    android:background="@drawable/bg_day_pill_idle"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/dayLetter"
+        style="@style/Text.MicroLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_dim_dark" />
+
+    <TextView
+        android:id="@+id/dayNumber"
+        style="@style/Text.MicroLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_primary_dark"
+        android:textStyle="bold" />
+
+    <View
+        android:id="@+id/dayDot"
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="@dimen/space_xxs"
+        android:background="@drawable/dot_idle" />
+
+</LinearLayout>

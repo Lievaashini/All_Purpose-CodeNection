@@ -108,4 +108,34 @@
     <!-- ============ Transparent helpers ============ -->
     <color name="transparent">#00000000</color>
     <color name="scrim">#99000000</color>
+
+    <!-- ==================================================================
+         ADDED FOR SCREENS 3-9 - bright values. Purely additive.
+
+         Same rule as the brand colours above: the dashboard's amber and blue
+         accents are NOT darkened in bright mode, only the surfaces flip.
+         ================================================================== -->
+
+    <color name="accent_amber">#FFF59E0B</color>
+    <color name="accent_amber_bg">#1FF59E0B</color>
+
+    <!-- Chart on a white card: slate tracks, amber heavy bar -->
+    <color name="chart_bar_idle">#FFCBD5E1</color>
+    <color name="chart_bar_dim">#FFE2E8F0</color>
+    <color name="chart_ceiling">#FFEF4444</color>
+
+    <color name="task_check_border">#FF94A3B8</color>
+
+    <!-- Prototype uses #fff1f2 on #fecdd3 for the anomaly card -->
+    <color name="anomaly_bg">#FFFFF1F2</color>
+    <color name="metric_track_bg">#FFE2E8F0</color>
+
+    <!-- Harvest / feast: daily-harvest.html bright mode is #F1F5F9 / #FFFFFF -->
+    <color name="feast_canvas">#FFF1F5F9</color>
+    <color name="feast_card">#FFFFFFFF</color>
+    <color name="feast_basket">#FF8B5A2B</color>
+    <color name="apple_red">#FFFF2A2A</color>
+    <color name="apple_red_dark">#FFB30E0E</color>
+
+    <color name="sheet_scrim">#B3000000</color>
 </resources>

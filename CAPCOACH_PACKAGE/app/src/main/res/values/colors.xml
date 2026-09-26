@@ -68,4 +68,40 @@
     <!-- ============ Transparent helpers ============ -->
     <color name="transparent">#00000000</color>
     <color name="scrim">#99000000</color>
+
+    <!-- ==================================================================
+         ADDED FOR SCREENS 3-9 (dashboard, add-task, biometrics, harvest,
+         feast, settings, companion). Purely additive - every token above is
+         unchanged.
+
+         Only genuinely new colour ROLES live here. Anything already covered
+         by the tokens above (surfaces, text, mint/blue/gold, zone tints) is
+         reused rather than redefined.
+         ================================================================== -->
+
+    <!-- Amber accent: weekly cap badge, heavy-load bar, postponed tag -->
+    <color name="accent_amber">#FFF59E0B</color>
+    <color name="accent_amber_bg">#1FF59E0B</color>
+
+    <!-- Weekly load chart -->
+    <color name="chart_bar_idle">#66CBD5E1</color>
+    <color name="chart_bar_dim">#4DCBD5E1</color>
+    <color name="chart_ceiling">#66EF4444</color>
+
+    <!-- Task feed row -->
+    <color name="task_check_border">#FF64748B</color>
+
+    <!-- Biometrics -->
+    <color name="anomaly_bg">#FF1E2020</color>
+    <color name="metric_track_bg">#FF343535</color>
+
+    <!-- Harvest / feast garden -->
+    <color name="feast_canvas">#FF101212</color>
+    <color name="feast_card">#FF171C1B</color>
+    <color name="feast_basket">#FF8B5A2B</color>
+    <color name="apple_red">#FFFF2A2A</color>
+    <color name="apple_red_dark">#FFB30E0E</color>
+
+    <!-- Bottom-sheet scrim, sits over the dimmed dashboard -->
+    <color name="sheet_scrim">#BF000000</color>
 </resources>
