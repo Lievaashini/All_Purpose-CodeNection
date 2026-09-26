@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Simplified Dino-focused voice popup.
+
+  Shown as a dialog from the onboarding screen when the user taps TALK TO ME or the round
+  microphone button. It strips the voice screen down to one thing: the Dino, what it is
+  saying, and a single big button to talk to it.
+
+  Deliberately not a full screen - the point is a quick, focused exchange that returns the
+  user to onboarding afterwards, so the surrounding page stays visible behind a dim scrim.
+
+  NEW FILE - additive. Nothing existing is modified.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/voiceDinoRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/space_lg"
+    android:paddingTop="@dimen/space_md"
+    android:paddingBottom="@dimen/space_lg">
+
+    <!-- Close -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:layout_width="48dp"
+            android:layout_height="5dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bg_drag_handle" />
+
+        <ImageView
+            android:id="@+id/voiceCloseButton"
+            android:layout_width="@dimen/touch_target_min"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_gravity="end"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_close_modal"
+            android:padding="@dimen/space_sm"
+            android:src="@drawable/ic_close"
+            app:tint="@color/text_muted_dark" />
+    </FrameLayout>
+
+    <!-- What the Dino is saying -->
+    <TextView
+        android:id="@+id/voiceBubble"
+        style="@style/Text.Body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_sm"
+        android:background="@drawable/bg_zone_pill"
+        android:gravity="center"
+        android:maxWidth="300dp"
+        android:paddingHorizontal="@dimen/space_md"
+        android:paddingVertical="@dimen/space_sm"
+        android:text="@string/voice_command_default"
+        android:textColor="@color/text_primary_dark"
+        android:textStyle="bold" />
+
+    <!-- The Dino, the focus of the popup -->
+    <FrameLayout
+        android:layout_width="@dimen/mic_ring_size"
+        android:layout_height="@dimen/mic_ring_size"
+        android:layout_marginTop="@dimen/space_md"
+        android:background="@drawable/bg_zone_pill">
+
+        <View
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_tree_aura" />
+
+        <ImageView
+            android:id="@+id/voiceDinoAvatar"
+            android:layout_width="@dimen/dino_hero"
+            android:layout_height="@dimen/dino_hero"
+            android:layout_gravity="center"
+            android:contentDescription="@string/dino_description"
+            android:scaleType="fitCenter" />
+    </FrameLayout>
+
+    <!-- Listening state -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_md"
+        android:background="@drawable/bg_zone_pill"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/space_md"
+        android:paddingVertical="@dimen/space_xxs">
+
+        <View
+            android:id="@+id/voiceStatusDot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/dot_mint" />
+
+        <TextView
+            android:id="@+id/voiceStatusText"
+            style="@style/Text.MicroLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_sm"
+            android:text="@string/voice_status_ready"
+            android:textColor="@color/brand_mint"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/voiceHint"
+        style="@style/Text.MicroLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_md"
+        android:gravity="center"
+        android:text="@string/voice_instruction"
+        android:textColor="@color/text_primary_dark"
+        android:textStyle="bold" />
+
+    <!-- The one big action -->
+    <FrameLayout
+        android:id="@+id/voiceMicButton"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="@dimen/space_md"
+        android:background="@drawable/bg_mic_button"
+        android:clickable="true"
+        android:contentDescription="@string/cd_mic_button"
+        android:focusable="true">
+
+        <ImageView
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_mic"
+            app:tint="@color/bg_dark" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/voiceReadyText"
+        style="@style/Text.MicroLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_sm"
+        android:text="@string/voice_cta"
+        android:textColor="@color/text_dim_dark"
+        tools:text="READY TO LISTEN" />
+
+</LinearLayout>

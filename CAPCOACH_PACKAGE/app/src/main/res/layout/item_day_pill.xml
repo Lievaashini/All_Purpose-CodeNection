@@ -13,6 +13,7 @@
     android:layout_width="0dp"
     android:layout_height="@dimen/day_pill_height"
     android:layout_weight="1"
+    android:layout_marginHorizontal="3dp"
     android:background="@drawable/bg_day_pill_idle"
     android:clickable="true"
     android:focusable="true"

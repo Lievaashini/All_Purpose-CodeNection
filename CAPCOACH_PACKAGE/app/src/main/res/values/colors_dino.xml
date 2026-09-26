@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Palette for the hand-drawn 8-bit Dino on the Weekly Feast screen.
+
+  Prototype/feast.html inlines this character as an SVG made of 28 <rect> elements. The
+  feast screen now draws it as Android vector drawables instead of using the animated
+  dino_happy GIF, so the sprite can swap between its closed-mouth and open-mouth states
+  while the user feeds it.
+
+  The values are copied verbatim from that SVG's fill attributes, so the vector version
+  matches the prototype pixel for pixel.
+
+  Deliberately NOT given a values-night variant: the Dino is its own artwork and must keep
+  the same mint body in both themes, exactly as the prototype does. Only the surfaces
+  behind it flip.
+-->
+<resources>
+    <!-- #00E676 main mint body -->
+    <color name="dino_body">#FF00E676</color>
+    <!-- #00C853 darker mint used for shading, legs and arms -->
+    <color name="dino_body_shadow">#FF00C853</color>
+    <!-- #FFE082 warm cream belly patch -->
+    <color name="dino_belly">#FFFFE082</color>
+    <!-- #121414 eye -->
+    <color name="dino_outline">#FF121414</color>
+    <!-- #FFFFFF eye glint and teeth -->
+    <color name="dino_eye_glint">#FFFFFFFF</color>
+    <!-- #007E33 closed smiling mouth and feet -->
+    <color name="dino_mouth_inner">#FF007E33</color>
+    <!-- #FF5252 tongue -->
+    <color name="dino_tongue">#FFFF5252</color>
+    <!-- #FF8A80 cheek blush and heart particles -->
+    <color name="dino_blush">#FFFF8A80</color>
+    <!-- #FF9100 retro back spines -->
+    <color name="dino_spine">#FFFF9100</color>
+</resources>

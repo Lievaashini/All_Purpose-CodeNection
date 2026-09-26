@@ -141,7 +141,9 @@ public class BiometricsFragment extends Fragment {
         reportHealthConnectCapability();
 
         View overrideButton = view.findViewById(R.id.overrideSensorButton);
-        overrideButton.setOnClickListener(v -> ScreenNav.showDashboard(this));
+        // "Override Sensor Metric" opens the Hard Limits screen, where the study / work /
+        // co-curricular ceilings are actually editable, rather than the dashboard.
+        overrideButton.setOnClickListener(v -> ScreenNav.showHardLimits(this));
 
         startPenaltyAnimation();
         eventDotPulse = startDotPulse(eventDot);

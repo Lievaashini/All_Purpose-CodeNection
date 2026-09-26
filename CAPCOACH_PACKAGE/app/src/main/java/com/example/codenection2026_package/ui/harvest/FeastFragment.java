@@ -57,8 +57,9 @@ public class FeastFragment extends Fragment {
     private boolean isEating = false;
 
     private final Random random = new Random();
-
-    private ImageView feastDino;
+    private View feastDino;
+    private View dinoMouthClosed;
+    private View dinoMouthOpen;
     private TextView dinoBubble;
     private TextView applesRemainingCount;
     private TextView satietyPercentage;
@@ -85,6 +86,8 @@ public class FeastFragment extends Fragment {
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
 
         feastDino = view.findViewById(R.id.feastDino);
+        dinoMouthClosed = view.findViewById(R.id.dinoMouthClosed);
+        dinoMouthOpen = view.findViewById(R.id.dinoMouthOpen);
         ImageView feastTree = view.findViewById(R.id.feastTree);
         dinoBubble = view.findViewById(R.id.dinoBubble);
         applesRemainingCount = view.findViewById(R.id.applesRemainingCount);
@@ -114,12 +117,11 @@ public class FeastFragment extends Fragment {
             subtitle.setText(getString(R.string.feast_subtitle, TOTAL_APPLES));
         }
 
-        // Animated GIFs, so Glide rather than setImageResource.
-        if (isAdded()) {
-            Glide.with(this).load(R.drawable.dino_happy).into(feastDino);
-            if (feastTree != null) {
-                Glide.with(this).load(R.drawable.apple_tree_sparse).into(feastTree);
-            }
+        // The tree backdrop is still an animated GIF, so it goes through Glide. The Dino
+        // itself is now vector layers drawn by the layout, which is what lets its mouth
+        // open and close while feeding.
+        if (isAdded() && feastTree != null) {
+            Glide.with(this).load(R.drawable.apple_tree_sparse).into(feastTree);
         }
 
         buildAppleTray();
@@ -195,6 +197,7 @@ public class FeastFragment extends Fragment {
         }
 
         leanIn();
+        openMouth();
         spawnFlyingApple(() -> {
             createCrumbs();
             createFloatingXp("+25 XP");
@@ -203,6 +206,7 @@ public class FeastFragment extends Fragment {
             eatenApples++;
             updateCounters();
 
+            closeMouth();
             chew(() -> {
                 if (button != null) {
                     button.setEnabled(true);
@@ -246,6 +250,7 @@ public class FeastFragment extends Fragment {
             dinoBubble.setText(R.string.feast_bubble_all);
         }
         leanIn();
+        openMouth();
 
         final int count = remainingApples;
         if (dinoStage != null) {
@@ -260,6 +265,7 @@ public class FeastFragment extends Fragment {
 
             dinoStage.postDelayed(() -> {
                 createFloatingXp("+400 XP MAX");
+                closeMouth();
                 chew(() -> {
                     isEating = false;
                     if (remainingApples == 0) {
@@ -276,7 +282,7 @@ public class FeastFragment extends Fragment {
     //  Animation helpers
     // ==================================================================
 
-    /** Squash-and-stretch "lean in", standing in for the prototype's mouth-open state. */
+    /** Squash-and-stretch "lean in" as the Dino anticipates the apple. */
     private void leanIn() {
         if (feastDino == null) {
             return;
@@ -287,6 +293,32 @@ public class FeastFragment extends Fragment {
                 .scaleX(1.04f).scaleY(1.02f)
                 .setDuration(150)
                 .start();
+    }
+
+    /**
+     * Port of the prototype's openDinoMouth(): hides the closed-mouth layer and reveals
+     * the wide open one, so the Dino visibly opens up to catch the incoming apple.
+     *
+     * <p>This is why the Dino is drawn as vector layers rather than the animated GIF - an
+     * image swap is the only way to change its mouth.
+     */
+    private void openMouth() {
+        if (dinoMouthClosed != null) {
+            dinoMouthClosed.setVisibility(View.INVISIBLE);
+        }
+        if (dinoMouthOpen != null) {
+            dinoMouthOpen.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /** Port of closeDinoMouth(): restores the closed smile after a chew. */
+    private void closeMouth() {
+        if (dinoMouthOpen != null) {
+            dinoMouthOpen.setVisibility(View.INVISIBLE);
+        }
+        if (dinoMouthClosed != null) {
+            dinoMouthClosed.setVisibility(View.VISIBLE);
+        }
     }
 
     /** Port of the dino-chewing keyframe: three quick squashes then a settle. */

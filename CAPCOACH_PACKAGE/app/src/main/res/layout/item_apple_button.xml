@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   One quick-feed apple in the feast tray. Inflated four times by FeastFragment.
   NEW FILE - additive.
@@ -9,6 +9,7 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_weight="1"
+    android:layout_marginHorizontal="@dimen/space_xs"
     android:background="@drawable/bg_surface_high"
     android:clickable="true"
     android:contentDescription="@string/cd_feed_apple"
@@ -29,7 +30,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_xxs"
         android:ellipsize="end"
-        android:maxLines="1"
+        android:gravity="center"
+        android:maxLines="2"
         android:textColor="@color/text_muted_dark"
         tools:text="CS101" />
 

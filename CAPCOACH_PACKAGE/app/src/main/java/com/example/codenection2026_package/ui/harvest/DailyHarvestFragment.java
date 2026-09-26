@@ -41,12 +41,39 @@ public class DailyHarvestFragment extends Fragment {
 
     /** The prototype starts at 12 stashed and harvests 4 more. */
     private static final int STARTING_STASH = 12;
-    private static final int APPLES_ON_TREE = 4;
     private static final int FEAST_GOAL = 20;
     private static final int STREAK_DAY = 4;
 
-    private static final int[] APPLE_IDS = {R.id.apple1, R.id.apple2, R.id.apple3, R.id.apple4};
-    private static final int[] APPLE_DOT_IDS = {R.id.apple1Dot, R.id.apple2Dot, R.id.apple3Dot, R.id.apple4Dot};
+    /**
+     * How many tasks were completed yesterday, and therefore how many apples grew on the
+     * tree overnight.
+     *
+     * <p>This is the number the whole screen is about: one completed task becomes one
+     * apple. It is a constant here only because nothing else supplies it yet - hand this
+     * the real count from Role 1's completed-task query (or the feast stash) and the tree,
+     * the basket, the badge and the progress bar all follow automatically, because every
+     * one of them is derived from this value rather than hard-coded in the layout.
+     */
+    private static final int APPLES_GROWN = 4;
+
+    /**
+     * Where apples sit on the tree crown, as a fraction of the stage size.
+     *
+     * <p>Laid out around the canopy rather than at the four corners of the stage: the
+     * earlier version pinned apples to the stage edges, which read as random red dots
+     * floating beside the tree instead of fruit hanging on it. Extra apples beyond this
+     * list reuse the positions from the start, so any count renders sensibly.
+     */
+    private static final float[][] APPLE_SPOTS = {
+            {0.34f, 0.22f},
+            {0.62f, 0.18f},
+            {0.26f, 0.40f},
+            {0.70f, 0.36f},
+            {0.45f, 0.30f},
+            {0.56f, 0.47f},
+            {0.36f, 0.53f},
+            {0.74f, 0.55f}
+    };
 
     private TextView basketLabel;
     private TextView stashSubtitle;
@@ -56,6 +83,7 @@ public class DailyHarvestFragment extends Fragment {
     private TextView collectButton;
     private View feastProgressBar;
     private View harvestToast;
+    private ViewGroup appleContainer;
     private ImageView appleTree;
     private ImageView dinoSprite;
 
@@ -87,13 +115,18 @@ public class DailyHarvestFragment extends Fragment {
         harvestToast = view.findViewById(R.id.harvestToast);
         collectButton = view.findViewById(R.id.collectButton);
 
+        View apples = view.findViewById(R.id.appleContainer);
+        if (apples instanceof ViewGroup) {
+            appleContainer = (ViewGroup) apples;
+        }
+
         TextView streakText = view.findViewById(R.id.streakText);
         if (streakText != null) {
             streakText.setText(getString(R.string.harvest_streak_badge, STREAK_DAY));
         }
         TextView tooltipBadge = view.findViewById(R.id.tooltipBadge);
         if (tooltipBadge != null) {
-            tooltipBadge.setText(getString(R.string.harvest_tooltip_badge, APPLES_ON_TREE));
+            tooltipBadge.setText(getString(R.string.harvest_tooltip_badge, APPLES_GROWN));
         }
         TextView milestoneMid = view.findViewById(R.id.milestoneMid);
         if (milestoneMid != null) {
@@ -110,9 +143,70 @@ public class DailyHarvestFragment extends Fragment {
             Glide.with(this).load(R.drawable.dino_happy).into(dinoSprite);
         }
 
+        growApples();
         renderCounters(STARTING_STASH);
-        wireApples();
         wireActions(view);
+    }
+
+    // ==================================================================
+    //  Apples grown on the tree
+    // ==================================================================
+
+    /**
+     * Places one apple on the tree crown per task completed yesterday.
+     *
+     * <p>This is the screen's core idea: completed tasks turn into apples overnight. The
+     * layout ships an empty apple container, so a day with no completed tasks shows a bare
+     * tree, and the crop always matches the real count instead of a fixed four.
+     *
+     * <p>Positions come from {@link #APPLE_SPOTS}, and the apples fade and scale in so the
+     * crop reads as something that grew rather than popped into existence.
+     */
+    private void growApples() {
+        if (appleContainer == null) {
+            return;
+        }
+        appleContainer.removeAllViews();
+
+        int size = Math.round(getResources().getDimension(R.dimen.apple_size));
+
+        appleContainer.post(() -> {
+            int stageWidth = appleContainer.getWidth();
+            int stageHeight = appleContainer.getHeight();
+            if (stageWidth <= 0 || stageHeight <= 0) {
+                return;
+            }
+
+            for (int i = 0; i < APPLES_GROWN; i++) {
+                float[] spot = APPLE_SPOTS[i % APPLE_SPOTS.length];
+
+                View apple = new View(requireContext());
+                apple.setBackgroundResource(R.drawable.bg_apple);
+
+                android.widget.FrameLayout.LayoutParams params =
+                        new android.widget.FrameLayout.LayoutParams(size, size);
+                params.leftMargin = Math.round(stageWidth * spot[0]) - (size / 2);
+                params.topMargin = Math.round(stageHeight * spot[1]) - (size / 2);
+
+                // Each apple is tappable - tapping one makes the Dino cheer.
+                apple.setClickable(true);
+                apple.setContentDescription(getString(R.string.cd_feed_apple));
+                apple.setOnClickListener(v -> cheerDino());
+
+                appleContainer.addView(apple, params);
+
+                // Grow in, staggered so the crop appears one fruit at a time.
+                apple.setScaleX(0f);
+                apple.setScaleY(0f);
+                apple.setAlpha(0f);
+                apple.animate()
+                        .scaleX(1f).scaleY(1f).alpha(1f)
+                        .setStartDelay(140L * i)
+                        .setDuration(300)
+                        .setInterpolator(new OvershootInterpolator())
+                        .start();
+            }
+        });
     }
 
     // ==================================================================
@@ -163,15 +257,6 @@ public class DailyHarvestFragment extends Fragment {
     // ==================================================================
     //  Apple taps
     // ==================================================================
-
-    private void wireApples() {
-        for (int i = 0; i < APPLE_IDS.length; i++) {
-            View apple = getView() == null ? null : getView().findViewById(APPLE_IDS[i]);
-            if (apple != null) {
-                apple.setOnClickListener(v -> cheerDino());
-            }
-        }
-    }
 
     /** The prototype's cheerDino() - a squash-and-stretch bounce on the Dino. */
     private void cheerDino() {
@@ -224,24 +309,25 @@ public class DailyHarvestFragment extends Fragment {
         }
         collected = true;
 
-        for (int i = 0; i < APPLE_DOT_IDS.length; i++) {
-            View dot = getView() == null ? null : getView().findViewById(APPLE_DOT_IDS[i]);
-            if (dot == null) {
-                continue;
+        // Each apple grown on the tree drops toward the basket, staggered 120ms apart so
+        // the harvest reads as a sequence rather than one jump.
+        if (appleContainer != null) {
+            for (int i = 0; i < appleContainer.getChildCount(); i++) {
+                View apple = appleContainer.getChildAt(i);
+
+                ObjectAnimator fall = ObjectAnimator.ofFloat(apple, View.TRANSLATION_Y, 0f, 140f);
+                fall.setDuration(850);
+                fall.setStartDelay(i * 120L);
+                fall.setInterpolator(new AccelerateInterpolator());
+
+                ObjectAnimator fade = ObjectAnimator.ofFloat(apple, View.ALPHA, 1f, 0f);
+                fade.setDuration(850);
+                fade.setStartDelay(i * 120L);
+
+                AnimatorSet set = new AnimatorSet();
+                set.playTogether(fall, fade);
+                set.start();
             }
-
-            ObjectAnimator fall = ObjectAnimator.ofFloat(dot, View.TRANSLATION_Y, 0f, 140f);
-            fall.setDuration(850);
-            fall.setStartDelay(i * 120L);
-            fall.setInterpolator(new AccelerateInterpolator());
-
-            ObjectAnimator fade = ObjectAnimator.ofFloat(dot, View.ALPHA, 1f, 0f);
-            fade.setDuration(850);
-            fade.setStartDelay(i * 120L);
-
-            AnimatorSet set = new AnimatorSet();
-            set.playTogether(fall, fade);
-            set.start();
         }
 
         if (dinoSprite != null) {
@@ -275,7 +361,7 @@ public class DailyHarvestFragment extends Fragment {
             return;
         }
 
-        int total = STARTING_STASH + APPLES_ON_TREE;
+        int total = STARTING_STASH + APPLES_GROWN;
         renderCounters(total);
 
         if (collectButton != null) {
@@ -297,7 +383,7 @@ public class DailyHarvestFragment extends Fragment {
         TextView title = harvestToast.findViewById(R.id.toastTitle);
         TextView sub = harvestToast.findViewById(R.id.toastSub);
         if (title != null) {
-            title.setText(getString(R.string.harvest_toast_title, APPLES_ON_TREE));
+            title.setText(getString(R.string.harvest_toast_title, APPLES_GROWN));
         }
         if (sub != null) {
             sub.setText(getString(R.string.harvest_toast_sub, total));

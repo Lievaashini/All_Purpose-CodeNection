@@ -18,6 +18,7 @@ import com.example.codenection2026_package.ui.biometrics.BiometricsFragment;
 import com.example.codenection2026_package.ui.dashboard.DashboardFragment;
 import com.example.codenection2026_package.ui.harvest.DailyHarvestFragment;
 import com.example.codenection2026_package.ui.harvest.FeastFragment;
+import com.example.codenection2026_package.ui.onboarding.HardLimitsFragment;
 import com.example.codenection2026_package.ui.settings.SettingsFragment;
 
 /**
@@ -64,6 +65,19 @@ public final class ScreenNav {
 
     public static void showFeast(@NonNull Fragment from) {
         replace(from, new FeastFragment(), "feast");
+    }
+
+    /**
+     * Opens the Hard Limits screen (Screen 2) so the user can re-edit the study / work /
+     * co-curricular ceilings.
+     *
+     * <p>Reachable from the biometrics screen's "Override Sensor Metric" button: when a
+     * biometric reading is wrong, the manual override lives on the limits screen, not on
+     * today's schedule. This reuses the existing {@link HardLimitsFragment} unchanged -
+     * no edits to the onboarding package were needed.
+     */
+    public static void showHardLimits(@NonNull Fragment from) {
+        replace(from, new HardLimitsFragment(), "hard_limits");
     }
 
     /**

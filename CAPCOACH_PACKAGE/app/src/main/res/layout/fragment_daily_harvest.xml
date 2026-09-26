@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 6 - DAILY HARVEST  (port of Prototype/daily-harvest.html)
 
@@ -168,68 +168,17 @@
                         android:contentDescription="@string/cd_apple_tree"
                         android:scaleType="fitCenter" />
 
+                    <!--
+                      Apples grown overnight are added here by DailyHarvestFragment, one
+                      per task completed yesterday, positioned across the tree crown.
+                      The container is filled in code rather than declared statically so
+                      the count always matches the real task count - an empty container
+                      means a bare tree.
+                    -->
                     <FrameLayout
-                        android:id="@+id/apple1"
-                        android:layout_width="@dimen/touch_target_min"
-                        android:layout_height="@dimen/touch_target_min"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <View
-                            android:id="@+id/apple1Dot"
-                            android:layout_width="@dimen/apple_size"
-                            android:layout_height="@dimen/apple_size"
-                            android:layout_gravity="center"
-                            android:background="@drawable/bg_apple" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:id="@+id/apple2"
-                        android:layout_width="@dimen/touch_target_min"
-                        android:layout_height="@dimen/touch_target_min"
-                        android:layout_gravity="end"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <View
-                            android:id="@+id/apple2Dot"
-                            android:layout_width="@dimen/apple_size"
-                            android:layout_height="@dimen/apple_size"
-                            android:layout_gravity="center"
-                            android:background="@drawable/bg_apple" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:id="@+id/apple3"
-                        android:layout_width="@dimen/touch_target_min"
-                        android:layout_height="@dimen/touch_target_min"
-                        android:layout_gravity="bottom"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <View
-                            android:id="@+id/apple3Dot"
-                            android:layout_width="@dimen/apple_size"
-                            android:layout_height="@dimen/apple_size"
-                            android:layout_gravity="center"
-                            android:background="@drawable/bg_apple" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:id="@+id/apple4"
-                        android:layout_width="@dimen/touch_target_min"
-                        android:layout_height="@dimen/touch_target_min"
-                        android:layout_gravity="bottom|end"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <View
-                            android:id="@+id/apple4Dot"
-                            android:layout_width="@dimen/apple_size"
-                            android:layout_height="@dimen/apple_size"
-                            android:layout_gravity="center"
-                            android:background="@drawable/bg_apple" />
-                    </FrameLayout>
+                        android:id="@+id/appleContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
                 </FrameLayout>
             </FrameLayout>
 
@@ -242,15 +191,20 @@
                 android:gravity="bottom"
                 android:orientation="horizontal">
 
-                <FrameLayout
+                <!--
+                  Stacked vertically, NOT overlaid: the speech bubble sits above the
+                  Dino so the two can never cover each other.
+                -->
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="top|start"
                         android:background="@drawable/bg_zone_pill"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
@@ -270,7 +224,7 @@
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="bottom|start"
+                        android:layout_marginTop="@dimen/space_sm"
                         android:gravity="bottom"
                         android:orientation="horizontal">
 
@@ -299,7 +253,7 @@
                                 tools:text="12" />
                         </FrameLayout>
                     </LinearLayout>
-                </FrameLayout>
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="140dp"

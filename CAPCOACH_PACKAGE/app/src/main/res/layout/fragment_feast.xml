@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 7 - WEEKLY FEAST  (port of Prototype/feast.html)
 
@@ -157,13 +157,50 @@
                         android:contentDescription="@string/cd_apple_tree"
                         android:scaleType="fitCenter" />
 
-                    <ImageView
+                    <!--
+                      The Dino, drawn from vector layers rather than the animated
+                      dino_happy GIF. Prototype/feast.html inlines this character as a
+                      28-rect SVG and feeds it by swapping a closed-mouth group for an
+                      open-mouth group; keeping it as vectors here is what makes that
+                      swap possible. Three layers, bottom to top:
+                          dino_feast_body          everything except the mouth
+                          dino_feast_mouth_closed  the smile, shown by default
+                          dino_feast_mouth_open    the wide mouth, shown while feeding
+                    -->
+                    <FrameLayout
                         android:id="@+id/feastDino"
                         android:layout_width="@dimen/dino_hero"
                         android:layout_height="@dimen/dino_hero"
                         android:layout_gravity="center"
-                        android:contentDescription="@string/cd_feast_dino"
-                        android:scaleType="fitCenter" />
+                        android:contentDescription="@string/cd_feast_dino">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:importantForAccessibility="no"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/dino_feast_body" />
+
+                        <ImageView
+                            android:id="@+id/dinoMouthClosed"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:importantForAccessibility="no"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/dino_feast_mouth_closed" />
+
+                        <ImageView
+                            android:id="@+id/dinoMouthOpen"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:importantForAccessibility="no"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/dino_feast_mouth_open"
+                            android:visibility="invisible" />
+                    </FrameLayout>
                 </FrameLayout>
             </FrameLayout>
 

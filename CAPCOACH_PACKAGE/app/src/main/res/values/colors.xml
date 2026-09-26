@@ -1,16 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
-  DARK PALETTE  =  this file  (res/values/)
-  BRIGHT PALETTE =  res/values-night/
+  BRIGHT PALETTE  =  this file  (res/values/)
+  DARK PALETTE    =  res/values-night/
 
   SOURCE OF TRUTH: Prototype/onboarding.html in the GitHub repo.
 
   The prototype defines its dark colours in the Tailwind config block, and its
-  bright colours in the `body.bright-mode` CSS overrides. On Android those two
-  sets map onto values/ and values-night/ - see that file for the note on the
-  inverted -night naming.
+  bright colours in the `body.bright-mode` CSS overrides, so both sets are ported
+  here. This file holds the BRIGHT (default) set; res/values-night/ holds the dark
+  one.
 
-  DARK values below are copied verbatim from onboarding.html's tailwind.config.
+  This follows the standard Android qualifier meaning: `-night` applies when the
+  device/app is in night mode. ThemeController switches palettes with
+  AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES / MODE_NIGHT_NO), so
+  MODE_NIGHT_YES loads values-night/ (dark) and MODE_NIGHT_NO loads this file
+  (bright). No manual view recolouring is needed.
+
+  The two palettes previously lived in the opposite folders, which made every
+  theme toggle land on the wrong colours. They are now swapped so the qualifier
+  means what it says.
+
+  Bright values below are copied from onboarding.html's `body.bright-mode` block.
 -->
 <resources>
     <!-- ============ Brand ============ -->
@@ -34,31 +44,31 @@
     <color name="brand_error_container">#FF93000A</color>
 
     <!-- ============ Dark surfaces (verbatim from tailwind.config) ============ -->
-    <color name="bg_dark">#FF121414</color>                      <!-- background / surface -->
-    <color name="surface_container_lowest">#FF0D0E0F</color>
-    <color name="surface_container_low">#FF1A1C1C</color>
-    <color name="surface_container">#FF1E2020</color>
-    <color name="surface_container_high">#FF292A2A</color>
-    <color name="surface_container_highest">#FF343535</color>
-    <color name="surface_bright">#FF383939</color>
-    <color name="divider_dark">#FF343535</color>                 <!-- surface-variant -->
-    <color name="outline_dark">#FF3B4A3D</color>                 <!-- outline-variant -->
-    <color name="outline_muted">#FF859585</color>                <!-- outline -->
+    <color name="bg_dark">#FFF8FAFC</color>                      <!-- app background -->
+    <color name="surface_container_lowest">#FFF1F5F9</color>
+    <color name="surface_container_low">#FFFFFFFF</color>
+    <color name="surface_container">#FFFFFFFF</color>
+    <color name="surface_container_high">#FFE2E8F0</color>
+    <color name="surface_container_highest">#FFF1F5F9</color>
+    <color name="surface_bright">#FFFFFFFF</color>
+    <color name="divider_dark">#FFE2E8F0</color>                 <!-- surface-variant -->
+    <color name="outline_dark">#FFCBD5E1</color>                 <!-- outline-variant -->
+    <color name="outline_muted">#FF94A3B8</color>                <!-- outline -->
 
     <!-- ============ Dark text (verbatim from tailwind.config) ============ -->
-    <color name="text_on_dark">#FFE3E2E2</color>                 <!-- on-surface -->
-    <color name="text_primary_dark">#FFE3E2E2</color>
-    <color name="text_muted_dark">#FFBACBB9</color>              <!-- on-surface-variant -->
-    <color name="text_dim_dark">#FF859585</color>                <!-- outline -->
-    <color name="text_outline_dark">#FF859585</color>
+    <color name="text_on_dark">#FF0F172A</color>                 <!-- on-surface -->
+    <color name="text_primary_dark">#FF0F172A</color>
+    <color name="text_muted_dark">#FF475569</color>              <!-- on-surface-variant -->
+    <color name="text_dim_dark">#FF64748B</color>                <!-- outline -->
+    <color name="text_outline_dark">#FF64748B</color>
 
     <!-- ============ Semantic aliases used by the layouts ============ -->
-    <color name="secondary_blue">@color/brand_blue</color>
-    <color name="tertiary_gold_container">@color/brand_gold_container</color>
+    <color name="secondary_blue">#FF2563EB</color>
+    <color name="tertiary_gold_container">#FFB45309</color>
 
-    <color name="status_green">#FF00E676</color>
-    <color name="status_amber">#FFFCBF01</color>
-    <color name="status_red">#FFFFB4AB</color>
+    <color name="status_green">#FF047857</color>
+    <color name="status_amber">#FFB45309</color>
+    <color name="status_red">#FFD83B01</color>
 
     <!-- Load-zone tints (low alpha) for banner backgrounds -->
     <color name="zone_safe_bg">#1F00E676</color>
@@ -84,24 +94,25 @@
     <color name="accent_amber_bg">#1FF59E0B</color>
 
     <!-- Weekly load chart -->
-    <color name="chart_bar_idle">#66CBD5E1</color>
-    <color name="chart_bar_dim">#4DCBD5E1</color>
-    <color name="chart_ceiling">#66EF4444</color>
+    <color name="chart_bar_idle">#FFCBD5E1</color>
+    <color name="chart_bar_dim">#FFE2E8F0</color>
+    <color name="chart_ceiling">#FFEF4444</color>
 
     <!-- Task feed row -->
-    <color name="task_check_border">#FF64748B</color>
+    <color name="task_check_border">#FF94A3B8</color>
 
     <!-- Biometrics -->
-    <color name="anomaly_bg">#FF1E2020</color>
-    <color name="metric_track_bg">#FF343535</color>
+    <color name="anomaly_bg">#FFFFF1F2</color>
+    <color name="metric_track_bg">#FFE2E8F0</color>
 
     <!-- Harvest / feast garden -->
-    <color name="feast_canvas">#FF101212</color>
-    <color name="feast_card">#FF171C1B</color>
+    <color name="feast_canvas">#FFF1F5F9</color>
+    <color name="feast_card">#FFFFFFFF</color>
     <color name="feast_basket">#FF8B5A2B</color>
     <color name="apple_red">#FFFF2A2A</color>
     <color name="apple_red_dark">#FFB30E0E</color>
 
     <!-- Bottom-sheet scrim, sits over the dimmed dashboard -->
-    <color name="sheet_scrim">#BF000000</color>
+    <color name="sheet_scrim">#B3000000</color>
 </resources>
+
