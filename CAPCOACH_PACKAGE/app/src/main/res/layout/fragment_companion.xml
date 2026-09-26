@@ -104,7 +104,7 @@
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_light_mode"
+                    android:src="@drawable/ic_dark_mode"
                     app:tint="@color/text_primary_dark" />
             </FrameLayout>
         </LinearLayout>
@@ -236,7 +236,7 @@
                     android:layout_gravity="center"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_mic"
-                    app:tint="@color/bg_dark" />
+                    app:tint="@color/on_brand" />
             </FrameLayout>
         </FrameLayout>
 
@@ -251,3 +251,4 @@
             android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>
+

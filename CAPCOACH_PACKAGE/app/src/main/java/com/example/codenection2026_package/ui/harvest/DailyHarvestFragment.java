@@ -84,7 +84,6 @@ public class DailyHarvestFragment extends Fragment {
     private View feastProgressBar;
     private View harvestToast;
     private ViewGroup appleContainer;
-    private ImageView appleTree;
     private ImageView dinoSprite;
 
     /** True once the apples have been collected; the CTA then becomes "start my day". */
@@ -103,8 +102,6 @@ public class DailyHarvestFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
-
-        appleTree = view.findViewById(R.id.appleTree);
         dinoSprite = view.findViewById(R.id.dinoSprite);
         basketLabel = view.findViewById(R.id.basketLabel);
         stashSubtitle = view.findViewById(R.id.stashSubtitle);
@@ -137,9 +134,11 @@ public class DailyHarvestFragment extends Fragment {
             milestoneGoal.setText(getString(R.string.harvest_milestone_goal, FEAST_GOAL));
         }
 
-        // Glide, not setImageResource - these assets are animated GIFs.
+        // The tree is a STATIC blank vector, not the apple_tree_full GIF. It must render
+        // empty and still: the only fruit on it is the apples added by growApples() from
+        // yesterday's completed tasks, so an animated pre-loaded crop would contradict
+        // what the screen is telling the user. The Dino stays an animated GIF.
         if (isAdded()) {
-            Glide.with(this).load(R.drawable.apple_tree_full).into(appleTree);
             Glide.with(this).load(R.drawable.dino_happy).into(dinoSprite);
         }
 
@@ -368,10 +367,9 @@ public class DailyHarvestFragment extends Fragment {
             collectButton.setText(R.string.harvest_start_day);
         }
 
-        // The tree sheds its crop, so swap to the sparser animated sprite.
-        if (appleTree != null) {
-            Glide.with(this).load(R.drawable.apple_tree_sparse).into(appleTree);
-        }
+        // The tree itself is a fixed blank vector and is deliberately left alone here.
+        // Its apples were animated away in triggerHarvest(), so it is already bare again -
+        // swapping in a "sparse" tree sprite would draw a second, contradictory crop.
 
         showToast(total);
     }
@@ -417,3 +415,4 @@ public class DailyHarvestFragment extends Fragment {
                 .show();
     }
 }
+

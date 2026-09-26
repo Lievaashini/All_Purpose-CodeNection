@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   Simplified Dino-focused voice popup.
 
@@ -141,7 +141,7 @@
             android:layout_gravity="center"
             android:contentDescription="@null"
             android:src="@drawable/ic_mic"
-            app:tint="@color/bg_dark" />
+            app:tint="@color/on_brand" />
     </FrameLayout>
 
     <TextView
@@ -155,3 +155,4 @@
         tools:text="READY TO LISTEN" />
 
 </LinearLayout>
+

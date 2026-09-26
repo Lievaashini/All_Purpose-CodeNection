@@ -308,7 +308,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
                     : R.drawable.bg_mode_icon_idle);
         }
         if (iconFlexible != null) {
-            tint(iconFlexible, flexible ? R.color.bg_dark : R.color.text_muted_dark);
+            tint(iconFlexible, flexible ? R.color.on_brand : R.color.text_muted_dark);
         }
         if (checkFlexible != null) {
             checkFlexible.setBackgroundResource(flexible
@@ -319,7 +319,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             checkIconFlexible.setImageResource(flexible
                     ? R.drawable.ic_check
                     : R.drawable.ic_radio_unchecked);
-            tint(checkIconFlexible, flexible ? R.color.bg_dark : R.color.text_muted_dark);
+            tint(checkIconFlexible, flexible ? R.color.on_brand : R.color.text_muted_dark);
         }
 
         if (iconContainerInflexible != null) {
@@ -328,7 +328,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
                     : R.drawable.bg_mode_icon_work);
         }
         if (iconInflexible != null) {
-            tint(iconInflexible, flexible ? R.color.text_muted_dark : R.color.bg_dark);
+            tint(iconInflexible, flexible ? R.color.text_muted_dark : R.color.on_brand);
         }
         if (checkInflexible != null) {
             checkInflexible.setBackgroundResource(flexible
@@ -339,7 +339,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             checkIconInflexible.setImageResource(flexible
                     ? R.drawable.ic_radio_unchecked
                     : R.drawable.ic_check);
-            tint(checkIconInflexible, flexible ? R.color.text_muted_dark : R.color.bg_dark);
+            tint(checkIconInflexible, flexible ? R.color.text_muted_dark : R.color.on_brand);
         }
 
         show(badgeFlexibleGuard, flexible);
@@ -354,7 +354,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         ImageView glyph = root == null ? null : root.findViewById(R.id.modalBadgeGlyph);
         if (glyph != null) {
             glyph.setImageResource(flexible ? R.drawable.ic_school : R.drawable.ic_work);
-            tint(glyph, flexible ? R.color.bg_dark : R.color.bg_dark);
+            tint(glyph, flexible ? R.color.on_brand : R.color.on_brand);
         }
         if (modalSubtitle != null) {
             modalSubtitle.setText(flexible
@@ -554,3 +554,4 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         }
     }
 }
+

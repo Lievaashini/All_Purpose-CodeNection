@@ -18,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
@@ -88,7 +87,6 @@ public class FeastFragment extends Fragment {
         feastDino = view.findViewById(R.id.feastDino);
         dinoMouthClosed = view.findViewById(R.id.dinoMouthClosed);
         dinoMouthOpen = view.findViewById(R.id.dinoMouthOpen);
-        ImageView feastTree = view.findViewById(R.id.feastTree);
         dinoBubble = view.findViewById(R.id.dinoBubble);
         applesRemainingCount = view.findViewById(R.id.applesRemainingCount);
         satietyPercentage = view.findViewById(R.id.satietyPercentage);
@@ -115,13 +113,6 @@ public class FeastFragment extends Fragment {
         TextView subtitle = view.findViewById(R.id.feastSubtitle);
         if (subtitle != null) {
             subtitle.setText(getString(R.string.feast_subtitle, TOTAL_APPLES));
-        }
-
-        // The tree backdrop is still an animated GIF, so it goes through Glide. The Dino
-        // itself is now vector layers drawn by the layout, which is what lets its mouth
-        // open and close while feeding.
-        if (isAdded() && feastTree != null) {
-            Glide.with(this).load(R.drawable.apple_tree_sparse).into(feastTree);
         }
 
         buildAppleTray();
@@ -593,3 +584,5 @@ public class FeastFragment extends Fragment {
         }, 2500);
     }
 }
+
+

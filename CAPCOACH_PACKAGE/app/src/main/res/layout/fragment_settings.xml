@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 8 - SETTINGS  (port of Prototype/settings.html)
 
@@ -342,7 +342,7 @@
                 android:layout_width="19dp"
                 android:layout_height="19dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_light_mode"
+                android:src="@drawable/ic_dark_mode"
                 app:tint="@color/accent_amber" />
         </FrameLayout>
 
@@ -390,3 +390,4 @@
         android:layout_height="@dimen/bottom_nav_height"
         android:layout_gravity="bottom" />
 </FrameLayout>
+

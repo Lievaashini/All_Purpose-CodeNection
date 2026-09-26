@@ -104,6 +104,13 @@
          accents are NOT darkened in bright mode, only the surfaces flip.
          ================================================================== -->
 
+    <!--
+      Content drawn ON the mint brand colour. Identical in both palettes, because the
+      mint behind it is identical in both palettes. See values/colors.xml for the note
+      on why bg_dark must not be used for this job.
+    -->
+    <color name="on_brand">#FF003918</color>
+
     <color name="accent_amber">#FFF59E0B</color>
     <color name="accent_amber_bg">#1FF59E0B</color>
 
@@ -127,4 +134,5 @@
 
     <color name="sheet_scrim">#BF000000</color>
 </resources>
+
 

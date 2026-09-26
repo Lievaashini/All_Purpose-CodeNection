@@ -266,7 +266,7 @@ public class DashboardFragment extends Fragment {
 
         int activeBg = R.drawable.bg_day_pill_active;
         int idleBg = R.drawable.bg_day_pill_idle;
-        int activeText = ContextCompat.getColor(requireContext(), R.color.bg_dark);
+        int activeText = ContextCompat.getColor(requireContext(), R.color.on_brand);
         int idleLetter = ContextCompat.getColor(requireContext(), R.color.text_dim_dark);
         int idleNumber = ContextCompat.getColor(requireContext(), R.color.text_primary_dark);
 
@@ -554,6 +554,12 @@ public class DashboardFragment extends Fragment {
         click(root, R.id.filterWork, () -> applyFilter("INFLEXIBLE", R.id.filterWork));
         click(root, R.id.filterClasses, () -> applyFilter("FLEXIBLE", R.id.filterClasses));
         click(root, R.id.filterStudy, () -> applyFilter("FLEXIBLE", R.id.filterStudy));
+
+        // Paint "All" as the selected chip on entry, and give it its task count straight
+        // away. Without this the chip only picked up its mint fill and "All (n)" label
+        // after the first tap, so on arrival it looked missing or blank.
+        applyFilter(null, R.id.filterAll);
+        updateCounterAndChips();
     }
 
     /**
@@ -567,7 +573,7 @@ public class DashboardFragment extends Fragment {
 
         int activeBg = R.drawable.bg_chip_active;
         int idleBg = R.drawable.bg_chip_idle;
-        int activeText = ContextCompat.getColor(requireContext(), R.color.bg_dark);
+        int activeText = ContextCompat.getColor(requireContext(), R.color.on_brand);
         int idleText = ContextCompat.getColor(requireContext(), R.color.text_muted_dark);
 
         int[] chips = {R.id.filterAll, R.id.filterWork, R.id.filterClasses, R.id.filterStudy};
@@ -662,3 +668,4 @@ public class DashboardFragment extends Fragment {
         }
     }
 }
+

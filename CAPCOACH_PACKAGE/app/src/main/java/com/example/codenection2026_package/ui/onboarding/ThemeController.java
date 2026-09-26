@@ -71,7 +71,9 @@ public final class ThemeController {
         if (icon == null) {
             return;
         }
-        // Dark theme showing -> tapping switches to bright, so show the sun.
+        // The icon advertises the theme you would switch TO, not the one you are in:
+        //   bright showing -> tapping goes to night  -> show the moon
+        //   night showing  -> tapping goes to bright -> show the sun
         @DrawableRes int res = isNightMode(context)
                 ? R.drawable.ic_light_mode
                 : R.drawable.ic_dark_mode;

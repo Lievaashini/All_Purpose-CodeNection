@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   LIGHT-SIDE VALUES  (res/values/)
 
@@ -14,10 +14,10 @@
     <style name="Base.Theme.CODENECTION2026_PACKAGE" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- ===== CapCoach palette ===== -->
         <item name="colorPrimary">@color/brand_mint</item>
-        <item name="colorOnPrimary">@color/bg_dark</item>
+        <item name="colorOnPrimary">@color/on_brand</item>
         <item name="colorPrimaryContainer">@color/surface_container_high</item>
         <item name="colorSecondary">@color/brand_blue</item>
-        <item name="colorOnSecondary">@color/bg_dark</item>
+        <item name="colorOnSecondary">@color/on_brand</item>
         <item name="colorTertiary">@color/brand_gold_container</item>
         <item name="colorError">@color/brand_coral</item>
 
@@ -107,3 +107,4 @@
     </style>
 
 </resources>
+

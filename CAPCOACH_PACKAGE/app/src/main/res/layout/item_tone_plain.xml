@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- Tone card: PLAIN (unselected by default) -->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -93,7 +93,8 @@
                 android:contentDescription="@null"
                 android:src="@drawable/ic_check"
                 android:visibility="gone"
-                app:tint="@color/bg_dark" />
+                app:tint="@color/on_brand" />
         </FrameLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+

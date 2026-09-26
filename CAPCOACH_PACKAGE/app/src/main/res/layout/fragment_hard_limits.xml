@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 2 - SET LIMITS / HARD LIMITS  (port of prototype/hard-limits.html)
 
@@ -88,7 +88,7 @@
                         android:layout_height="20dp"
                         android:layout_gravity="center"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_light_mode"
+                        android:src="@drawable/ic_dark_mode"
                         app:tint="@color/brand_mint" />
                 </FrameLayout>
             </LinearLayout>
@@ -828,7 +828,7 @@
                 android:text="@string/limits_cta"
                 app:icon="@drawable/ic_arrow_forward"
                 app:iconGravity="textEnd"
-                app:iconTint="@color/bg_dark" />
+                app:iconTint="@color/on_brand" />
 
             <TextView
                 style="@style/Text.MicroLabel"
@@ -841,3 +841,5 @@
         </LinearLayout>
     </com.example.codenection2026_package.ui.widget.ObservableScrollView>
 </FrameLayout>
+
+

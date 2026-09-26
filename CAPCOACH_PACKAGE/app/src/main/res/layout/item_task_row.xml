@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   One card in the dashboard task feed (prototype: article.task-item in
   dashboard.html).
@@ -63,7 +63,7 @@
                 android:contentDescription="@null"
                 android:src="@drawable/ic_check"
                 android:visibility="invisible"
-                app:tint="@color/bg_dark" />
+                app:tint="@color/on_brand" />
         </FrameLayout>
 
         <LinearLayout
@@ -128,3 +128,4 @@
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
+

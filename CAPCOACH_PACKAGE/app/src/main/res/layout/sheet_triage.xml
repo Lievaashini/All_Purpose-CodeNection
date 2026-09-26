@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   Triage bottom sheet (port of the #triageModal block in dashboard.html).
 
@@ -383,7 +383,7 @@
             android:layout_marginTop="@dimen/space_md"
             android:text="@string/triage_accept"
             app:icon="@drawable/ic_done_all"
-            app:iconTint="@color/bg_dark" />
+            app:iconTint="@color/on_brand" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/triageDismiss"
@@ -396,3 +396,4 @@
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
+

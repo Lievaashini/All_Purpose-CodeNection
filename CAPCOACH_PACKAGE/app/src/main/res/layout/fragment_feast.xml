@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 7 - WEEKLY FEAST  (port of Prototype/feast.html)
 
@@ -84,7 +84,7 @@
                         android:layout_width="19dp"
                         android:layout_height="19dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_light_mode"
+                        android:src="@drawable/ic_dark_mode"
                         app:tint="@color/accent_amber" />
                 </FrameLayout>
 
@@ -147,15 +147,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/tree_size_large"
                     android:layout_marginTop="@dimen/space_xl">
-
-                    <ImageView
-                        android:id="@+id/feastTree"
-                        android:layout_width="@dimen/tree_size"
-                        android:layout_height="@dimen/tree_size"
-                        android:layout_gravity="center"
-                        android:alpha="0.35"
-                        android:contentDescription="@string/cd_apple_tree"
-                        android:scaleType="fitCenter" />
 
                     <!--
                       The Dino, drawn from vector layers rather than the animated
@@ -405,13 +396,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:layout_marginTop="@dimen/space_md"
-                android:textColor="@color/bg_dark"
+                android:textColor="@color/on_brand"
                 android:textStyle="bold"
                 app:backgroundTint="@color/brand_mint"
                 app:cornerRadius="@dimen/radius_md"
                 app:icon="@drawable/ic_restaurant"
                 app:iconGravity="textStart"
-                app:iconTint="@color/bg_dark"
+                app:iconTint="@color/on_brand"
                 tools:text="Feast All Apples (16)" />
 
             <com.google.android.material.button.MaterialButton
@@ -457,3 +448,5 @@
     </LinearLayout>
 
 </FrameLayout>
+
+

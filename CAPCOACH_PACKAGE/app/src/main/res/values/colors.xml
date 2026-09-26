@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   BRIGHT PALETTE  =  this file  (res/values/)
   DARK PALETTE    =  res/values-night/
@@ -88,6 +88,16 @@
          by the tokens above (surfaces, text, mint/blue/gold, zone tints) is
          reused rather than redefined.
          ================================================================== -->
+
+    <!--
+      Content drawn ON the mint brand colour: button labels, chip labels, icon tints.
+
+      This token exists because bg_dark was being used for that job. bg_dark is the app
+      BACKGROUND, so it flips with the theme - which meant mint buttons read white-on-mint
+      in bright mode. This colour is deliberately identical in both palettes, because the
+      mint behind it is identical in both palettes.
+    -->
+    <color name="on_brand">#FF003918</color>
 
     <!-- Amber accent: weekly cap badge, heavy-load bar, postponed tag -->
     <color name="accent_amber">#FFF59E0B</color>

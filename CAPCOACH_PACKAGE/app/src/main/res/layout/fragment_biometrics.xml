@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 5 - BIOMETRICS  (port of Prototype/biometrics.html)
 
@@ -132,7 +132,7 @@
                             android:gravity="center"
                             android:includeFontPadding="false"
                             android:text="!"
-                            android:textColor="@color/bg_dark"
+                            android:textColor="@color/on_brand"
                             android:textSize="11sp"
                             android:textStyle="bold" />
                     </FrameLayout>
@@ -515,7 +515,7 @@
                 android:layout_width="19dp"
                 android:layout_height="19dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_light_mode"
+                android:src="@drawable/ic_dark_mode"
                 app:tint="@color/accent_amber" />
         </FrameLayout>
     </LinearLayout>
@@ -527,3 +527,5 @@
         android:layout_height="@dimen/bottom_nav_height"
         android:layout_gravity="bottom" />
 </FrameLayout>
+
+

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 3 - DASHBOARD  (port of Prototype/dashboard.html)
 
@@ -289,12 +289,12 @@
                             android:insetTop="0dp"
                             android:minHeight="36dp"
                             android:text="@string/dash_btn_rebalance"
-                            android:textColor="@color/bg_dark"
+                            android:textColor="@color/on_brand"
                             android:textSize="@dimen/text_micro"
                             app:backgroundTint="@color/brand_mint"
                             app:cornerRadius="@dimen/radius_sm"
                             app:icon="@drawable/ic_bolt"
-                            app:iconTint="@color/bg_dark" />
+                            app:iconTint="@color/on_brand" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/dailyPopupButton"
@@ -348,7 +348,7 @@
                         android:background="@drawable/bg_chip_active"
                         android:gravity="center"
                         android:paddingHorizontal="@dimen/space_md"
-                        android:textColor="@color/bg_dark"
+                        android:textColor="@color/on_brand"
                         tools:text="All (4)" />
 
                     <TextView
@@ -577,7 +577,7 @@
                     android:layout_height="19dp"
                     android:layout_gravity="center"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_light_mode"
+                    android:src="@drawable/ic_dark_mode"
                     app:tint="@color/accent_amber" />
             </FrameLayout>
 
@@ -590,7 +590,7 @@
                 android:background="@drawable/bg_circle_mint"
                 android:gravity="center"
                 android:text="@string/avatar_initial"
-                android:textColor="@color/bg_dark"
+                android:textColor="@color/on_brand"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
@@ -663,11 +663,11 @@
         android:layout_marginEnd="@dimen/space_md"
         android:contentDescription="@string/cd_add_task"
         android:text="@string/dash_add_task"
-        android:textColor="@color/bg_dark"
+        android:textColor="@color/on_brand"
         app:backgroundTint="@color/brand_mint"
         app:cornerRadius="@dimen/radius_pill"
         app:icon="@drawable/ic_add"
-        app:iconTint="@color/bg_dark" />
+        app:iconTint="@color/on_brand" />
 
     <!-- ==================== Bottom navigation ==================== -->
     <include
@@ -678,3 +678,5 @@
         android:layout_gravity="bottom" />
 
 </FrameLayout>
+
+

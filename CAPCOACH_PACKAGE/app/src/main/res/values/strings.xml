@@ -304,6 +304,7 @@
     <string name="harvest_toast_sub">Dino excitement +100%% | %1$d total</string>
     <string name="cd_harvest_dino">CapCoach Dino looking up excitedly</string>
     <string name="cd_apple_tree">Your weekly apple tree harvest</string>
+    <string name="cd_harvest_basket">Basket holding this week\'s collected apples</string>
 
     <!-- ==================================================================
          SCREEN 7 - WEEKLY FEAST  (port of Prototype/feast.html)

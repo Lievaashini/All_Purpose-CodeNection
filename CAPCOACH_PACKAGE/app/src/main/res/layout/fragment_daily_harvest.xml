@@ -84,7 +84,7 @@
                         android:layout_width="18dp"
                         android:layout_height="18dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_light_mode"
+                        android:src="@drawable/ic_dark_mode"
                         app:tint="@color/text_primary_dark" />
                 </FrameLayout>
             </FrameLayout>
@@ -166,7 +166,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:contentDescription="@string/cd_apple_tree"
-                        android:scaleType="fitCenter" />
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/tree_blank" />
 
                     <!--
                       Apples grown overnight are added here by DailyHarvestFragment, one
@@ -235,20 +236,32 @@
                             android:contentDescription="@string/cd_harvest_dino"
                             android:scaleType="fitCenter" />
 
+                        <!--
+                          Woven basket. An ImageView rather than a background drawable so
+                          the vector keeps its own aspect ratio, and the count sits over
+                          the body rather than the handle.
+                        -->
                         <FrameLayout
                             android:id="@+id/harvestBasket"
                             android:layout_width="@dimen/basket_size"
-                            android:layout_height="@dimen/basket_size"
-                            android:layout_marginStart="@dimen/space_xs"
-                            android:background="@drawable/bg_basket">
+                            android:layout_height="52dp"
+                            android:layout_marginStart="@dimen/space_xs">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:contentDescription="@string/cd_harvest_basket"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/basket_harvest" />
 
                             <TextView
                                 android:id="@+id/basketLabel"
                                 style="@style/Text.MicroLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:textColor="@color/brand_gold"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="24dp"
+                                android:textColor="@color/basket_count"
                                 android:textStyle="bold"
                                 tools:text="12" />
                         </FrameLayout>
@@ -450,13 +463,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:layout_marginTop="@dimen/space_lg"
-                android:textColor="@color/bg_dark"
+                android:textColor="@color/on_brand"
                 android:textStyle="bold"
                 app:backgroundTint="@color/brand_mint"
                 app:cornerRadius="@dimen/radius_md"
                 app:icon="@drawable/ic_shopping_basket"
                 app:iconGravity="textStart"
-                app:iconTint="@color/bg_dark"
+                app:iconTint="@color/on_brand"
                 tools:text="Collect 4 Apples" />
 
             <com.google.android.material.button.MaterialButton
@@ -538,3 +551,5 @@
     </LinearLayout>
 
 </FrameLayout>
+
+

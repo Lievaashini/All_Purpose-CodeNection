@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 4 - ADD TASK bottom sheet (port of Prototype/add-task.html)
 
@@ -100,7 +100,7 @@
                     android:layout_height="19dp"
                     android:layout_gravity="center"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_light_mode"
+                    android:src="@drawable/ic_dark_mode"
                     app:tint="@color/accent_amber" />
             </FrameLayout>
 
@@ -293,7 +293,7 @@
                         android:layout_gravity="center"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_swap_horiz"
-                        app:tint="@color/bg_dark" />
+                        app:tint="@color/on_brand" />
                 </FrameLayout>
 
                 <LinearLayout
@@ -353,7 +353,7 @@
                         android:layout_gravity="center"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_check"
-                        app:tint="@color/bg_dark" />
+                        app:tint="@color/on_brand" />
                 </FrameLayout>
             </LinearLayout>
 
@@ -853,12 +853,12 @@
             android:layout_height="52dp"
             android:layout_marginTop="@dimen/space_md"
             android:text="@string/addtask_save_academic"
-            android:textColor="@color/bg_dark"
+            android:textColor="@color/on_brand"
             android:textStyle="bold"
             app:backgroundTint="@color/brand_mint"
             app:cornerRadius="@dimen/radius_md"
             app:icon="@drawable/ic_event_available"
-            app:iconTint="@color/bg_dark" />
+            app:iconTint="@color/on_brand" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cancelButton"
@@ -871,3 +871,5 @@
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
+
+
