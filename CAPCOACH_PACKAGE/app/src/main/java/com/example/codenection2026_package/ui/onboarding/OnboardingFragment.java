@@ -128,7 +128,6 @@ public class OnboardingFragment extends Fragment {
                         String spokenText = matches.get(0);
                         dinoDialogue.setText("You said: " + spokenText);
 
-                        // --- WEEK 2 ML BINDING TEST ---
                         // --- WEEK 2 RAW TFLITE TEST ---
                         try {
                             // 1. Load the raw model file from the assets folder
