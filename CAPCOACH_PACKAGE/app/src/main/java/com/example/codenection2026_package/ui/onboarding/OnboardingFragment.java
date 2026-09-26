@@ -128,34 +128,10 @@ public class OnboardingFragment extends Fragment {
                         String spokenText = matches.get(0);
                         dinoDialogue.setText("You said: " + spokenText);
 
-                        // --- WEEK 2 ML BINDING TEST ---
-                        // --- WEEK 2 RAW TFLITE TEST ---
-                        try {
-                            // 1. Load the raw model file from the assets folder
-                            android.content.res.AssetFileDescriptor fileDescriptor = requireContext().getAssets().openFd("text_classification_v2.tflite");
-                            java.io.FileInputStream inputStream = new java.io.FileInputStream(fileDescriptor.getFileDescriptor());
-                            java.nio.channels.FileChannel fileChannel = inputStream.getChannel();
-                            java.nio.MappedByteBuffer modelBuffer = fileChannel.map(java.nio.channels.FileChannel.MapMode.READ_ONLY, fileDescriptor.getStartOffset(), fileDescriptor.getDeclaredLength());
-
-                            // 2. Initialize the core TFLite Engine
-                            org.tensorflow.lite.Interpreter tflite = new org.tensorflow.lite.Interpreter(modelBuffer);
-
-                            // 3. Prepare inputs and outputs using raw Java arrays
-                            int[][] input = new int[1][256]; // Dummy 256 integer tokens
-                            float[][] output = new float[1][2]; // Assuming the model outputs 2 probability categories
-
-                            // 4. Run Inference
-                            tflite.run(input, output);
-
-                            android.util.Log.d("CapCoachAPI", "Raw TFLite Pipeline Connected! Output: " + output[0][0]);
-
-                            // 5. Prevent memory leaks
-                            tflite.close();
-                            fileChannel.close();
-                            inputStream.close();
-                        } catch (Exception e) {
-                            android.util.Log.e("CapCoachAPI", "TFLite failed: " + e.getMessage());
-                        }
+                        // --- WEEK 2 ML BINDING (PATH A) ---
+                        // TODO: Route parsed spokenText into Task properties, then call:
+                        // int decision = LoadShedder_generated.predictTaskAction(...);
+                        android.util.Log.d("CapCoachAPI", "Voice captured, ready for Java ML Shedder routing.");
                     }
                 }
             }

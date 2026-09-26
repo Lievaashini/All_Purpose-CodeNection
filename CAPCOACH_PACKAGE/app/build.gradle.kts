@@ -30,11 +30,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // CRITICAL: Prevents Android from compressing ML model
-    androidResources {
-        noCompress += "tflite"
-    }
-
     buildFeatures {
         mlModelBinding = false
     }
@@ -58,9 +53,6 @@ dependencies {
 
     // 2. Health Connect API
     implementation("androidx.health.connect:connect-client:1.1.0-alpha11")
-
-    // 3. TensorFlow Lite
-    implementation("org.tensorflow:tensorflow-lite:2.16.1")
 
     // 4. Glide (UI Assets)
     implementation("com.github.bumptech.glide:glide:4.16.0")
