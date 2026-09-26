@@ -47,11 +47,16 @@ public class OnboardingFragment extends Fragment {
             registerForActivityResult(
                     androidx.health.connect.client.PermissionController.createRequestPermissionResultContract(),
                     grantedPermissions -> {
-                        if (grantedPermissions != null && healthManager != null && grantedPermissions.containsAll(healthManager.getRequiredPermissions())) {
+                        // Kotlin Interop Fix: Convert Java Class to Kotlin KClass for the API
+                        kotlin.reflect.KClass<androidx.health.connect.client.records.SleepSessionRecord> sleepClass =
+                                kotlin.jvm.JvmClassMappingKt.getKotlinClass(androidx.health.connect.client.records.SleepSessionRecord.class);
 
-                            // 1. Update your UI teammate's card visually
+                        // Check if the user granted the baseline Sleep Read permission
+                        if (grantedPermissions != null &&
+                                grantedPermissions.contains(androidx.health.connect.client.permission.HealthPermission.getReadPermission(sleepClass))) {
+                            // 1. Update UI visually
                             setHealthConnectState(true);
-                            android.util.Log.d("CapCoachAPI", "1. Health Connect Permissions Granted via UI!");
+                            android.util.Log.d("CapCoachAPI", "1. Sleep Permissions Granted via UI!");
 
                             // 2. Run your Automated Read/Write Database Test
                             try {
