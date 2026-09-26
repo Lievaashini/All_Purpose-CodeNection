@@ -577,7 +577,7 @@
                     android:layout_height="19dp"
                     android:layout_gravity="center"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_dark_mode"
+                    android:src="@drawable/ic_light_mode"
                     app:tint="@color/accent_amber" />
             </FrameLayout>
 
@@ -678,5 +678,6 @@
         android:layout_gravity="bottom" />
 
 </FrameLayout>
+
 
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 6 - DAILY HARVEST  (port of Prototype/daily-harvest.html)
 
@@ -84,7 +84,7 @@
                         android:layout_width="18dp"
                         android:layout_height="18dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_dark_mode"
+                        android:src="@drawable/ic_light_mode"
                         app:tint="@color/text_primary_dark" />
                 </FrameLayout>
             </FrameLayout>
@@ -551,5 +551,6 @@
     </LinearLayout>
 
 </FrameLayout>
+
 
 

@@ -52,31 +52,44 @@ public final class ThemeController {
         });
     }
 
-    /** @return true when the app is currently rendering the dark palette. */
+    /**
+     * @return true when the app is currently rendering the dark palette.
+     *
+     * <p>Reads the resource configuration first, because that is what actually decides
+     * which of values/ or values-night/ supplied the colours on screen. Falls back to the
+     * explicit AppCompatDelegate setting, then to the system setting.
+     *
+     * <p><b>Why the configuration and not just the delegate:</b> when the delegate is left
+     * on MODE_NIGHT_FOLLOW_SYSTEM (or unset, which is the default), a device in system
+     * dark mode makes the delegate report nighttime even though the app's own colours may
+     * still be the bright set. Trusting the delegate there would flip the toggle icon to a
+     * moon while the screen was still bright.
+     */
     public static boolean isNightMode(@NonNull Context context) {
-        int mode = AppCompatDelegate.getDefaultNightMode();
-        if (mode == AppCompatDelegate.MODE_NIGHT_YES) {
-            return true;
-        }
-        if (mode == AppCompatDelegate.MODE_NIGHT_NO) {
-            return false;
-        }
-        // MODE_NIGHT_FOLLOW_SYSTEM or UNSET: fall back to the system setting.
         int uiMode = context.getResources().getConfiguration().uiMode
                 & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
-        return uiMode == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        if (uiMode == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+            return true;
+        }
+        if (uiMode == android.content.res.Configuration.UI_MODE_NIGHT_NO) {
+            return false;
+        }
+
+        // Configuration was undecided, so trust an explicit delegate choice instead.
+        int mode = AppCompatDelegate.getDefaultNightMode();
+        return mode == AppCompatDelegate.MODE_NIGHT_YES;
     }
 
     private static void updateIcon(@NonNull Context context, ImageView icon) {
         if (icon == null) {
             return;
         }
-        // The icon advertises the theme you would switch TO, not the one you are in:
-        //   bright showing -> tapping goes to night  -> show the moon
-        //   night showing  -> tapping goes to bright -> show the sun
+        // The icon shows the theme you are CURRENTLY in, not the one you will switch to:
+        //   bright showing -> sun   (matches the prototype, which labels itself Night)
+        //   night showing  -> moon
         @DrawableRes int res = isNightMode(context)
-                ? R.drawable.ic_light_mode
-                : R.drawable.ic_dark_mode;
+                ? R.drawable.ic_dark_mode
+                : R.drawable.ic_light_mode;
         icon.setImageResource(res);
         icon.setImageTintList(
                 ContextCompat.getColorStateList(context, R.color.brand_mint));

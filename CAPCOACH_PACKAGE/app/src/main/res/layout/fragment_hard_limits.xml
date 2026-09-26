@@ -88,7 +88,7 @@
                         android:layout_height="20dp"
                         android:layout_gravity="center"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_dark_mode"
+                        android:src="@drawable/ic_light_mode"
                         app:tint="@color/brand_mint" />
                 </FrameLayout>
             </LinearLayout>
@@ -841,5 +841,6 @@
         </LinearLayout>
     </com.example.codenection2026_package.ui.widget.ObservableScrollView>
 </FrameLayout>
+
 
 
