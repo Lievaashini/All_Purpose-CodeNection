@@ -4,6 +4,7 @@ import android.content.Context;
 import androidx.health.connect.client.HealthConnectClient;
 import androidx.health.connect.client.permission.HealthPermission;
 import androidx.health.connect.client.records.SleepSessionRecord;
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord;
 import androidx.health.connect.client.records.metadata.Metadata;
 
 import java.time.Instant;
@@ -34,7 +35,12 @@ public class HealthConnectManager {
         Set<String> permissions = new HashSet<>();
         // Converting Java Class to Kotlin KClass for the API
         permissions.add(HealthPermission.getReadPermission(JvmClassMappingKt.getKotlinClass(SleepSessionRecord.class)));
+        // NOTE: Remove this line before final submission!
         permissions.add(HealthPermission.getWritePermission(JvmClassMappingKt.getKotlinClass(SleepSessionRecord.class)));
+
+        // Add HRV Read Permission
+        permissions.add(HealthPermission.getReadPermission(JvmClassMappingKt.getKotlinClass(HeartRateVariabilityRmssdRecord.class)));
+
         return permissions;
     }
 

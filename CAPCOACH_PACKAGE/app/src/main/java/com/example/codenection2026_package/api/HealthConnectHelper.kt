@@ -2,6 +2,7 @@ package com.example.codenection2026_package.api
 
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import kotlinx.coroutines.runBlocking
@@ -15,6 +16,18 @@ object HealthConnectHelper {
         return runBlocking {
             val request = ReadRecordsRequest(
                 recordType = SleepSessionRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(start, end)
+            )
+            client.readRecords(request).records
+        }
+    }
+
+    // READ HRV
+    @JvmStatic
+    fun readHrvDataSync(client: HealthConnectClient, start: Instant, end: Instant): List<HeartRateVariabilityRmssdRecord> {
+        return runBlocking {
+            val request = ReadRecordsRequest(
+                recordType = HeartRateVariabilityRmssdRecord::class,
                 timeRangeFilter = TimeRangeFilter.between(start, end)
             )
             client.readRecords(request).records
