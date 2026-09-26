@@ -1,5 +1,8 @@
 package com.example.codenection2026_package.ui.onboarding;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.ui.widget.ObservableScrollView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -25,15 +29,6 @@ import com.google.android.material.slider.Slider;
 
 /**
  * SCREEN 2 - Set Limits. Port of {@code prototype/hard-limits.html}.
- *
- * <p>Three sliders define the weekly baseline:
- * study (10-50), work (0-40), co-curricular (0-20). Their sum is graded live by
- * {@link LoadZones} and reflected in the banner, the work-status pill, the warning
- * callout, and the Dino's dialogue.
- *
- * <p>This replaces the prototype's {@code updateWorkSliderState()}, which referenced
- * DOM ids ({@code statusPill}, {@code warningBox}) that no longer existed in the HTML
- * and therefore threw on every drag.
  */
 public class HardLimitsFragment extends Fragment {
 
@@ -63,7 +58,23 @@ public class HardLimitsFragment extends Fragment {
 
     private MaterialSwitch calendarSyncSwitch;
 
-    private boolean initialised = false;
+    private boolean initialized = false;
+
+    // --- API INJECTIONS ---
+    private CalendarManager calendarManager;
+
+    private final androidx.activity.result.ActivityResultLauncher<String[]> requestCalendarPermissionsLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                Boolean readGranted = result.getOrDefault(Manifest.permission.READ_CALENDAR, false);
+                Boolean writeGranted = result.getOrDefault(Manifest.permission.WRITE_CALENDAR, false);
+
+                if (Boolean.TRUE.equals(readGranted) && Boolean.TRUE.equals(writeGranted)) {
+                    runCalendarTest();
+                } else {
+                    Toast.makeText(getContext(), "Calendar access is required.", Toast.LENGTH_SHORT).show();
+                }
+            });
+    // -------------------------------
 
     @NonNull
     @Override
@@ -76,6 +87,7 @@ public class HardLimitsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        calendarManager = new CalendarManager(requireContext());
 
         bindViews(view);
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
@@ -84,10 +96,9 @@ public class HardLimitsFragment extends Fragment {
         wireScrollProgress(view);
         wireCalendarSync();
         wireSaveButton(view);
-        wireThemePreview(view);
+        wireThemePreview();
 
-        // Render once with the restored values.
-        initialised = true;
+        initialized = true;
         refreshAll();
     }
 
@@ -139,13 +150,6 @@ public class HardLimitsFragment extends Fragment {
         cocurricularSlider.addOnChangeListener(listener);
     }
 
-    /**
-     * Thin progress bar at the top, mirroring the prototype's scroll indicator.
-     *
-     * <p>There is no {@code ViewCompat.setOnScrollChangeListener} - that API does not
-     * exist. {@link ObservableScrollView} overrides {@code onScrollChanged} instead,
-     * which is stable across all API levels.
-     */
     private void wireScrollProgress(@NonNull View view) {
         final LinearProgressIndicator progress = view.findViewById(R.id.scrollProgress);
         View scroll = view.findViewById(R.id.limitsScroll);
@@ -157,15 +161,22 @@ public class HardLimitsFragment extends Fragment {
         ((ObservableScrollView) scroll).setOnScrollProgressListener(
                 percent -> progress.setProgressCompat(percent, true));
     }
+
     private void wireCalendarSync() {
         if (calendarSyncSwitch == null) {
             return;
         }
         calendarSyncSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (initialised && getContext() != null) {
-                Toast.makeText(requireContext(),
-                        isChecked ? "Calendar sync enabled" : "Calendar sync disabled",
-                        Toast.LENGTH_SHORT).show();
+            if (initialized && getContext() != null && isChecked) {
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                    runCalendarTest();
+                } else {
+                    requestCalendarPermissionsLauncher.launch(new String[]{
+                            Manifest.permission.READ_CALENDAR,
+                            Manifest.permission.WRITE_CALENDAR
+                    });
+                }
             }
         });
     }
@@ -176,6 +187,17 @@ public class HardLimitsFragment extends Fragment {
      * band, so this only prevents a blank frame on first paint.
      */
     private void wireThemePreview(@NonNull View view) {
+    private void runCalendarTest() {
+        try {
+            calendarManager.logUpcomingWeekEvents();
+            calendarManager.blockRecoveryTime("Mandatory Brain Rest", 4);
+            android.util.Log.d("CapCoachAPI", "Calendar automated test complete. Check Logcat.");
+        } catch (Exception e) {
+            android.util.Log.e("CapCoachAPI", "Calendar Test failed: " + e.getMessage());
+        }
+    }
+
+    private void wireThemePreview() {
         if (dinoGuardAvatar != null) {
             loadDinoSprite(dinoGuardAvatar, R.drawable.dino_happy);
         }
@@ -221,14 +243,8 @@ public class HardLimitsFragment extends Fragment {
 
             Toast.makeText(requireContext(),
                     "Baseline saved", Toast.LENGTH_SHORT).show();
-
-            // Screen 2 is the end of the Week 1 flow. Role 1 routes to the Dashboard here.
         });
     }
-
-    // ==================================================================
-    //  Rendering
-    // ==================================================================
 
     private void refreshAll() {
         int study = (int) studySlider.getValue();
@@ -263,18 +279,15 @@ public class HardLimitsFragment extends Fragment {
         LoadZones.WorkBand band = LoadZones.workBand(work);
         int accent = color(workHoursValue, band.colorRes);
 
-        // Big number colour
         workHoursValue.setTextColor(accent);
 
-        // Slider track + thumb follow the same colour so the control matches the warning.
-        workSlider.setTrackActiveTintList(
-                ContextCompat.getColorStateList(requireContext(), band.colorRes));
-        workSlider.setThumbTintList(
-                ContextCompat.getColorStateList(requireContext(), band.colorRes));
-        workSlider.setHaloTintList(
-                ContextCompat.getColorStateList(requireContext(), band.colorRes));
+        android.content.res.ColorStateList tintList = ContextCompat.getColorStateList(requireContext(), band.colorRes);
+        if (tintList != null) {
+            workSlider.setTrackActiveTintList(tintList);
+            workSlider.setThumbTintList(tintList);
+            workSlider.setHaloTintList(tintList);
+        }
 
-        // Status pill
         if (workStatusLabel != null) {
             workStatusLabel.setText(band.statusLabelRes);
             workStatusLabel.setTextColor(accent);
@@ -283,7 +296,6 @@ public class HardLimitsFragment extends Fragment {
             workStatusDot.setBackgroundResource(dotFor(band));
         }
 
-        // Protected badge
         if (workBadge != null) {
             workBadge.setText(work <= LoadZones.WORK_CAP_HOURS
                     ? getString(R.string.work_badge_prefix) + work + "h"
@@ -291,13 +303,11 @@ public class HardLimitsFragment extends Fragment {
             workBadge.setTextColor(accent);
         }
 
-        // Warning callout
         if (workWarningText != null) {
             workWarningText.setText(band.warningTextRes);
         }
-        if (workWarningIcon != null) {
-            workWarningIcon.setImageTintList(
-                    ContextCompat.getColorStateList(requireContext(), band.colorRes));
+        if (workWarningIcon != null && tintList != null) {
+            workWarningIcon.setImageTintList(tintList);
         }
         if (workWarningBox != null) {
             workWarningBox.setBackgroundResource(
@@ -306,7 +316,6 @@ public class HardLimitsFragment extends Fragment {
                             : R.drawable.bg_surface_low);
         }
 
-        // Dino speech + avatar + status dot
         if (dinoGuardSpeech != null) {
             dinoGuardSpeech.setText(band == LoadZones.WorkBand.SAFE
                     ? getString(band.dinoSpeechRes, work)
@@ -336,25 +345,25 @@ public class HardLimitsFragment extends Fragment {
             zoneDot.setBackgroundResource(dotFor(result.zone));
         }
         if (totalCapacityIcon != null) {
-            totalCapacityIcon.setImageTintList(
-                    ContextCompat.getColorStateList(requireContext(), result.zone.colorRes));
+            android.content.res.ColorStateList tintList = ContextCompat.getColorStateList(requireContext(), result.zone.colorRes);
+            if (tintList != null) {
+                totalCapacityIcon.setImageTintList(tintList);
+            }
         }
         if (totalCapacityBanner != null) {
-            // GradientDrawable lets us recolour the 1dp border per zone.
             android.graphics.drawable.Drawable bg = totalCapacityBanner.getBackground();
             if (bg instanceof android.graphics.drawable.GradientDrawable) {
                 ((android.graphics.drawable.GradientDrawable) bg.mutate())
-                        .setStroke(dp(1), accent);
+                        .setStroke(dp1(), accent);
             }
         }
     }
 
-    // ==================================================================
-    //  Small helpers
-    // ==================================================================
-
     private int color(@Nullable View anchor, @ColorRes int colorRes) {
-        android.content.Context ctx = anchor != null ? anchor.getContext() : getContext();
+        Context ctx = anchor != null ? anchor.getContext() : getContext();
+        if (ctx == null) {
+            ctx = requireContext();
+        }
         return ContextCompat.getColor(ctx, colorRes);
     }
 
@@ -384,20 +393,6 @@ public class HardLimitsFragment extends Fragment {
         }
     }
 
-    /**
-     * Maps the work-hour band to the Dino sprite.
-     *
-     * <p>Uses the real prototype art:
-     * <ul>
-     *   <li>{@code dino_happy}    - thriving_big - green, healthy</li>
-     *   <li>{@code dino_steady}   - steady_big   - amber, holding on</li>
-     *   <li>{@code dino_overload} - overload_big - red, strained</li>
-     * </ul>
-     *
-     * <p>{@code dino_dead} (dead_big) is reserved for a fully burnt-out state - it is
-     * available but not wired to a band yet, because the prototype's work slider only
-     * had three thresholds.
-     */
     @androidx.annotation.DrawableRes
     private static int avatarFor(LoadZones.WorkBand band) {
         switch (band) {
@@ -411,7 +406,7 @@ public class HardLimitsFragment extends Fragment {
         }
     }
 
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
+    private int dp1() {
+        return Math.round(getResources().getDisplayMetrics().density);
     }
 }
