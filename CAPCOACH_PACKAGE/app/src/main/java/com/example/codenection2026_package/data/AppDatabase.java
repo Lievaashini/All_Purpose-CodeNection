@@ -23,10 +23,15 @@ import com.example.codenection2026_package.model.Task;
  * references are used exactly as their author wrote them and are not modified.
  *
  * <p>Access is through {@link #get(Context)} so the whole app shares one instance.
+ *
+ * <p><b>Version 2.</b> {@code tasks} gained the {@code priority} and
+ * {@code deferral_hours} columns, which the Add Activity sheet now collects from the
+ * user so the scheduler can protect urgent work. Version 1 was never released, so the
+ * existing {@code fallbackToDestructiveMigration()} below is still the whole migration.
  */
 @Database(
         entities = {Task.class, Category.class, Biometrics.class},
-        version = 1,
+        version = 2,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {

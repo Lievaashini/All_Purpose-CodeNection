@@ -6,8 +6,9 @@
   Inflated seven times by DashboardFragment into @id/weekStrip. The weight of 1
   inside that weightSum 7 row is what makes the seven cells share the width.
   The letter, number and dot are all repainted by the fragment: the selected
-  cell swaps bg_day_pill_idle for bg_day_pill_active, drops its text to
-  @color/bg_dark and relabels the letter as "TODAY".
+  cell swaps bg_day_pill_idle for bg_day_pill_active and drops its text to
+  @color/on_brand. Only the cell that is genuinely today is relabelled "TODAY" -
+  selecting any other day highlights it but keeps its own day letter.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="0dp"

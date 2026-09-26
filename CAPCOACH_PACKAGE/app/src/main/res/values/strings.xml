@@ -162,6 +162,7 @@
     <string name="cd_add_task">Add a new task or shift</string>
     <string name="cd_mark_task_done">Mark task done</string>
     <string name="dash_no_tasks">No tasks yet. Tap Add Task to create one.</string>
+    <string name="dash_saved_other_week">Saved for %1$s, which is outside this week.</string>
 
     <!-- Triage sheet (opened by the dashboard's Rebalance button) -->
     <string name="triage_eyebrow">AUTONOMOUS ML TRIAGE</string>
@@ -216,13 +217,23 @@
     <string name="addtask_academic_default">Read Ch. 4 Neurobiology</string>
     <string name="cd_dictate_task">Dictate the task name</string>
     <string name="addtask_category_label">CATEGORY</string>
-    <!-- Category names, stored in the Category entity via CategoryDao.insert(). -->
-    <string name="cat_employment">Employment / Logistics Dept</string>
-    <string name="cat_neuro201">NEUR 201 - Neurobiology</string>
-    <string name="cat_cs101">CS 101 - Algorithms</string>
-    <string name="cat_econ102">ECON 102 - Macroeconomics</string>
-    <string name="cat_phys210">PHYS 210 - Electromagnetism</string>
-    <string name="cat_personal">Personal Recovery &amp; Health</string>
+    <!--
+      The five baseline categories. These are the labels shown in the spinner;
+      CategoryRepository holds the canonical names that are actually written to the
+      categories table, and the two lists are in the same order.
+    -->
+    <string name="cat_academic">Academic</string>
+    <string name="cat_work">Work</string>
+    <string name="cat_errand">Errand</string>
+    <string name="cat_social">Social</string>
+    <string name="cat_cocurricular">Co-curricular</string>
+    <!-- Priority is chosen by the user, not inferred: the scheduler protects a HIGH task. -->
+    <string name="addtask_priority_label">PRIORITY</string>
+    <string name="addtask_priority_hint">Protects urgent work</string>
+    <string name="addtask_priority_high">High</string>
+    <string name="addtask_priority_med">Med</string>
+    <string name="addtask_priority_low">Low</string>
+    <string name="cd_priority_group">Task priority</string>
     <string name="addtask_date_label">Date</string>
     <string name="addtask_start_label">START TIME</string>
     <string name="addtask_end_label">END TIME</string>
@@ -232,22 +243,36 @@
     <string name="addtask_cap_footnote">Protected Shift - Never deferred by algorithm.</string>
     <string name="addtask_buffer_label">COGNITIVE LOAD &amp; BUFFER</string>
     <string name="addtask_buffer_eligible">Eligible for Auto-Shed</string>
-    <string name="addtask_buffer_deferral">Deferral</string>
-    <string name="addtask_buffer_deferral_value">48h max</string>
-    <string name="addtask_buffer_priority">Priority</string>
-    <string name="addtask_buffer_priority_value">Med</string>
+    <!-- Deferral is a choice, not a constant: the user decides how late it may slip. -->
+    <string name="addtask_buffer_deferral">DEFERRAL WINDOW</string>
+    <string name="addtask_deferral_hint">How late the scheduler may push this activity.</string>
+    <string name="addtask_deferral_none">Locked - never deferred</string>
+    <string name="addtask_deferral_12">Up to 12h late</string>
+    <string name="addtask_deferral_24">Up to 24h late</string>
+    <string name="addtask_deferral_48">Up to 48h late</string>
+    <string name="addtask_deferral_72">Up to 72h late</string>
+    <!-- Spoken back by the Dino line under the sheet. -->
+    <string name="addtask_deferral_summary_none">a locked, never-deferred task</string>
+    <string name="addtask_deferral_summary_hours">a %1$dh deferral window</string>
     <string name="addtask_buffer_effort">Effort</string>
     <string name="addtask_buffer_effort_value">45m</string>
     <string name="addtask_dino_guard_label">CapCoach Dino Guard</string>
     <string name="addtask_dino_guard_speech">"Locking shift. 0% chance of study-hall collisions."</string>
     <string name="addtask_dino_scheduler_label">CapCoach ML Scheduler</string>
     <string name="addtask_dino_scheduler_speech">"Shedding buffer allocated: 48h elasticity active for neuro exam prep."</string>
+    <!-- Echoes the two values the user just picked, so the sheet proves it read them. -->
+    <string name="addtask_dino_scheduler_speech_fmt">Shedding buffer: %1$s. Priority %2$s is held back from the shed list.</string>
     <string name="addtask_save_work">Save &amp; Shield Shift</string>
     <string name="addtask_save_academic">Save Academic Task</string>
+    <string name="addtask_save_category">Save %1$s Task</string>
     <string name="addtask_cancel">Cancel</string>
     <string name="addtask_saved_work">Work shift saved and locked against auto-cancellation!</string>
     <string name="addtask_saved_academic">Flexible academic task saved and queued for triage!</string>
+    <string name="addtask_saved_category">%1$s task saved and queued for triage!</string>
     <string name="addtask_save_failed">Could not save the task. Please try again.</string>
+    <string name="addtask_subtitle_flexible_category">Flexible %1$s Mode Active</string>
+    <string name="addtask_name_hint_generic">e.g., Grocery run or Society meeting</string>
+    <string name="addtask_name_required">Give the activity a name before saving.</string>
 
     <!-- ==================================================================
          SCREEN 5 - BIOMETRICS  (port of Prototype/biometrics.html)

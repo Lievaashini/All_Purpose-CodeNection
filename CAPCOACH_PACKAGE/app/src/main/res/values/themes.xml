@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   LIGHT-SIDE VALUES  (res/values/)
 
@@ -104,6 +104,31 @@
         <item name="trackColorInactive">@color/surface_container_highest</item>
         <item name="haloColor">@color/brand_mint_glow</item>
         <item name="android:minHeight">@dimen/touch_target_min</item>
+    </style>
+
+    <!--
+      One segment of the priority selector in sheet_add_task.xml.
+
+      Text, fill and outline are all colour state lists so the chosen segment flips
+      to solid mint with dark text while the other two stay quiet outlines. A plain
+      colour would leave all three looking identical and the choice invisible.
+    -->
+    <style name="PrioritySegment" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">@dimen/touch_target_min</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">@dimen/space_xxs</item>
+        <item name="android:paddingEnd">@dimen/space_xxs</item>
+        <item name="android:textSize">@dimen/text_micro</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:textColor">@color/priority_segment_text</item>
+        <item name="backgroundTint">@color/priority_segment_bg</item>
+        <item name="strokeColor">@color/priority_segment_stroke</item>
+        <item name="strokeWidth">@dimen/stroke_thin</item>
+        <item name="cornerRadius">@dimen/radius_sm</item>
+        <item name="iconTint">@color/priority_segment_text</item>
     </style>
 
 </resources>

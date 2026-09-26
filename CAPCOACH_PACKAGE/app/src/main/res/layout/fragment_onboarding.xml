@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 1 - ONBOARDING  (port of prototype/onboarding.html)
 
@@ -165,13 +165,17 @@
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- Mic button. Opens the voice companion (Role 4 wires SpeechRecognizer). -->
+            <!-- Mic button. Opens the voice companion (Role 4 wires SpeechRecognizer).
+                 bg_mic_button is the same solid light-mint disc the companion screen and
+                 the voice dialog use. It must NOT be bg_circle_mint: that drawable is the
+                 18%-alpha ambient glow, which reads as a dark smudge in night mode and
+                 left the mic glyph invisible against its own background. -->
             <FrameLayout
                 android:id="@+id/micButton"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_marginStart="@dimen/space_lg"
-                android:background="@drawable/bg_circle_mint"
+                android:background="@drawable/bg_mic_button"
                 android:clickable="true"
                 android:contentDescription="@string/cd_mic_button"
                 android:focusable="true">

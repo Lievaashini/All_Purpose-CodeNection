@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 4 - ADD TASK bottom sheet (port of Prototype/add-task.html)
 
@@ -13,6 +13,14 @@
   Both mode cards are present in the layout at all times; Java only swaps their
   backgrounds, icon plates, checks and badges, exactly like the prototype's
   className rewrites.
+
+  Two controls the prototype showed as static text are real inputs here:
+
+    @id/priorityGroup   High / Med / Low. Always visible - a work shift carries a
+                        priority too - and the scheduler protects a HIGH task.
+    @id/deferralSpinner How late the scheduler may push the task. Lives in the
+                        buffer panel, which only sheddable tasks can see, because a
+                        protected shift can never be deferred.
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -476,6 +484,70 @@
                 app:tint="@color/text_muted_dark" />
         </FrameLayout>
 
+        <!-- ============ Priority ============
+             Always visible, whatever the classification: a work shift and a study
+             task both carry the user's own priority, and the scheduler protects a
+             HIGH task from auto-shedding rather than guessing from the category. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/addtask_priority_label"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/addtask_priority_hint"
+                android:textColor="@color/text_muted_dark" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/priorityGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            android:contentDescription="@string/cd_priority_group"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/priorityHigh"
+                style="@style/PrioritySegment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/addtask_priority_high" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/priorityMed"
+                style="@style/PrioritySegment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_xs"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="@string/addtask_priority_med" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/priorityLow"
+                style="@style/PrioritySegment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_xs"
+                android:layout_weight="1"
+                android:text="@string/addtask_priority_low" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
         <!-- ============ Date and time ============ -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -674,7 +746,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- ============ Panel 2: cognitive buffer (academic mode only) ============ -->
+        <!-- ============ Panel 2: cognitive buffer (sheddable modes only) ============ -->
         <LinearLayout
             android:id="@+id/panelCognitiveBuffer"
             android:layout_width="match_parent"
@@ -716,69 +788,65 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_sm"
                 android:background="@drawable/bg_time_card"
-                android:baselineAligned="false"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:padding="@dimen/space_sm">
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
+                    android:text="@string/addtask_buffer_deferral"
+                    android:textColor="@color/text_muted_dark" />
 
-                    <TextView
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/addtask_buffer_deferral"
-                        android:textColor="@color/text_muted_dark" />
-
-                    <TextView
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/addtask_buffer_deferral_value"
-                        android:textColor="@color/text_primary_dark"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <!-- How late the scheduler may push this task, chosen by the user. -->
+                <FrameLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
+                    android:layout_marginTop="@dimen/space_xs">
 
-                    <TextView
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/addtask_buffer_priority"
-                        android:textColor="@color/text_muted_dark" />
+                    <Spinner
+                        android:id="@+id/deferralSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/touch_target_min"
+                        android:background="@drawable/bg_input"
+                        android:paddingEnd="40dp" />
 
-                    <TextView
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/addtask_buffer_priority_value"
-                        android:textColor="@color/brand_gold_container"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="@dimen/space_md"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_expand_more"
+                        app:tint="@color/text_muted_dark" />
+                </FrameLayout>
+
+                <TextView
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xs"
+                    android:text="@string/addtask_deferral_hint"
+                    android:textColor="@color/text_dim_dark" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/stroke_thin"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:background="@color/divider_dark" />
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
                         style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:text="@string/addtask_buffer_effort"
                         android:textColor="@color/text_muted_dark" />
 
@@ -786,7 +854,6 @@
                         style="@style/Text.MicroLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
                         android:text="@string/addtask_buffer_effort_value"
                         android:textColor="@color/brand_mint"
                         android:textStyle="bold" />

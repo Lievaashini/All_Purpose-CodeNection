@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.data.TaskRepository;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
@@ -25,11 +26,13 @@ import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.widget.LoadChartView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -38,67 +41,40 @@ import java.util.Set;
  * <p>One scrolling feed plus four fixed pieces of chrome: the header, the rebalance
  * toast, the floating Add Task button, and the shared bottom navigation bar.
  *
- * <p><b>DATA ACCESS IS DELIBERATELY ISOLATED.</b> The Room database class is being
- * written by another agent, so this screen talks to {@link TaskSource} and nothing
- * else. The default implementation is a stub: it returns no tasks, which is exactly
- * the state a first launch is in, so the screen renders its empty state honestly
- * rather than pretending to have data it cannot load. When AppDatabase lands, swap
- * the stub for a real implementation and nothing else in this class changes.
+ * <p><b>The week strip is the real week.</b> The prototype hardcodes Mon 14 to Sun 20
+ * with Wednesday marked today. This screen builds the seven cells from the device
+ * calendar instead, so the numbers are the actual dates and exactly one cell - the
+ * real today - is labelled TODAY. Tapping any other cell selects that day and nothing
+ * else: it is not relabelled as today, because it is not one.
  *
- * <p>NEW FILE - additive. Nothing existing is modified.
+ * <p><b>The feed is the real feed.</b> Rows come from Room through
+ * {@link TaskRepository}, filtered to the selected day's date, so a task saved from
+ * the Add Activity sheet appears on the day it was filed under. {@link TaskRepository}
+ * owns the background thread Room requires and answers on the main thread; until the
+ * first answer arrives the feed shows its "no tasks yet" empty state, which is also
+ * what a genuinely free day looks like.
+ *
+ * <p>The capacity card and the weekly load chart still run on the prototype's demo
+ * percentages - the biometrics model that will supply them is not wired yet.
  */
 public class DashboardFragment extends Fragment {
-
-    /**
-     * Swap-in point for AppDatabase once it lands.
-     *
-     * <p>Room wiring goes here: the real implementation should be
-     * {@code AppDatabase.getInstance(context).taskDao().getAll()} for {@link #loadAll()}
-     * and {@code taskDao().insert(task)} for {@link #save(Task)}. Both DAO calls are
-     * blocking, so the real implementation must run them off the main thread.
-     */
-    private interface TaskSource {
-        List<Task> loadAll();
-
-        long save(Task task);
-    }
-
-    /**
-     * Placeholder source. Returns an empty feed so the dashboard shows its
-     * "no tasks yet" empty state on a fresh install.
-     */
-    private static final TaskSource EMPTY_SOURCE = new TaskSource() {
-        @Override
-        public List<Task> loadAll() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public long save(Task task) {
-            // TODO Room wiring: replace with AppDatabase.getInstance(context).taskDao().insert(task).
-            return -1L;
-        }
-    };
 
     /** Sleep figure shown in the telemetry line. The Room layer will supply the real one. */
     private static final String DEMO_SLEEP_HOURS = "7.8h";
 
-    // Week strip: the prototype shows Mon 14 through Sun 20 with today on Wednesday.
-    private static final String[] DAY_LETTERS = {"M", "T", "W", "T", "F", "S", "S"};
-    private static final String[] DAY_NAMES = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-    private static final int[] DAY_NUMBERS = {14, 15, 16, 17, 18, 19, 20};
-
     /**
-     * The prototype's seven charted loads, in day order. The weekly chart draws all
-     * seven; the capacity card reads whichever one the selected day points at.
+     * The prototype's seven charted loads, in week order from Monday. Demo data:
+     * nothing computes these yet.
      */
     private static final float[] WEEK_LOADS = {65f, 50f, 40f, 75f, 88f, 25f, 20f};
 
-    private static final int TODAY_INDEX = 2;
     private static final int CRASH_CEILING_PERCENT = 90;
     private static final long TOAST_VISIBLE_MS = 4200L;
 
-    private TaskSource taskSource = EMPTY_SOURCE;
+    /** Narrow day letters, Monday first. Matches the prototype's M T W T F S S. */
+    private static final String[] DAY_LETTERS = {"M", "T", "W", "T", "F", "S", "S"};
+
+    private static final String ISO_PATTERN = "yyyy-MM-dd";
 
     private TextView stateLabel;
     private View stateDot;
@@ -107,6 +83,7 @@ public class DashboardFragment extends Fragment {
     private TextView headline;
     private TextView telemetry;
     private TextView capLabel;
+    private TextView monthLabel;
     private TextView weekLabel;
     private TextView currentDayTitle;
     private TextView taskCounter;
@@ -116,11 +93,32 @@ public class DashboardFragment extends Fragment {
     private LoadChartView loadChart;
     private View rebalanceToast;
 
-    /** 0 = Mon ... 6 = Sun. The prototype starts on Wednesday. */
-    private int selectedDay = TODAY_INDEX;
+    // ---- The current week, built from the device calendar in buildWeek() ----
+
+    /** ISO dates ("yyyy-MM-dd"), Monday first. The DAO queries on exactly these. */
+    private final String[] weekDates = new String[7];
+    private final String[] dayNames = new String[7];
+    private final int[] dayNumbers = new int[7];
+    private final int[] weekOfYear = new int[7];
+    private final String[] monthTitles = new String[7];
+
+    /** 0 = Mon ... 6 = Sun. Today's own cell. */
+    private int todayIndex;
+
+    /** The cell drawn amber: the heaviest load of the week in the demo data. */
+    private int heavyIndex = 4;
+
+    /** 0 = Mon ... 6 = Sun. The cell the user is looking at; starts on today. */
+    private int selectedDay;
 
     /** Load shown in the capacity card, in percent. Tracks the selected day. */
-    private int selectedLoad = (int) WEEK_LOADS[TODAY_INDEX];
+    private int selectedLoad;
+
+    /** The chip the user last tapped, so a reload keeps the same filter applied. */
+    @Nullable
+    private String activeFilter;
+
+    private int activeFilterChip = R.id.filterAll;
 
     private final List<View> taskRows = new ArrayList<>();
     private final Set<View> doneRows = new HashSet<>();
@@ -157,6 +155,7 @@ public class DashboardFragment extends Fragment {
             Glide.with(this).load(R.drawable.dino_happy).into(headerDino);
         }
 
+        buildWeek();
         setupWeekStrip();
         setupLoadChart();
         renderCapLabel();
@@ -164,9 +163,12 @@ public class DashboardFragment extends Fragment {
         renderCapacityCard();
         renderDays();
 
-        setupTaskFeed();
+        // Paints "All" as the selected chip on entry, so it is never blank on arrival.
         setupFilters();
         setupActions(view);
+
+        // Rows arrive asynchronously, so the empty state is on screen until they do.
+        reloadTasks();
     }
 
     @Override
@@ -183,6 +185,7 @@ public class DashboardFragment extends Fragment {
         headline = null;
         telemetry = null;
         capLabel = null;
+        monthLabel = null;
         weekLabel = null;
         currentDayTitle = null;
         taskCounter = null;
@@ -206,6 +209,7 @@ public class DashboardFragment extends Fragment {
         headline = view.findViewById(R.id.headline);
         telemetry = view.findViewById(R.id.telemetry);
         capLabel = view.findViewById(R.id.capLabel);
+        monthLabel = view.findViewById(R.id.monthLabel);
         weekLabel = view.findViewById(R.id.weekLabel);
         currentDayTitle = view.findViewById(R.id.currentDayTitle);
         taskCounter = view.findViewById(R.id.taskCounter);
@@ -214,6 +218,53 @@ public class DashboardFragment extends Fragment {
         tasksList = view.findViewById(R.id.tasksList);
         loadChart = view.findViewById(R.id.loadChart);
         rebalanceToast = view.findViewById(R.id.rebalanceToast);
+    }
+
+    /**
+     * Builds the seven days of the week the device is currently in, Monday first.
+     *
+     * <p>Everything the strip and the header show comes from here: the ISO date the
+     * feed is queried with, the day numbers, the month title and the week number.
+     * The prototype's fixed 14-20 is gone, which is what lets a task saved today be
+     * found on today's cell.
+     */
+    private void buildWeek() {
+        SimpleDateFormat iso = new SimpleDateFormat(ISO_PATTERN, Locale.US);
+        SimpleDateFormat shortName = new SimpleDateFormat("EEE", Locale.US);
+        SimpleDateFormat monthTitle = new SimpleDateFormat("MMMM yyyy", Locale.US);
+
+        Calendar cursor = Calendar.getInstance();
+        // Calendar.SUNDAY is 1 and Calendar.SATURDAY is 7, so this shifts the week to
+        // start on Monday: Mon -> 0, Tue -> 1, ... Sun -> 6.
+        todayIndex = (cursor.get(Calendar.DAY_OF_WEEK) + 5) % 7;
+        cursor.add(Calendar.DAY_OF_YEAR, -todayIndex);
+
+        for (int i = 0; i < 7; i++) {
+            Date date = cursor.getTime();
+            weekDates[i] = iso.format(date);
+            dayNames[i] = shortName.format(date);
+            dayNumbers[i] = cursor.get(Calendar.DAY_OF_MONTH);
+            weekOfYear[i] = cursor.get(Calendar.WEEK_OF_YEAR);
+            monthTitles[i] = monthTitle.format(date);
+            cursor.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        heavyIndex = heaviestLoadIndex();
+
+        // Land on today, which is also what the capacity card starts on.
+        selectedDay = todayIndex;
+        selectedLoad = (int) WEEK_LOADS[selectedDay];
+    }
+
+    /** @return the index of the largest demo load, so the amber bar is never a guess */
+    private static int heaviestLoadIndex() {
+        int heaviest = 0;
+        for (int i = 1; i < WEEK_LOADS.length; i++) {
+            if (WEEK_LOADS[i] > WEEK_LOADS[heaviest]) {
+                heaviest = i;
+            }
+        }
+        return heaviest;
     }
 
     /**
@@ -227,7 +278,7 @@ public class DashboardFragment extends Fragment {
         weekStrip.removeAllViews();
 
         LayoutInflater inflater = LayoutInflater.from(requireContext());
-        for (int i = 0; i < DAY_NUMBERS.length; i++) {
+        for (int i = 0; i < weekDates.length; i++) {
             View pill = inflater.inflate(R.layout.item_day_pill, weekStrip, false);
             final int index = i;
             pill.setOnClickListener(v -> selectDay(index));
@@ -239,24 +290,34 @@ public class DashboardFragment extends Fragment {
      * Hands the seven daily loads to the chart.
      *
      * <p>LoadChartView draws straight to a Canvas because XML cannot express a
-     * percentage height against a value range. Index 2 is today (drawn mint with its
-     * value label) and index 4 is the heavy day (drawn amber).
+     * percentage height against a value range. The mint bar follows the selected day
+     * and the amber bar is the week's heaviest, the same two signals the strip shows.
      */
     private void setupLoadChart() {
         if (loadChart == null) {
             return;
         }
         loadChart.setCeilingPercent(CRASH_CEILING_PERCENT);
-        loadChart.setLoads(WEEK_LOADS.clone(), DAY_LETTERS.clone(), TODAY_INDEX, 4);
+        renderChart();
+    }
+
+    private void renderChart() {
+        if (loadChart == null) {
+            return;
+        }
+        loadChart.setLoads(WEEK_LOADS.clone(), DAY_LETTERS.clone(), selectedDay, heavyIndex);
     }
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */
     private void selectDay(int index) {
         selectedDay = index;
         selectedLoad = (int) WEEK_LOADS[index];
+        renderChart();
+        renderWeekLabel();
         renderDays();
         renderCapacityCard();
         renderScheduleTitle();
+        reloadTasks();
     }
 
     private void renderDays() {
@@ -268,11 +329,13 @@ public class DashboardFragment extends Fragment {
         int idleBg = R.drawable.bg_day_pill_idle;
         int activeText = ContextCompat.getColor(requireContext(), R.color.on_brand);
         int idleLetter = ContextCompat.getColor(requireContext(), R.color.text_dim_dark);
+        int todayLetter = ContextCompat.getColor(requireContext(), R.color.brand_mint);
         int idleNumber = ContextCompat.getColor(requireContext(), R.color.text_primary_dark);
 
         for (int i = 0; i < weekStrip.getChildCount(); i++) {
             View pill = weekStrip.getChildAt(i);
             boolean active = i == selectedDay;
+            boolean today = i == todayIndex;
 
             TextView letter = pill.findViewById(R.id.dayLetter);
             TextView number = pill.findViewById(R.id.dayNumber);
@@ -281,35 +344,44 @@ public class DashboardFragment extends Fragment {
             pill.setBackgroundResource(active ? activeBg : idleBg);
 
             if (letter != null) {
-                letter.setText(active
-                        ? getString(R.string.dash_today)
-                        : DAY_LETTERS[i]);
-                letter.setTextColor(active ? activeText : idleLetter);
-                letter.setTypeface(null, active
+                // Only the real today says TODAY. Any other cell keeps its own letter,
+                // so selecting Thursday cannot turn Thursday into today.
+                letter.setText(today ? getString(R.string.dash_today) : DAY_LETTERS[i]);
+                letter.setTextColor(active ? activeText : (today ? todayLetter : idleLetter));
+                letter.setTypeface(null, active || today
                         ? android.graphics.Typeface.BOLD
                         : android.graphics.Typeface.NORMAL);
             }
             if (number != null) {
-                number.setText(String.valueOf(DAY_NUMBERS[i]));
+                number.setText(String.valueOf(dayNumbers[i]));
                 number.setTextColor(active ? activeText : idleNumber);
             }
             if (dot != null) {
-                // The prototype flags the heaviest day of the week with an amber dot.
-                boolean heavy = i == 4;
-                dot.setBackgroundResource(active
-                        ? (heavy ? R.drawable.dot_amber : R.drawable.dot_mint)
-                        : (heavy ? R.drawable.dot_amber : R.drawable.dot_idle));
+                dot.setBackgroundResource(dotFor(i, active, today));
             }
         }
+    }
 
-        renderScheduleTitle();
+    /**
+     * The strip's dots, in priority order: the week's heaviest day keeps its amber
+     * warning whatever else is going on, today and the selected cell get mint, and
+     * every other day gets the idle grey.
+     */
+    private int dotFor(int index, boolean active, boolean today) {
+        if (index == heavyIndex) {
+            return R.drawable.dot_amber;
+        }
+        if (today || active) {
+            return R.drawable.dot_mint;
+        }
+        return R.drawable.dot_idle;
     }
 
     private void renderScheduleTitle() {
         if (currentDayTitle == null) {
             return;
         }
-        String day = DAY_NAMES[selectedDay] + " " + DAY_NUMBERS[selectedDay];
+        String day = dayNames[selectedDay] + " " + dayNumbers[selectedDay];
         currentDayTitle.setText(getString(R.string.dash_schedule_title, day));
     }
 
@@ -323,13 +395,14 @@ public class DashboardFragment extends Fragment {
         }
     }
 
+    /** Month and week number of the selected day, so the header follows the strip. */
     private void renderWeekLabel() {
-        if (weekLabel == null) {
-            return;
+        if (monthLabel != null) {
+            monthLabel.setText(monthTitles[selectedDay]);
         }
-        Calendar calendar = Calendar.getInstance();
-        int week = calendar.get(Calendar.WEEK_OF_YEAR);
-        weekLabel.setText(getString(R.string.dash_week_number, week));
+        if (weekLabel != null) {
+            weekLabel.setText(getString(R.string.dash_week_number, weekOfYear[selectedDay]));
+        }
     }
 
     /**
@@ -407,21 +480,41 @@ public class DashboardFragment extends Fragment {
     // Task feed
     // ==================================================================
 
-    private void setupTaskFeed() {
+    /**
+     * Loads the selected day's rows and paints them.
+     *
+     * <p>The query runs on {@link TaskRepository}'s worker thread and comes back on
+     * the main thread, so this can be called from a click handler.
+     */
+    private void reloadTasks() {
+        if (tasksList == null || weekDates[selectedDay] == null) {
+            return;
+        }
+        TaskRepository.loadByDate(requireContext(), weekDates[selectedDay], tasks -> {
+            if (!isAdded() || tasksList == null) {
+                return;
+            }
+            renderTaskFeed(tasks);
+        });
+    }
+
+    private void renderTaskFeed(@Nullable List<Task> tasks) {
         if (tasksList == null) {
             return;
         }
         tasksList.removeAllViews();
+        taskRows.clear();
+        doneRows.clear();
 
-        List<Task> tasks = taskSource.loadAll();
-        if (tasks == null) {
-            tasks = Collections.emptyList();
-        }
-
-        if (tasks.isEmpty()) {
-            // Honest empty state: the feed is unpopulated, so say so.
+        if (tasks == null || tasks.isEmpty()) {
+            // Honest empty state: this day genuinely has nothing filed under it.
             showEmptyState();
             return;
+        }
+
+        tasksList.setVisibility(View.VISIBLE);
+        if (emptyState != null) {
+            emptyState.setVisibility(View.GONE);
         }
 
         LayoutInflater inflater = LayoutInflater.from(requireContext());
@@ -429,7 +522,8 @@ public class DashboardFragment extends Fragment {
             tasksList.addView(inflateTaskRow(inflater, task));
         }
 
-        updateCounterAndChips();
+        // Keep whatever chip was active across the refresh.
+        applyFilter(activeFilter, activeFilterChip);
     }
 
     private void showEmptyState() {
@@ -571,6 +665,10 @@ public class DashboardFragment extends Fragment {
             return;
         }
 
+        // Remembered so a reload after a save or a day change keeps the same chip.
+        activeFilter = wanted;
+        activeFilterChip = selectedChipId;
+
         int activeBg = R.drawable.bg_chip_active;
         int idleBg = R.drawable.bg_chip_idle;
         int activeText = ContextCompat.getColor(requireContext(), R.color.on_brand);
@@ -618,7 +716,41 @@ public class DashboardFragment extends Fragment {
     }
 
     private void openAddTask() {
-        new AddTaskSheetFragment().show(getChildFragmentManager(), "add_task");
+        AddTaskSheetFragment sheet = new AddTaskSheetFragment();
+        // A saved row has to show up without leaving the screen, so the sheet reports
+        // back the date it filed the task under.
+        sheet.setOnTaskSavedListener(this::onTaskSaved);
+        sheet.show(getChildFragmentManager(), AddTaskSheetFragment.TAG);
+    }
+
+    /**
+     * The sheet wrote a row. If it belongs to a day of the week on screen, jump to
+     * that day so the new task is visible immediately. A date further out than this
+     * week is not silently swallowed: the toast says where it landed.
+     */
+    private void onTaskSaved(@NonNull String isoDate) {
+        int index = indexOfWeekDate(isoDate);
+        if (index >= 0) {
+            if (index != selectedDay) {
+                selectDay(index);
+            } else {
+                reloadTasks();
+            }
+            return;
+        }
+        Toast.makeText(requireContext(),
+                getString(R.string.dash_saved_other_week, isoDate),
+                Toast.LENGTH_LONG).show();
+        reloadTasks();
+    }
+
+    private int indexOfWeekDate(@NonNull String isoDate) {
+        for (int i = 0; i < weekDates.length; i++) {
+            if (isoDate.equals(weekDates[i])) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     // ==================================================================
@@ -668,4 +800,3 @@ public class DashboardFragment extends Fragment {
         }
     }
 }
-

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Text colour for one segment of the priority selector (sheet_add_task.xml).
+  Checked = solid mint fill behind it, so the label has to go dark; unchecked =
+  quiet outline, so the label stays muted. Without the checked state the user
+  cannot see which priority is selected.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/on_brand" android:state_checked="true" />
+    <item android:color="@color/text_muted_dark" />
+</selector>
