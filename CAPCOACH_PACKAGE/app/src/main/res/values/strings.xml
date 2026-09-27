@@ -308,7 +308,12 @@
     <string name="harvest_subtitle">Look what grew overnight on your tree.</string>
     <string name="harvest_tooltip">1 Apple = 1 Task completed yesterday</string>
     <string name="harvest_tooltip_badge">+%1$d</string>
-    <string name="harvest_dino_bubble">"4 ripe apples! Yum!"</string>
+    <!-- Both of these name the size of the crop, so both follow APPLES_GROWN. The
+         singular matters: a one-task day must not read "Collect 1 Apples". -->
+    <plurals name="harvest_dino_bubble_apples">
+        <item quantity="one">"1 ripe apple! Yum!"</item>
+        <item quantity="other">"%1$d ripe apples! Yum!"</item>
+    </plurals>
     <string name="harvest_yesterday">Yesterday</string>
     <string name="harvest_yesterday_pct">100%</string>
     <string name="harvest_yesterday_more">+2 more logged</string>
@@ -320,7 +325,10 @@
     <string name="harvest_milestone_start">0 Mon</string>
     <string name="harvest_milestone_mid">Midweek %1$d</string>
     <string name="harvest_milestone_goal">Goal: %1$d</string>
-    <string name="harvest_collect">Collect %1$d Apples</string>
+    <plurals name="harvest_collect_apples">
+        <item quantity="one">Collect %1$d Apple</item>
+        <item quantity="other">Collect %1$d Apples</item>
+    </plurals>
     <string name="harvest_start_day">Start Maya\'s Day</string>
     <string name="harvest_launch">Launch Dashboard</string>
     <string name="harvest_skip">Skip for now</string>

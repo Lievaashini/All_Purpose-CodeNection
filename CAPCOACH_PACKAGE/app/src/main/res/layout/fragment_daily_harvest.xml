@@ -1,13 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 6 - DAILY HARVEST  (port of Prototype/daily-harvest.html)
 
   The morning pop-up: apples that grew overnight from yesterday's completed tasks, a
   Dino holding a basket, and the weekly feast meter.
 
-  The apple tree is apple_tree_full.gif, the animated form of the pixel-art SVG the
-  prototype inlines. Four tappable apples sit over it in a FrameLayout; tapping one
-  animates it down toward the basket.
+  The apple tree is @drawable/tree_blank: the prototype's pixel-art SVG converted to a
+  static, deliberately empty vector. The crop is added at runtime by the fragment - one
+  apple per task completed yesterday - so a tree with fruit already drawn on it would
+  contradict the screen. Tapping an apple makes the Dino cheer.
+
+  The two labels that name the crop (@id/collectButton, @id/dinoChatBubble) are set from
+  APPLES_GROWN in DailyHarvestFragment; the text here is only a tools: preview.
 
   NEW FILE - additive. Nothing existing is modified.
 -->
@@ -217,9 +221,9 @@
                             style="@style/Text.MicroLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/harvest_dino_bubble"
                             android:textColor="@color/brand_mint"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:text="4 ripe apples! Yum!" />
                     </LinearLayout>
 
                     <LinearLayout

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   Blank apple tree for the Daily Harvest screen.
 
@@ -32,14 +32,18 @@
     <path android:fillColor="@color/tree_trunk_light" android:pathData="M37,52 h2 v12 h-2 Z" />
     <path android:fillColor="@color/tree_trunk_dark" android:pathData="M40,48 h2 v14 h-2 Z" />
 
-    <!-- Canopy, darkest layer first -->
-    <path android:fillColor="@color/tree_leaf_dark" android:pathData="M8,18 h44 a4,4 0 0 1 4,4 v24 a4,4 0 0 1 -4,4 h-44 a4,4 0 0 1 -4,-4 v-24 a4,4 0 0 1 4,-4 Z" />
-    <path android:fillColor="@color/tree_leaf_dark" android:pathData="M6,22 h52 a4,4 0 0 1 4,4 v16 a4,4 0 0 1 -4,4 h-52 a4,4 0 0 1 -4,-4 v-16 a4,4 0 0 1 4,-4 Z" />
+    <!-- Canopy, darkest layer first.
+         These five rects are the prototype's, rect for rect, with only the corner
+         radii turned into SVG arcs. An earlier transcription read the wrong x, y and
+         height off the first three, which pushed the mid-green layer 4-12 units left
+         of the dark one and grew a flat green bar down the canopy's left edge. -->
+    <path android:fillColor="@color/tree_leaf_dark" android:pathData="M14,14 h44 a4,4 0 0 1 4,4 v24 a4,4 0 0 1 -4,4 h-44 a4,4 0 0 1 -4,-4 v-24 a4,4 0 0 1 4,-4 Z" />
+    <path android:fillColor="@color/tree_leaf_dark" android:pathData="M10,18 h52 a4,4 0 0 1 4,4 v16 a4,4 0 0 1 -4,4 h-52 a4,4 0 0 1 -4,-4 v-16 a4,4 0 0 1 4,-4 Z" />
 
     <!-- Main green foliage -->
-    <path android:fillColor="@color/tree_leaf_mid" android:pathData="M4,12 h40 a2,2 0 0 1 2,2 v30 a2,2 0 0 1 -2,2 h-40 a2,2 0 0 1 -2,-2 v-30 a2,2 0 0 1 2,-2 Z" />
-    <path android:fillColor="@color/tree_leaf_mid" android:pathData="M4,18 h48 a2,2 0 0 1 2,2 v20 a2,2 0 0 1 -2,2 h-48 a2,2 0 0 1 -2,-2 v-20 a2,2 0 0 1 2,-2 Z" />
-    <path android:fillColor="@color/tree_leaf_mid" android:pathData="M4,22 h56 a2,2 0 0 1 2,2 v12 a2,2 0 0 1 -2,2 h-56 a2,2 0 0 1 -2,-2 v-12 a2,2 0 0 1 2,-2 Z" />
+    <path android:fillColor="@color/tree_leaf_mid" android:pathData="M16,10 h40 a2,2 0 0 1 2,2 v30 a2,2 0 0 1 -2,2 h-40 a2,2 0 0 1 -2,-2 v-30 a2,2 0 0 1 2,-2 Z" />
+    <path android:fillColor="@color/tree_leaf_mid" android:pathData="M12,16 h48 a2,2 0 0 1 2,2 v20 a2,2 0 0 1 -2,2 h-48 a2,2 0 0 1 -2,-2 v-20 a2,2 0 0 1 2,-2 Z" />
+    <path android:fillColor="@color/tree_leaf_mid" android:pathData="M8,20 h56 a2,2 0 0 1 2,2 v12 a2,2 0 0 1 -2,2 h-56 a2,2 0 0 1 -2,-2 v-12 a2,2 0 0 1 2,-2 Z" />
 
     <!-- Mid-tone highlights -->
     <path android:fillColor="@color/tree_leaf" android:pathData="M18,8 h34 v10 h-34 Z" />

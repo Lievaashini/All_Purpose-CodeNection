@@ -144,7 +144,31 @@ public class DailyHarvestFragment extends Fragment {
 
         growApples();
         renderCounters(STARTING_STASH);
+        renderCropCopy();
         wireActions(view);
+    }
+
+    /**
+     * Names the size of the crop wherever the screen talks about it.
+     *
+     * <p>The primary button reads "Collect 4 Apples", exactly as the prototype's
+     * triggerHarvest() writes into #btnText. It has to be set here rather than in the
+     * layout: the layout can only carry a tools:text, which is a design-time
+     * attribute, so without this the button renders as a bare basket icon on a green
+     * pill with no label at all.
+     *
+     * <p>Both strings are plurals because {@link #APPLES_GROWN} is not always four, and
+     * "Collect 1 Apples" is the kind of detail that makes a prototype look unfinished.
+     */
+    private void renderCropCopy() {
+        if (collectButton != null) {
+            collectButton.setText(getResources().getQuantityString(
+                    R.plurals.harvest_collect_apples, APPLES_GROWN, APPLES_GROWN));
+        }
+        if (dinoChatBubble != null) {
+            dinoChatBubble.setText(getResources().getQuantityString(
+                    R.plurals.harvest_dino_bubble_apples, APPLES_GROWN, APPLES_GROWN));
+        }
     }
 
     // ==================================================================
