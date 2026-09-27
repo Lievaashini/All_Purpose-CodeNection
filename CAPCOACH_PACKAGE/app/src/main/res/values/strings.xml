@@ -148,10 +148,9 @@
     <string name="dash_btn_rebalance">Rebalance</string>
     <string name="dash_btn_daily_popup">Daily Pop-up</string>
     <string name="dash_btn_weekly_popup">Weekly Pop-up</string>
+    <!-- The other filter chips are the five baseline categories, so they reuse the
+         cat_* labels rather than repeating them here. -->
     <string name="dash_filter_all">All (%1$d)</string>
-    <string name="dash_filter_work">Work</string>
-    <string name="dash_filter_classes">Classes</string>
-    <string name="dash_filter_study">Study</string>
     <string name="dash_schedule_title">Schedule (%1$s)</string>
     <string name="dash_rebalanced_badge">Rebalanced</string>
     <string name="dash_task_counter">%1$d/%2$d Done</string>

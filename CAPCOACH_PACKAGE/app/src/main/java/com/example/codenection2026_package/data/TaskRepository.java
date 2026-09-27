@@ -7,10 +7,14 @@ import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.codenection2026_package.model.Category;
 import com.example.codenection2026_package.model.Task;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -50,30 +54,89 @@ public final class TaskRepository {
     }
 
     /**
-     * Loads every task filed under {@code isoDate} ("yyyy-MM-dd").
+     * One row of the dashboard feed: the task itself, plus the name of the category it
+     * was filed under.
+     *
+     * <p>Only the row id lives on {@link Task}, so the name has to be resolved here.
+     * Doing it in the repository means the screen never holds a second map, and the
+     * row's tag and the filter chips compare against the same canonical string.
+     */
+    public static final class FeedItem {
+
+        private final Task task;
+
+        @Nullable
+        private final String categoryName;
+
+        FeedItem(@NonNull Task task, @Nullable String categoryName) {
+            this.task = task;
+            this.categoryName = categoryName;
+        }
+
+        @NonNull
+        public Task getTask() {
+            return task;
+        }
+
+        /**
+         * The canonical category name - Academic, Work, Errand, Social or
+         * Co-curricular - or null for a row that predates category filing. Such a row
+         * shows no tag and only appears under "All".
+         */
+        @Nullable
+        public String getCategoryName() {
+            return categoryName;
+        }
+    }
+
+    /**
+     * Loads every task filed under {@code isoDate} ("yyyy-MM-dd"), each paired with its
+     * category name.
      *
      * <p>An empty list means the day is genuinely free - the dashboard shows its
      * empty state for it.
      */
     public static void loadByDate(@NonNull Context context,
                                   @NonNull String isoDate,
-                                  @NonNull Callback<List<Task>> callback) {
+                                  @NonNull Callback<List<FeedItem>> callback) {
         final Context appContext = context.getApplicationContext();
         IO.execute(() -> {
-            List<Task> tasks;
+            List<FeedItem> feed;
             try {
                 AppDatabase db = AppDatabase.get(appContext);
                 seedCategories(db);
-                tasks = db.taskDao().findByDate(isoDate);
+
+                List<Task> tasks = db.taskDao().findByDate(isoDate);
+                Map<Long, String> names = categoryNames(db.categoryDao());
+
+                feed = new ArrayList<>(tasks.size());
+                for (Task task : tasks) {
+                    feed.add(new FeedItem(task, names.get(task.getCategory_id())));
+                }
             } catch (RuntimeException e) {
-                tasks = null;
+                feed = null;
             }
-            if (tasks == null) {
-                tasks = Collections.emptyList();
+            if (feed == null) {
+                feed = Collections.emptyList();
             }
-            final List<Task> result = tasks;
+            final List<FeedItem> result = feed;
             MAIN.post(() -> callback.onResult(result));
         });
+    }
+
+    /**
+     * Maps category row ids to their names.
+     *
+     * <p>One query for the whole feed rather than one per row. A HashMap tolerates the
+     * null key a task with no category produces, which is exactly the fallback wanted.
+     */
+    @NonNull
+    private static Map<Long, String> categoryNames(@NonNull CategoryDao dao) {
+        Map<Long, String> names = new HashMap<>();
+        for (Category category : dao.getAll()) {
+            names.put(category.getId(), category.getName());
+        }
+        return names;
     }
 
     /**

@@ -1,20 +1,27 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   One card in the dashboard task feed (prototype: article.task-item in
   dashboard.html).
 
-  Inflated by DashboardFragment for every Task the TaskSource returns. The
-  fragment fills the title, the time range and the tag, and picks the accent
-  colour from the classification: INFLEXIBLE (a protected work shift) gets blue,
-  FLEXIBLE (sheddable academic work) gets mint.
+  Inflated by DashboardFragment for every FeedItem the repository returns. The
+  fragment fills the title, the time range, the category tag and the priority chip,
+  and picks the accent colour from the classification: INFLEXIBLE (a protected work
+  shift) gets blue, FLEXIBLE (sheddable work) gets mint.
+
+  The tag prints the task's own CATEGORY - Academic, Work, Errand, Social or
+  Co-curricular - not a classification stand-in. It used to read "Work"/"Classes"
+  for the whole FLEXIBLE bucket, which told the user nothing about what they filed
+  the task under and made the filter chips disagree with the Add Activity sheet.
+
+  @id/taskPriority repeats the High/Med/Low the sheet collected, colour-coded:
+  red for High, amber for Med, quiet for Low.
 
   Tapping @id/taskCheck toggles the done state: the row drops to 65% alpha, the
   box swaps bg_task_check for bg_task_check_done, the tick appears and the title
   is struck through.
 
-  @id/taskCheck also carries the row's classification via setTag(R.id.taskAccent,
-  classification) so the filter chips can show and hide rows without a second
-  lookup.
+  The row carries its category name via setTag(R.id.taskAccent, categoryName) so
+  the filter chips can show and hide rows without a second lookup.
 -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -119,10 +126,24 @@
                 <TextView
                     android:id="@+id/taskTime"
                     style="@style/Text.MicroLabel"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_xxs"
+                    android:layout_weight="1"
                     android:textColor="@color/text_muted_dark" />
+
+                <!-- The priority the Add Activity sheet captured. -->
+                <TextView
+                    android:id="@+id/taskPriority"
+                    style="@style/Text.MicroLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_sm"
+                    android:background="@drawable/bg_task_tag"
+                    android:paddingHorizontal="@dimen/space_sm"
+                    android:paddingVertical="2dp"
+                    android:textColor="@color/text_muted_dark"
+                    android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

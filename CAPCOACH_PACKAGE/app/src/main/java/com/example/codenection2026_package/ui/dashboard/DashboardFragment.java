@@ -11,13 +11,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
@@ -47,12 +50,17 @@ import java.util.Set;
  * real today - is labelled TODAY. Tapping any other cell selects that day and nothing
  * else: it is not relabelled as today, because it is not one.
  *
- * <p><b>The feed is the real feed.</b> Rows come from Room through
- * {@link TaskRepository}, filtered to the selected day's date, so a task saved from
- * the Add Activity sheet appears on the day it was filed under. {@link TaskRepository}
- * owns the background thread Room requires and answers on the main thread; until the
- * first answer arrives the feed shows its "no tasks yet" empty state, which is also
- * what a genuinely free day looks like.
+ * <p><b>The feed is grouped by the task's own category.</b> Rows come from Room through
+ * {@link TaskRepository}, filtered to the selected day's date, and each one carries the
+ * category it was filed under - the same five the Add Activity sheet offers. The filter
+ * chips are built from {@link CategoryRepository#BASELINE} at runtime rather than being
+ * written into the layout, so they can never name a bucket the sheet cannot produce.
+ * The row tag prints that category, and the row also repeats the High/Med/Low priority
+ * the sheet collected.
+ *
+ * <p>{@link TaskRepository} owns the background thread Room requires and answers on the
+ * main thread; until the first answer arrives the feed shows its "no tasks yet" empty
+ * state, which is also what a genuinely free day looks like.
  *
  * <p>The capacity card and the weekly load chart still run on the prototype's demo
  * percentages - the biometrics model that will supply them is not wired yet.
@@ -61,6 +69,21 @@ public class DashboardFragment extends Fragment {
 
     /** Sleep figure shown in the telemetry line. The Room layer will supply the real one. */
     private static final String DEMO_SLEEP_HOURS = "7.8h";
+
+    /**
+     * Labels for {@link CategoryRepository#BASELINE}, in that exact order.
+     *
+     * <p>Kept here rather than in the repository so the data layer stays free of
+     * resource ids; the two lists are index-aligned and must be edited together.
+     */
+    @StringRes
+    private static final int[] CATEGORY_LABELS = {
+            R.string.cat_academic,
+            R.string.cat_work,
+            R.string.cat_errand,
+            R.string.cat_social,
+            R.string.cat_cocurricular
+    };
 
     /**
      * The prototype's seven charted loads, in week order from Monday. Demo data:
@@ -90,6 +113,7 @@ public class DashboardFragment extends Fragment {
     private TextView emptyState;
     private LinearLayout weekStrip;
     private LinearLayout tasksList;
+    private LinearLayout filterPills;
     private LoadChartView loadChart;
     private View rebalanceToast;
 
@@ -114,11 +138,18 @@ public class DashboardFragment extends Fragment {
     /** Load shown in the capacity card, in percent. Tracks the selected day. */
     private int selectedLoad;
 
-    /** The chip the user last tapped, so a reload keeps the same filter applied. */
+    /**
+     * The canonical category the user last filtered by, or null for "All". Held as a
+     * name rather than a chip reference so a reload can re-apply it to fresh rows.
+     */
     @Nullable
-    private String activeFilter;
+    private String activeCategory;
 
-    private int activeFilterChip = R.id.filterAll;
+    private final List<TextView> filterChips = new ArrayList<>();
+
+    /** The "All (n)" chip, which also carries the visible-row count. */
+    @Nullable
+    private TextView allChip;
 
     private final List<View> taskRows = new ArrayList<>();
     private final Set<View> doneRows = new HashSet<>();
@@ -178,6 +209,8 @@ public class DashboardFragment extends Fragment {
         }
         taskRows.clear();
         doneRows.clear();
+        filterChips.clear();
+        allChip = null;
         stateLabel = null;
         stateDot = null;
         statePill = null;
@@ -192,6 +225,7 @@ public class DashboardFragment extends Fragment {
         emptyState = null;
         weekStrip = null;
         tasksList = null;
+        filterPills = null;
         loadChart = null;
         rebalanceToast = null;
         super.onDestroyView();
@@ -216,6 +250,7 @@ public class DashboardFragment extends Fragment {
         emptyState = view.findViewById(R.id.emptyState);
         weekStrip = view.findViewById(R.id.weekStrip);
         tasksList = view.findViewById(R.id.tasksList);
+        filterPills = view.findViewById(R.id.filterPills);
         loadChart = view.findViewById(R.id.loadChart);
         rebalanceToast = view.findViewById(R.id.rebalanceToast);
     }
@@ -498,7 +533,7 @@ public class DashboardFragment extends Fragment {
         });
     }
 
-    private void renderTaskFeed(@Nullable List<Task> tasks) {
+    private void renderTaskFeed(@Nullable List<TaskRepository.FeedItem> feed) {
         if (tasksList == null) {
             return;
         }
@@ -506,9 +541,12 @@ public class DashboardFragment extends Fragment {
         taskRows.clear();
         doneRows.clear();
 
-        if (tasks == null || tasks.isEmpty()) {
+        if (feed == null || feed.isEmpty()) {
             // Honest empty state: this day genuinely has nothing filed under it.
             showEmptyState();
+            // The chips still have to be repainted: without this the "All (n)" count
+            // keeps whatever the previously viewed day had.
+            applyFilter(activeCategory);
             return;
         }
 
@@ -518,12 +556,12 @@ public class DashboardFragment extends Fragment {
         }
 
         LayoutInflater inflater = LayoutInflater.from(requireContext());
-        for (Task task : tasks) {
-            tasksList.addView(inflateTaskRow(inflater, task));
+        for (TaskRepository.FeedItem item : feed) {
+            tasksList.addView(inflateTaskRow(inflater, item));
         }
 
         // Keep whatever chip was active across the refresh.
-        applyFilter(activeFilter, activeFilterChip);
+        applyFilter(activeCategory);
     }
 
     private void showEmptyState() {
@@ -538,18 +576,25 @@ public class DashboardFragment extends Fragment {
         }
     }
 
+    /**
+     * Builds one row: title, time, the category it was filed under, and the priority
+     * that was chosen for it.
+     */
     @NonNull
-    private View inflateTaskRow(@NonNull LayoutInflater inflater, @NonNull Task task) {
+    private View inflateTaskRow(@NonNull LayoutInflater inflater,
+                                @NonNull TaskRepository.FeedItem item) {
         View row = inflater.inflate(R.layout.item_task_row, tasksList, false);
+
+        Task task = item.getTask();
+        String category = item.getCategoryName();
+        boolean inflexible = "INFLEXIBLE".equals(task.getClassification());
 
         TextView title = row.findViewById(R.id.taskTitle);
         TextView time = row.findViewById(R.id.taskTime);
         TextView tag = row.findViewById(R.id.taskTag);
+        TextView priority = row.findViewById(R.id.taskPriority);
         View accent = row.findViewById(R.id.taskAccent);
         View check = row.findViewById(R.id.taskCheck);
-
-        String classification = task.getClassification();
-        boolean inflexible = "INFLEXIBLE".equals(classification);
 
         if (title != null) {
             title.setText(task.getTaskName());
@@ -557,21 +602,87 @@ public class DashboardFragment extends Fragment {
         if (time != null) {
             time.setText(task.getStartTime() + " - " + task.getEndTime());
         }
+
+        // The tag names the user's own category. It used to print "Work"/"Classes" off
+        // the classification, which meant a Social task was labelled Classes and none of
+        // the five categories the sheet offers were visible here at all.
         if (tag != null) {
-            tag.setText(inflexible ? R.string.dash_filter_work : R.string.dash_filter_classes);
+            if (category == null) {
+                tag.setVisibility(View.GONE);
+            } else {
+                boolean work = CategoryRepository.WORK.equals(category);
+                tag.setVisibility(View.VISIBLE);
+                tag.setText(labelFor(category));
+                tag.setBackgroundResource(work ? R.drawable.bg_tag_blue : R.drawable.bg_task_tag);
+                tag.setTextColor(ContextCompat.getColor(requireContext(),
+                        work ? R.color.secondary_blue : R.color.text_muted_dark));
+            }
         }
+
+        if (priority != null) {
+            String level = task.getPriority();
+            priority.setText(priorityLabelRes(level));
+            priority.setBackgroundResource(priorityTagBackground(level));
+            priority.setTextColor(ContextCompat.getColor(requireContext(),
+                    priorityTagTextColor(level)));
+        }
+
         if (accent != null) {
             accent.setBackgroundResource(
                     inflexible ? R.drawable.bg_accent_blue : R.drawable.bg_accent_mint);
-            // The filter chips read the classification straight off the row.
-            row.setTag(R.id.taskAccent, classification);
         }
         if (check != null) {
             check.setOnClickListener(v -> toggleDone(row));
         }
 
+        // The filter chips read the category straight off the row.
+        row.setTag(R.id.taskAccent, category);
+
         taskRows.add(row);
         return row;
+    }
+
+    /** @return the localised label for a canonical category name */
+    @NonNull
+    private String labelFor(@Nullable String category) {
+        int index = CategoryRepository.indexOf(category);
+        if (index < 0 || index >= CATEGORY_LABELS.length) {
+            return category == null ? "" : category;
+        }
+        return getString(CATEGORY_LABELS[index]);
+    }
+
+    @StringRes
+    private static int priorityLabelRes(@Nullable String priority) {
+        if (Task.PRIORITY_HIGH.equals(priority)) {
+            return R.string.addtask_priority_high;
+        }
+        if (Task.PRIORITY_LOW.equals(priority)) {
+            return R.string.addtask_priority_low;
+        }
+        return R.string.addtask_priority_med;
+    }
+
+    /** High is red, Med amber, Low quiet - the same three steps the sheet offers. */
+    private static int priorityTagBackground(@Nullable String priority) {
+        if (Task.PRIORITY_HIGH.equals(priority)) {
+            return R.drawable.bg_tag_red;
+        }
+        if (Task.PRIORITY_LOW.equals(priority)) {
+            return R.drawable.bg_task_tag;
+        }
+        return R.drawable.bg_tag_amber;
+    }
+
+    @ColorRes
+    private static int priorityTagTextColor(@Nullable String priority) {
+        if (Task.PRIORITY_HIGH.equals(priority)) {
+            return R.color.status_red;
+        }
+        if (Task.PRIORITY_LOW.equals(priority)) {
+            return R.color.text_muted_dark;
+        }
+        return R.color.status_amber;
     }
 
     /** Check-off: strike the title, tick the box, drop the row to 65% alpha. */
@@ -629,9 +740,8 @@ public class DashboardFragment extends Fragment {
         if (taskCounter != null) {
             taskCounter.setText(getString(R.string.dash_task_counter, done, visible));
         }
-        TextView all = getView() == null ? null : getView().findViewById(R.id.filterAll);
-        if (all != null) {
-            all.setText(getString(R.string.dash_filter_all, visible));
+        if (allChip != null) {
+            allChip.setText(getString(R.string.dash_filter_all, visible));
         }
     }
 
@@ -639,56 +749,81 @@ public class DashboardFragment extends Fragment {
     // Filters
     // ==================================================================
 
+    /**
+     * Builds the chip row: "All (n)" followed by one chip per baseline category.
+     *
+     * <p>The chips are inflated from {@link CategoryRepository#BASELINE} instead of
+     * being written into the layout, which is what keeps them in step with the Add
+     * Activity sheet. The old hardcoded Work / Classes / Study chips filtered on the
+     * FLEXIBLE classification, so "Classes" and "Study" were the same bucket and a
+     * Social or Errand task could not be found at all.
+     */
     private void setupFilters() {
-        View root = getView();
-        if (root == null) {
+        if (filterPills == null) {
             return;
         }
-        click(root, R.id.filterAll, () -> applyFilter(null, R.id.filterAll));
-        click(root, R.id.filterWork, () -> applyFilter("INFLEXIBLE", R.id.filterWork));
-        click(root, R.id.filterClasses, () -> applyFilter("FLEXIBLE", R.id.filterClasses));
-        click(root, R.id.filterStudy, () -> applyFilter("FLEXIBLE", R.id.filterStudy));
+        filterPills.removeAllViews();
+        filterChips.clear();
+
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+
+        allChip = addChip(inflater, null, 0);
+        for (int i = 0; i < CategoryRepository.BASELINE.length; i++) {
+            addChip(inflater, CategoryRepository.BASELINE[i], i + 1);
+        }
 
         // Paint "All" as the selected chip on entry, and give it its task count straight
         // away. Without this the chip only picked up its mint fill and "All (n)" label
         // after the first tap, so on arrival it looked missing or blank.
-        applyFilter(null, R.id.filterAll);
-        updateCounterAndChips();
+        applyFilter(null);
+    }
+
+    @NonNull
+    private TextView addChip(@NonNull LayoutInflater inflater,
+                             @Nullable String category,
+                             int index) {
+        TextView chip = (TextView) inflater.inflate(R.layout.item_filter_chip, filterPills, false);
+
+        if (index > 0) {
+            // Every chip but the first is nudged off its neighbour; the first lines up
+            // with the cards above it.
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) chip.getLayoutParams();
+            params.setMarginStart(getResources().getDimensionPixelSize(R.dimen.space_sm));
+            chip.setLayoutParams(params);
+        }
+
+        chip.setText(category == null ? getString(R.string.dash_filter_all, 0) : labelFor(category));
+        chip.setTag(category);
+        chip.setOnClickListener(v -> applyFilter(category));
+
+        filterPills.addView(chip);
+        filterChips.add(chip);
+        return chip;
     }
 
     /**
-     * @param wanted classification to keep, or null for "show everything"
+     * @param category canonical category name to keep, or null for "show everything"
      */
-    private void applyFilter(@Nullable String wanted, int selectedChipId) {
-        View root = getView();
-        if (root == null) {
-            return;
-        }
-
-        // Remembered so a reload after a save or a day change keeps the same chip.
-        activeFilter = wanted;
-        activeFilterChip = selectedChipId;
+    private void applyFilter(@Nullable String category) {
+        // Remembered so a reload after a save or a day change keeps the same chip lit.
+        activeCategory = category;
 
         int activeBg = R.drawable.bg_chip_active;
         int idleBg = R.drawable.bg_chip_idle;
         int activeText = ContextCompat.getColor(requireContext(), R.color.on_brand);
         int idleText = ContextCompat.getColor(requireContext(), R.color.text_muted_dark);
 
-        int[] chips = {R.id.filterAll, R.id.filterWork, R.id.filterClasses, R.id.filterStudy};
-        for (int chipId : chips) {
-            TextView chip = root.findViewById(chipId);
-            if (chip == null) {
-                continue;
-            }
-            boolean active = chipId == selectedChipId;
+        for (TextView chip : filterChips) {
+            Object tag = chip.getTag();
+            boolean active = category == null ? tag == null : category.equals(tag);
             chip.setBackgroundResource(active ? activeBg : idleBg);
             chip.setTextColor(active ? activeText : idleText);
         }
 
         for (View row : taskRows) {
             Object tag = row.getTag(R.id.taskAccent);
-            String classification = tag instanceof String ? (String) tag : null;
-            boolean show = wanted == null || wanted.equals(classification);
+            String rowCategory = tag instanceof String ? (String) tag : null;
+            boolean show = category == null || category.equals(rowCategory);
             row.setVisibility(show ? View.VISIBLE : View.GONE);
         }
 

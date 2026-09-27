@@ -329,7 +329,13 @@
                 </HorizontalScrollView>
             </LinearLayout>
 
-            <!-- ============ Filter chips ============ -->
+            <!-- ============ Filter chips ============
+                 Built at runtime from CategoryRepository.BASELINE, one chip per
+                 category plus "All (n)", so the filters always name the same five
+                 categories the Add Activity sheet files tasks under. Six chips do
+                 not fit the screen width, which is why this row scrolls - the
+                 prototype's #filterPills is an overflow-x-auto row for the same
+                 reason. -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -340,55 +346,7 @@
                     android:id="@+id/filterPills"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/filterAll"
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/touch_target_min"
-                        android:background="@drawable/bg_chip_active"
-                        android:gravity="center"
-                        android:paddingHorizontal="@dimen/space_md"
-                        android:textColor="@color/on_brand"
-                        tools:text="All (4)" />
-
-                    <TextView
-                        android:id="@+id/filterWork"
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/touch_target_min"
-                        android:layout_marginStart="@dimen/space_sm"
-                        android:background="@drawable/bg_chip_idle"
-                        android:gravity="center"
-                        android:paddingHorizontal="@dimen/space_md"
-                        android:text="@string/dash_filter_work"
-                        android:textColor="@color/text_muted_dark" />
-
-                    <TextView
-                        android:id="@+id/filterClasses"
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/touch_target_min"
-                        android:layout_marginStart="@dimen/space_sm"
-                        android:background="@drawable/bg_chip_idle"
-                        android:gravity="center"
-                        android:paddingHorizontal="@dimen/space_md"
-                        android:text="@string/dash_filter_classes"
-                        android:textColor="@color/text_muted_dark" />
-
-                    <TextView
-                        android:id="@+id/filterStudy"
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/touch_target_min"
-                        android:layout_marginStart="@dimen/space_sm"
-                        android:background="@drawable/bg_chip_idle"
-                        android:gravity="center"
-                        android:paddingHorizontal="@dimen/space_md"
-                        android:text="@string/dash_filter_study"
-                        android:textColor="@color/text_muted_dark" />
-                </LinearLayout>
+                    android:orientation="horizontal" />
             </HorizontalScrollView>
 
             <!-- ============ Schedule header ============ -->
