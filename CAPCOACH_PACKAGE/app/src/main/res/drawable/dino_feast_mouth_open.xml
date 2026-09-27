@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Feast Dino - open mouth layer, drawn over dino_feast_body.
+
+  The prototype's mouthOpenGroup: the wide mouth with its tongue and two teeth. Shown the
+  moment an apple is thrown, so the Dino visibly opens up to catch it.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="130dp"
+    android:height="130dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+    <!-- Wide open mouth -->
+    <path android:fillColor="@color/dino_outline" android:pathData="M20,11 h7 v6 h-7 Z" />
+    <!-- Tongue -->
+    <path android:fillColor="@color/dino_tongue" android:pathData="M22,14 h4 v3 h-4 Z" />
+    <!-- Upper and lower teeth -->
+    <path android:fillColor="@color/dino_eye_glint" android:pathData="M22,11 h2 v2 h-2 Z" />
+    <path android:fillColor="@color/dino_eye_glint" android:pathData="M24,15 h2 v2 h-2 Z" />
+</vector>

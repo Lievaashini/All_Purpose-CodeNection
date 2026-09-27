@@ -45,4 +45,39 @@
     <dimen name="stroke_medium">2dp</dimen>
     <dimen name="card_elevation">0dp</dimen>
     <dimen name="slider_track_height">8dp</dimen>
+
+    <!-- ==================================================================
+         ADDED FOR SCREENS 3-9 (dashboard, add-task, biometrics, harvest,
+         feast, settings, companion). Purely additive - nothing above changed.
+         ================================================================== -->
+
+    <!-- ============ Shell chrome ============ -->
+    <dimen name="header_height">64dp</dimen>
+    <dimen name="bottom_nav_height">64dp</dimen>
+    <!-- Clearance so scrolling content is never hidden behind the fixed nav bar. -->
+    <dimen name="content_bottom_inset">96dp</dimen>
+    <dimen name="content_top_inset">80dp</dimen>
+    <dimen name="avatar_size">32dp</dimen>
+    <dimen name="avatar_size_lg">40dp</dimen>
+
+    <!-- ============ Dashboard ============ -->
+    <dimen name="day_pill_height">58dp</dimen>
+    <dimen name="load_chart_height">112dp</dimen>
+    <dimen name="task_check_size">20dp</dimen>
+    <dimen name="task_accent_width">4dp</dimen>
+
+    <!-- ============ Biometrics ============ -->
+    <dimen name="metric_bar_height">12dp</dimen>
+    <dimen name="trend_chart_height">48dp</dimen>
+    <dimen name="anomaly_icon_size">48dp</dimen>
+
+    <!-- ============ Harvest / Feast ============ -->
+    <dimen name="tree_size">210dp</dimen>
+    <dimen name="tree_size_large">260dp</dimen>
+    <dimen name="apple_size">24dp</dimen>
+    <dimen name="basket_size">40dp</dimen>
+
+    <!-- ============ Companion (voice) ============ -->
+    <dimen name="mic_ring_size">190dp</dimen>
+    <dimen name="mic_button_size">144dp</dimen>
 </resources>

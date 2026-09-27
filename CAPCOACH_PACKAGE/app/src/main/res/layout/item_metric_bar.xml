@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One sleep metric row for the Biometrics metrics card.
+
+  Inflated by BiometricsFragment.addMetricBar(), which fills in the dot colour, the label,
+  the value text and the fill percentage. The fill starts at width 0dp on purpose: the
+  track is not measured yet during onViewCreated, so its width is applied after the first
+  layout pass.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/metricDot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/dot_mint" />
+
+        <TextView
+            android:id="@+id/metricLabel"
+            style="@style/Text.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_xs"
+            android:text="@string/bio_baseline_label" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/metricValue"
+            style="@style/Text.MicroLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/metricTrack"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/metric_bar_height"
+        android:layout_marginTop="@dimen/space_xxs"
+        android:background="@drawable/bg_progress_track">
+
+        <View
+            android:id="@+id/metricFill"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_progress_mint" />
+    </FrameLayout>
+</LinearLayout>

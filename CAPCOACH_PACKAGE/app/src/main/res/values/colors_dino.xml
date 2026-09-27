@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Palette for the hand-drawn 8-bit Dino on the Weekly Feast screen.
+
+  Prototype/feast.html inlines this character as an SVG made of 28 <rect> elements. The
+  feast screen now draws it as Android vector drawables instead of using the animated
+  dino_happy GIF, so the sprite can swap between its closed-mouth and open-mouth states
+  while the user feeds it.
+
+  The values are copied verbatim from that SVG's fill attributes, so the vector version
+  matches the prototype pixel for pixel.
+
+  Deliberately NOT given a values-night variant: the Dino is its own artwork and must keep
+  the same mint body in both themes, exactly as the prototype does. Only the surfaces
+  behind it flip.
+-->
+<resources>
+    <!-- #00E676 main mint body -->
+    <color name="dino_body">#FF00E676</color>
+    <!-- #00C853 darker mint used for shading, legs and arms -->
+    <color name="dino_body_shadow">#FF00C853</color>
+    <!-- #FFE082 warm cream belly patch -->
+    <color name="dino_belly">#FFFFE082</color>
+    <!-- #121414 eye -->
+    <color name="dino_outline">#FF121414</color>
+    <!-- #FFFFFF eye glint and teeth -->
+    <color name="dino_eye_glint">#FFFFFFFF</color>
+    <!-- #007E33 closed smiling mouth and feet -->
+    <color name="dino_mouth_inner">#FF007E33</color>
+    <!-- #FF5252 tongue -->
+    <color name="dino_tongue">#FFFF5252</color>
+    <!-- #FF8A80 cheek blush and heart particles -->
+    <color name="dino_blush">#FFFF8A80</color>
+    <!-- #FF9100 retro back spines -->
+    <color name="dino_spine">#FFFF9100</color>
+
+    <!--
+      Palette for the blank apple tree behind the Dino on the Daily Harvest screen.
+
+      Prototype/daily-harvest.html draws this as a 22-rect SVG beside the Dino. Like the
+      Feast Dino it is kept as vector art rather than the apple_tree_full GIF, because the
+      tree must render EMPTY and stay still - the only fruit on it comes from yesterday's
+      completed tasks, added by DailyHarvestFragment.
+    -->
+    <!-- trunk and roots -->
+    <color name="tree_trunk">#FF5A351F</color>
+    <color name="tree_trunk_mid">#FF4E2E1B</color>
+    <color name="tree_trunk_dark">#FF381F12</color>
+    <color name="tree_trunk_light">#FF6A3F25</color>
+    <color name="tree_root">#FF3D2314</color>
+    <color name="tree_root_dark">#FF2E190C</color>
+    <!-- foliage -->
+    <color name="tree_leaf_dark">#FF13471E</color>
+    <color name="tree_leaf_mid">#FF1E7B34</color>
+    <color name="tree_leaf">#FF2BAC4A</color>
+    <color name="tree_leaf_light">#FF46D869</color>
+    <!--
+      Harvest basket. Values from the basket block in Prototype/daily-harvest.html:
+      a #8B5A2B to #5C3818 gradient body with an #A66E38 gold handle and rim, and the
+      dark weave lines that give it its wicker look.
+    -->
+    <color name="basket_body">#FF8B5A2B</color>
+    <color name="basket_body_dark">#FF5C3818</color>
+    <color name="basket_handle">#FFA66E38</color>
+    <color name="basket_rim">#FFA66E38</color>
+    <color name="basket_weave">#FF9E6A3A</color>
+    <!-- Apple count printed on the basket body -->
+    <color name="basket_count">#FFFFE9B8</color>
+
+</resources>
+
+
+
+
+

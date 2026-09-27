@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Feast Dino - body layer.
+
+  Converted from the inline SVG on Prototype/feast.html (id="dinoSvg", viewBox 0 0 32 32,
+  drawn at 130x130). Each SVG <rect> becomes one path here, which is how Android vectors
+  express pixel art: no anti-aliased curves, just solid axis-aligned blocks.
+
+  This layer holds everything except the mouth, so the open and closed mouth states can be
+  layered on top of it and swapped while feeding.
+
+  Kept in sync with dino_feast_mouth_closed.xml and dino_feast_mouth_open.xml.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="130dp"
+    android:height="130dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+    <!-- Retro spines (orange) -->
+    <path android:fillColor="@color/dino_spine" android:pathData="M7,5 h3 v3 h-3 Z" />
+    <path android:fillColor="@color/dino_spine" android:pathData="M5,9 h3 v3 h-3 Z" />
+    <path android:fillColor="@color/dino_spine" android:pathData="M4,13 h3 v3 h-3 Z" />
+    <path android:fillColor="@color/dino_spine" android:pathData="M3,17 h3 v3 h-3 Z" />
+
+    <!-- Tail -->
+    <path android:fillColor="@color/dino_body" android:pathData="M4,21 h3 v3 h-3 Z" />
+    <path android:fillColor="@color/dino_body_shadow" android:pathData="M2,22 h2 v2 h-2 Z" />
+
+    <!-- Main body -->
+    <path android:fillColor="@color/dino_body" android:pathData="M8,4 h14 v18 h-14 Z" />
+    <path android:fillColor="@color/dino_body" android:pathData="M7,8 h16 v15 h-16 Z" />
+    <path android:fillColor="@color/dino_body" android:pathData="M7,19 h17 v8 h-17 Z" />
+
+    <!-- Body shading -->
+    <path android:fillColor="@color/dino_body_shadow" android:pathData="M6,22 h2 v5 h-2 Z" />
+    <path android:fillColor="@color/dino_body_shadow" android:pathData="M23,10 h2 v12 h-2 Z" />
+
+    <!-- Soft belly patch -->
+    <path android:fillColor="@color/dino_belly" android:pathData="M13,15 h8 v9 h-8 Z" />
+    <path android:fillColor="@color/dino_belly" android:pathData="M14,14 h6 v1 h-6 Z" />
+
+    <!-- Eye and glint -->
+    <path android:fillColor="@color/dino_outline" android:pathData="M17,6 h5 v6 h-5 Z" />
+    <path android:fillColor="@color/dino_eye_glint" android:pathData="M19,6 h3 v3 h-3 Z" />
+
+    <!-- Cheek blush. The prototype sets opacity 0.6 on this rect. -->
+    <path android:fillColor="@color/dino_blush" android:fillAlpha="0.6" android:pathData="M14,11 h3 v2 h-3 Z" />
+
+    <!-- Legs and feet -->
+    <path android:fillColor="@color/dino_body_shadow" android:pathData="M10,27 h4 v3 h-4 Z" />
+    <path android:fillColor="@color/dino_mouth_inner" android:pathData="M9,29 h6 v2 h-6 Z" />
+    <path android:fillColor="@color/dino_body_shadow" android:pathData="M18,27 h4 v3 h-4 Z" />
+    <path android:fillColor="@color/dino_mouth_inner" android:pathData="M17,29 h6 v2 h-6 Z" />
+
+    <!-- Tiny front arms in the excited pose -->
+    <path android:fillColor="@color/dino_body_shadow" android:pathData="M20,17 h4 v2 h-4 Z" />
+    <path android:fillColor="@color/dino_body" android:pathData="M23,16 h2 v4 h-2 Z" />
+</vector>

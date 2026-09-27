@@ -101,14 +101,14 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/space_lg"
             android:text="@string/onboarding_talk_to_me"
-            android:textColor="@color/bg_dark"
+            android:textColor="@color/on_brand"
             android:textSize="@dimen/text_label"
             android:textStyle="bold"
             app:backgroundTint="@color/brand_mint"
             app:cornerRadius="@dimen/radius_pill"
             app:icon="@drawable/ic_play_arrow"
             app:iconGravity="textEnd"
-            app:iconTint="@color/bg_dark" />
+            app:iconTint="@color/on_brand" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -165,13 +165,17 @@
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- Mic button. Opens the voice companion (Role 4 wires SpeechRecognizer). -->
+            <!-- Mic button. Opens the voice companion (Role 4 wires SpeechRecognizer).
+                 bg_mic_button is the same solid light-mint disc the companion screen and
+                 the voice dialog use. It must NOT be bg_circle_mint: that drawable is the
+                 18%-alpha ambient glow, which reads as a dark smudge in night mode and
+                 left the mic glyph invisible against its own background. -->
             <FrameLayout
                 android:id="@+id/micButton"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_marginStart="@dimen/space_lg"
-                android:background="@drawable/bg_circle_mint"
+                android:background="@drawable/bg_mic_button"
                 android:clickable="true"
                 android:contentDescription="@string/cd_mic_button"
                 android:focusable="true">
@@ -182,7 +186,7 @@
                     android:layout_gravity="center"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_mic"
-                    app:tint="@color/bg_dark" />
+                    app:tint="@color/on_brand" />
             </FrameLayout>
         </LinearLayout>
 
@@ -333,7 +337,7 @@
             android:text="@string/onboarding_cta"
             app:icon="@drawable/ic_arrow_forward"
             app:iconGravity="textEnd"
-            app:iconTint="@color/bg_dark" />
+            app:iconTint="@color/on_brand" />
 
         <TextView
             style="@style/Text.MicroLabel"
@@ -345,3 +349,6 @@
 
     </LinearLayout>
 </ScrollView>
+
+
+

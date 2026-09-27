@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One filter chip in the dashboard's @id/filterPills row.
+
+  Inflated once per category by DashboardFragment.setupFilters(), which reads the list
+  straight off CategoryRepository.BASELINE - so the chips are the same five categories
+  the Add Activity sheet files tasks under, and cannot drift away from them.
+
+  The fragment paints bg_chip_idle / bg_chip_active and the matching text colours, and
+  sets the start margin on every chip except the first so it lines up with the cards
+  above it. The row lives in a HorizontalScrollView, exactly as the prototype's
+  overflow-x-auto #filterPills does, so six chips simply scroll.
+-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/touch_target_min"
+    android:background="@drawable/bg_chip_idle"
+    android:clickable="true"
+    android:ellipsize="end"
+    android:focusable="true"
+    android:gravity="center"
+    android:maxLines="1"
+    android:paddingHorizontal="@dimen/space_md"
+    android:textColor="@color/text_muted_dark"
+    android:textSize="@dimen/text_micro"
+    android:textStyle="bold" />

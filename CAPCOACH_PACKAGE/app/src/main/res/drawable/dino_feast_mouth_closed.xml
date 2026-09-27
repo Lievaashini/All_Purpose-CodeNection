@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Feast Dino - closed mouth layer, drawn over dino_feast_body.
+
+  The prototype's mouthClosedGroup: a small smiling line beside the eye. Shown by default
+  and restored after the Dino finishes chewing.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="130dp"
+    android:height="130dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+    <path android:fillColor="@color/dino_mouth_inner" android:pathData="M22,12 h4 v2 h-4 Z" />
+    <path android:fillColor="@color/dino_mouth_inner" android:pathData="M24,10 h2 v2 h-2 Z" />
+</vector>

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- material icon: ic_bedtime_off (added for Screens 3-9) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M2,5.27L3.28,4L20,20.72L18.73,22l-2.1,-2.1C15.77,20.32 14.65,20.62 13.5,20.62c-3.86,0 -7,-3.14 -7,-7c0,-1.15 0.3,-2.27 0.9,-3.4L2,5.27zM9.5,4.38c0.69,-0.24 1.42,-0.38 2.19,-0.38c0.05,0 0.1,0 0.15,0.01l1.19,1.19l-2.5,2.5L9.5,4.38zM15.18,5.82c0.24,0.16 0.47,0.35 0.68,0.55l1.41,1.41l-2.09,2.09L15.18,5.82zM20.94,12.19l1.06,1.06l-2.5,2.5l-1.06,-1.06L20.94,12.19z" />
+</vector>

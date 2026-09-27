@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Fill colour for one segment of the priority selector (sheet_add_task.xml).
+  The selected segment becomes solid brand mint - the same fill the app's primary
+  buttons use - and the other two sit on the low surface.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/brand_mint" android:state_checked="true" />
+    <item android:color="@color/surface_container_low" />
+</selector>

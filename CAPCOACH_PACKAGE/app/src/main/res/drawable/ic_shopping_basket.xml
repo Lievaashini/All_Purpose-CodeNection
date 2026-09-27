@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- material icon: ic_shopping_basket (added for Screens 3-9) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M17.21,9l-4.38,-6.56c-0.19,-0.28 -0.51,-0.42 -0.83,-0.42s-0.64,0.14 -0.83,0.42L6.79,9H2v2h1l2.1,8.4C5.32,20.35 6.03,21 6.86,21h10.28c0.83,0 1.54,-0.65 1.76,-1.6L21,11h1V9H17.21zM13.5,9h-3l1.5,-2.25L13.5,9zM7,12h10l-1.5,6h-7L7,12z" />
+</vector>

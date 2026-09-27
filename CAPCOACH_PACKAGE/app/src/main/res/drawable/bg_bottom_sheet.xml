@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- CapCoach shape: bg_bottom_sheet (added for Screens 3-9) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/surface_container"/><corners android:topLeftRadius="28dp" android:topRightRadius="28dp"/>
+</shape>

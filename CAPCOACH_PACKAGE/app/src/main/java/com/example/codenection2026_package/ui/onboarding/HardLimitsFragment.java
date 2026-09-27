@@ -181,12 +181,6 @@ public class HardLimitsFragment extends Fragment {
         });
     }
 
-    /**
-     * Seeds the Dino guard with the neutral sprite. {@link #refreshAll()} runs
-     * immediately afterwards and overwrites it with the sprite for the restored load
-     * band, so this only prevents a blank frame on first paint.
-     */
-    private void wireThemePreview(@NonNull View view) {
     private void runCalendarTest() {
         try {
             calendarManager.logUpcomingWeekEvents();
@@ -243,6 +237,12 @@ public class HardLimitsFragment extends Fragment {
 
             Toast.makeText(requireContext(),
                     "Baseline saved", Toast.LENGTH_SHORT).show();
+
+            // Setup is complete, so hand off to the dashboard. This is the ONE line added
+            // to a teammate file, approved in advance; everything else in wireSaveButton
+            // is untouched. The prototype's own nav table maps "Save & Launch" to
+            // dashboard.html.
+            com.example.codenection2026_package.ui.shell.ScreenNav.showDashboard(this);
         });
     }
 
