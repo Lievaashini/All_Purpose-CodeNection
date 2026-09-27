@@ -12,6 +12,8 @@ v2 changes, following the feature-importance audit:
      social-support burnout research. Tagging a NEW category as recovery
      later needs a database flag, not a model retrain.
   4. Rows raised 1000 -> 3000 so rare branches get enough examples to learn
+  5. Duration is now continuous (15-240) rather than a 5-value grid, so the
+     tree learns the real policy boundaries instead of grid midpoints
 
 Features:
 - Recovery_Debt_Score  : 0-100 (computed Java-side from Health Connect sleep data)
@@ -20,7 +22,7 @@ Features:
 - Is_Fixed_Time        : 1 fixed (shift/exam/class), 0 flexible
 - Is_Recovery_Activity : 1 if the activity restores capacity (Social today;
                          Fitness / Meditation / Family later), else 0
-- Duration_Minutes     : 30-180
+- Duration_Minutes     : 15-240 (continuous)
 
 Label: 1 = KEEP, 0 = MOVE
 """
@@ -36,7 +38,11 @@ ACADEMIC, WORK, ERRAND, SOCIAL, COCURRICULAR = 0, 1, 2, 3, 4
 recovery_debt = np.random.randint(0, 101, N)
 days_until_due = np.random.randint(0, 15, N)
 category_id = np.random.randint(0, 5, N)
-duration_minutes = np.random.choice([30, 60, 90, 120, 180], size=N)
+# Continuous, NOT a 5-value grid. Real durations come from startTime/endTime
+# and land on arbitrary minutes, so training on {30,60,90,120,180} would make
+# the tree learn thresholds at the midpoints (105/150) instead of the policy
+# boundaries (120/180), misclassifying every off-grid duration between them.
+duration_minutes = np.random.randint(15, 241, N)
 
 # --- Priority is now drawn independently, only *skewed* by category ---------
 # Academic work skews high-priority, errands skew low, but any category can

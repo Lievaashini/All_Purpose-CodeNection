@@ -4,7 +4,7 @@ Week 2 deliverable for Member 3 (ML Engineer)
 
 Pipeline:
   1. Load the synthetic dataset from Week 1
-  2. Train/test split (800/200)
+  2. Train/test split (2400/600)
   3. Train a Scikit-Learn Decision Tree
   4. Evaluate with a Confusion Matrix + classification report
   5. Print the learned tree rules (glass-box proof for judges)
@@ -31,9 +31,12 @@ FEATURES = [
 # ---------------------------------------------------------------- 1. Load
 # The Android package this class will live in. MUST match the folder path
 # under app/src/main/java/ exactly, or the file will not compile.
-JAVA_PACKAGE = "com.example.codenection2026.engine"
+JAVA_PACKAGE = "com.example.codenection2026_package.engine"
 
-MAX_DEPTH = 7   # minimum depth at which all six features contribute
+# All six features contribute from depth 6 onward; accuracy keeps improving
+# to depth 8 and is flat beyond it, so 8 is the saturation point rather than
+# the minimum. Deeper costs nothing here - the tree stops growing on its own.
+MAX_DEPTH = 8
 
 df = pd.read_csv("capcoach_synthetic_tasks.csv")
 X = df[FEATURES]
@@ -168,6 +171,15 @@ def tree_to_java(tree_clf, feature_names, accuracy, n_train, n_test):
     lines.append("        // tomorrow that they marked High is the worst thing this")
     lines.append("        // engine could do, so it is never left to the learned branches.")
     lines.append("        if (taskPriorityWeight == 3 && daysUntilDue <= 2) {")
+    lines.append("            return KEEP;")
+    lines.append("        }")
+    lines.append("")
+    lines.append("        // Rail 4: below the heavy-debt threshold, high-priority work is")
+    lines.append("        // never shed on duration alone - only debt > 80 can shed a")
+    lines.append("        // High task, and then only via the branches below. Without this")
+    lines.append("        // the tree sheds long High-priority recovery time at moderate")
+    lines.append("        // debt, which is both wrong and the most damaging direction.")
+    lines.append("        if (taskPriorityWeight == 3 && recoveryDebtScore <= 80) {")
     lines.append("            return KEEP;")
     lines.append("        }")
     lines.append("")
