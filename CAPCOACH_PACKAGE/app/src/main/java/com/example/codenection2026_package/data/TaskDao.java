@@ -21,6 +21,10 @@ public interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY date ASC, startTime ASC")
     List<Task> getAll();
 
+    // Find a task by its Google Calendar Event ID (used to prevent sync duplicates)
+    @Query("SELECT * FROM tasks WHERE calendar_event_id = :calendarEventId LIMIT 1")
+    Task findByCalendarEventId(Long calendarEventId);
+
     // Find a task by its ID
     @Query("SELECT * FROM tasks WHERE id = :id LIMIT 1")
     Task findById(long id);

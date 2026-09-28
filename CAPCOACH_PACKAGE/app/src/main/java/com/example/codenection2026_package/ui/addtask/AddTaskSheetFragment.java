@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.api.VoiceManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
@@ -73,6 +74,8 @@ import java.util.Locale;
  * "could not save" toast rather than a silent loss.
  */
 public class AddTaskSheetFragment extends BottomSheetDialogFragment {
+
+    private CalendarManager calendarManager;
 
     /** Tag used by DashboardFragment when it shows this sheet. */
     public static final String TAG = "add_task";
@@ -179,6 +182,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        calendarManager = new CalendarManager(requireContext());
         root = view;
 
         bindViews(view);
@@ -874,7 +878,6 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
         String name = taskNameInput == null ? "" : taskNameInput.getText().toString().trim();
         if (name.isEmpty()) {
-            // Fall back to the category's example name rather than saving a blank row.
             name = defaultNameFor(category);
             if (name.isEmpty()) {
                 Toast.makeText(requireContext(), R.string.addtask_name_required, Toast.LENGTH_SHORT).show();
@@ -890,17 +893,31 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
                 formatMinutes(startMinutes),
                 formatMinutes(endMinutes));
         task.setPriority(selectedPriority());
-        // A protected shift can never be deferred, so its window is zero whatever the
-        // spinner says: the scheduler reads the row, not the screen.
         task.setDeferralHours(flexible ? selectedDeferralHours() : 0);
+
+        // --- TWO-WAY SYNC LOGIC ---
+        // If it is an INFLEXIBLE work shift, push it to Android Calendar
+        if (!flexible) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(ISO_PATTERN + " HH:mm", Locale.US);
+                Date startDate = sdf.parse(dateIso + " " + formatMinutes(startMinutes));
+                Date endDate = sdf.parse(dateIso + " " + formatMinutes(endMinutes));
+
+                if (startDate != null && endDate != null) {
+                    // Push to Android Calendar and get the ID back
+                    Long newCalendarId = calendarManager.writeShiftToCalendar(name, startDate.getTime(), endDate.getTime());
+                    task.setCalendarEventId(newCalendarId); // Save the external ID to Room!
+                }
+            } catch (ParseException e) {
+                android.util.Log.e(TAG, "Failed to parse dates for Calendar sync.");
+            }
+        }
 
         Context appContext = requireContext().getApplicationContext();
         setSaving(true);
 
         final String savedCategory = category;
         TaskRepository.save(appContext, task, category, rowId -> {
-            // Room needs a background thread, so this arrives after the sheet may
-            // already be gone. isAdded() guards the views and the toasts.
             if (!isAdded()) {
                 return;
             }

@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.provider.CalendarContract;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,13 +28,17 @@ public class CalendarManager {
     }
 
     public static class CalendarEvent {
+
+        public long eventId;
+
         public String title;
         public String dateStr;      // "yyyy-MM-dd"
         public String startTimeStr; // "HH:mm"
         public String endTimeStr;   // "HH:mm"
         public boolean isAllDay;
 
-        public CalendarEvent(String title, String dateStr, String startTimeStr, String endTimeStr, boolean isAllDay) {
+        public CalendarEvent(long eventId, String title, String dateStr, String startTimeStr, String endTimeStr, boolean isAllDay) {
+            this.eventId=eventId;
             this.title = title;
             this.dateStr = dateStr;
             this.startTimeStr = startTimeStr;
@@ -82,6 +88,7 @@ public class CalendarManager {
         try (Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder)) {
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
+                    long eventId = cursor.getLong(0);
                     String title = cursor.getString(1);
                     long eventStart = cursor.getLong(2);
                     long eventEnd = cursor.getLong(3);
@@ -101,7 +108,7 @@ public class CalendarManager {
                     String startTimeStr = timeFormatter.format(calStart.getTime());
                     String endTimeStr = timeFormatter.format(calEnd.getTime());
 
-                    eventsList.add(new CalendarEvent(title, dateStr, startTimeStr, endTimeStr, isAllDay));
+                    eventsList.add(new CalendarEvent(eventId, title, dateStr, startTimeStr, endTimeStr, isAllDay));
                 }
             }
         } catch (SecurityException e) {
@@ -137,5 +144,40 @@ public class CalendarManager {
         } catch (SecurityException e) {
             Log.e(TAG, "Calendar write permission denied: " + e.getMessage());
         }
+    }
+
+    /**
+     * Writes a user-created inflexible shift to the native Android Calendar.
+     * @return The newly generated Google Calendar EVENT_ID, or null if it failed.
+     */
+    @Nullable
+    public Long writeShiftToCalendar(String title, long startMillis, long endMillis) {
+        ContentResolver contentResolver = context.getContentResolver();
+        Uri calendarsUri = CalendarContract.Calendars.CONTENT_URI;
+        String[] projection = new String[]{CalendarContract.Calendars._ID};
+        String selection = CalendarContract.Calendars.IS_PRIMARY + " = 1";
+
+        try (Cursor cursor = contentResolver.query(calendarsUri, projection, selection, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                long calendarId = cursor.getLong(0);
+
+                ContentValues values = new ContentValues();
+                values.put(CalendarContract.Events.DTSTART, startMillis);
+                values.put(CalendarContract.Events.DTEND, endMillis);
+                values.put(CalendarContract.Events.TITLE, title);
+                values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
+                values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
+
+                Uri uri = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values);
+                if (uri != null) {
+                    return Long.parseLong(uri.getLastPathSegment()); // Return the new Calendar ID!
+                }
+            }
+        } catch (SecurityException e) {
+            Log.e(TAG, "Calendar write permission denied: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Failed to parse new Calendar ID.");
+        }
+        return null;
     }
 }
