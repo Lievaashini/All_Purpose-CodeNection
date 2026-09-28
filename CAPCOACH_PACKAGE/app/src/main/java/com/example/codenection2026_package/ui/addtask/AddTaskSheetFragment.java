@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.api.VoiceManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
 import com.example.codenection2026_package.model.Task;
@@ -96,6 +97,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
     /** The prototype's "48h max", which is also {@link Task#DEFAULT_DEFERRAL_HOURS}. */
     private static final int DEFAULT_DEFERRAL_INDEX = 3;
+    private VoiceManager voiceManager;
 
     /** Tells the dashboard a row landed, so it can refresh the day it belongs to. */
     public interface OnTaskSavedListener {
@@ -185,6 +187,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         setupPriority();
         setupTimes();
         setupActions(view);
+        setupVoice();
 
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
 
@@ -200,6 +203,11 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
     @Override
     public void onDestroyView() {
+        if (voiceManager != null) {
+            voiceManager.destroy();
+            voiceManager = null;
+        }
+
         root = null;
         taskNameInput = null;
         categorySpinner = null;
@@ -229,6 +237,52 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         panelWorkCap = null;
         panelCognitiveBuffer = null;
         super.onDestroyView();
+    }
+
+    // ==================================================================
+    // Voice Dictation
+    // ==================================================================
+
+    private void setupVoice() {
+        if (!android.speech.SpeechRecognizer.isRecognitionAvailable(requireContext())) {
+            return;
+        }
+
+        voiceManager = new VoiceManager(requireContext(), new android.speech.RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+                if (taskNameInput != null) {
+                    taskNameInput.setHint("Listening...");
+                }
+            }
+
+            @Override public void onBeginningOfSpeech() {}
+            @Override public void onRmsChanged(float rmsdB) {}
+            @Override public void onBufferReceived(byte[] buffer) {}
+            @Override public void onEndOfSpeech() {}
+
+            @Override
+            public void onError(int error) {
+                if (taskNameInput != null) {
+                    taskNameInput.setHint("Didn't catch that. Try again.");
+                }
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                if (results != null) {
+                    java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                    if (matches != null && !matches.isEmpty() && taskNameInput != null) {
+                        String cleanTitle = com.example.codenection2026_package.api.VoiceInputFormatter.formatTaskTitle(matches.get(0));
+                        taskNameInput.setText(cleanTitle);
+                        taskNameInput.setSelection(cleanTitle.length());
+                    }
+                }
+            }
+
+            @Override public void onPartialResults(Bundle partialResults) {}
+            @Override public void onEvent(int eventType, Bundle params) {}
+        });
     }
 
     // ==================================================================
@@ -357,8 +411,17 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         click(view, R.id.sheetClose, this::dismiss);
         click(view, R.id.cancelButton, this::dismiss);
 
-        click(view, R.id.dictateButton, () ->
-                Toast.makeText(requireContext(), R.string.voice_unavailable, Toast.LENGTH_SHORT).show());
+        click(view, R.id.dictateButton, () -> {
+            if (voiceManager != null) {
+                if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    voiceManager.startListening();
+                } else {
+                    Toast.makeText(requireContext(), "Microphone permission required.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(requireContext(), R.string.voice_unavailable, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         click(view, R.id.dateButton, this::pickDate);
         click(view, R.id.startTimeButton, () -> pickTime(true));
