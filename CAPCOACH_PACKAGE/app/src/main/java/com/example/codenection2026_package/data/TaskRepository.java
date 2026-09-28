@@ -201,17 +201,19 @@ public final class TaskRepository {
     }
 
     /**
-     * Checks if a Google Calendar event already exists in the database.
+     * Checks if a specific occurrence of a Google Calendar event already exists in the database.
      */
-    public static void findByCalendarId(@NonNull Context context,
-                                        @NonNull Long calendarEventId,
-                                        @NonNull Callback<Task> callback) {
+    public static void findByCalendarIdAndDateAndTime(@NonNull Context context,
+                                                      @NonNull Long calendarEventId,
+                                                      @NonNull String date,
+                                                      @NonNull String startTime,
+                                                      @NonNull Callback<Task> callback) {
         final Context appContext = context.getApplicationContext();
         IO.execute(() -> {
             Task task;
             try {
                 AppDatabase db = AppDatabase.get(appContext);
-                task = db.taskDao().findByCalendarEventId(calendarEventId);
+                task = db.taskDao().findByCalendarEventIdAndDateAndTime(calendarEventId, date, startTime);
             } catch (RuntimeException e) {
                 task = null;
             }

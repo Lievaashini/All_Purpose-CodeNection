@@ -894,9 +894,11 @@ public class DashboardFragment extends Fragment {
 
         for (CalendarManager.CalendarEvent event : nativeEvents) {
 
-            // Search the ENTIRE database for this exact Google Calendar ID
-            TaskRepository.findByCalendarId(appContext, event.eventId, existingTask -> {
+            // TO BE DELETED LOGCAT TEST LINE:
+            android.util.Log.d("CapCoachAPI", "Syncing Event: " + event.title + " | ID: " + event.eventId + " | Date: " + event.dateStr);
 
+            // Search the database for this exact Google Calendar ID ON THIS EXACT Date and Time
+            TaskRepository.findByCalendarIdAndDateAndTime(appContext, event.eventId, event.dateStr, event.startTimeStr, existingTask -> {
                 if (existingTask != null) {
                     // THE EVENT ALREADY EXISTS!
                     // Update its times in case the user rescheduled it in Google Calendar
