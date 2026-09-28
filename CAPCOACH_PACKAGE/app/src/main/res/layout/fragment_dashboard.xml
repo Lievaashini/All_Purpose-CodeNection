@@ -38,7 +38,7 @@
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/gutter"
             android:paddingTop="@dimen/content_top_inset"
-            android:paddingBottom="@dimen/content_bottom_inset">
+            android:paddingBottom="144dp">
 
             <!-- ============ Capacity summary card ============ -->
             <com.google.android.material.card.MaterialCardView
