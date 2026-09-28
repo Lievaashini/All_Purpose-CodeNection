@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
 import com.example.codenection2026_package.model.Task;
@@ -156,6 +157,9 @@ public class DashboardFragment extends Fragment {
 
     private final Runnable hideToast = this::dismissRebalanceToast;
 
+    // API INJECTION
+    private CalendarManager calendarManager;
+
     public DashboardFragment() {
         super(R.layout.fragment_dashboard);
     }
@@ -173,6 +177,7 @@ public class DashboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         bindViews(view);
+        calendarManager = new CalendarManager(requireContext());
 
         // Shared shell: bottom nav selection, theme toggle, week strip, chart.
         ScreenNav.bindNav(this, view, ScreenNav.Tab.HOME);
@@ -840,8 +845,67 @@ public class DashboardFragment extends Fragment {
         click(view, R.id.weeklyPopupButton, () -> ScreenNav.showFeast(this));
         click(view, R.id.addTaskFab, this::openAddTask);
         click(view, R.id.toastClose, this::dismissRebalanceToast);
-        click(view, R.id.syncNowButton, () ->
-                Toast.makeText(requireContext(), R.string.dash_synced_ago, Toast.LENGTH_SHORT).show());
+
+        // WIRE CALENDAR MANAGER HERE
+        click(view, R.id.syncNowButton, this::syncCalendar);
+    }
+
+    /**
+     * Pulls the user's native Google Calendar events and maps them directly
+     * into Lieva's Room database via TaskRepository, with de-duplication.
+     */
+    private void syncCalendar() {
+        Toast.makeText(requireContext(), "Syncing Google Calendar...", Toast.LENGTH_SHORT).show();
+
+        List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
+
+        if (nativeEvents == null || nativeEvents.isEmpty()) {
+            Toast.makeText(requireContext(), "No upcoming events found.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Context appContext = requireContext().getApplicationContext();
+
+        for (CalendarManager.CalendarEvent event : nativeEvents) {
+            // Check if this task already exists in Room for that date before inserting
+            TaskRepository.loadByDate(appContext, event.dateStr, existingItems -> {
+                boolean alreadyExists = false;
+                if (existingItems != null) {
+                    for (TaskRepository.FeedItem item : existingItems) {
+                        Task t = item.getTask();
+                        if (t.getTaskName().equalsIgnoreCase(event.title) &&
+                                t.getStartTime().equals(event.startTimeStr)) {
+                            alreadyExists = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Only insert if it doesn't already exist
+                if (!alreadyExists) {
+                    Task importedTask = new Task(
+                            "INFLEXIBLE",
+                            event.title,
+                            null,
+                            event.dateStr,
+                            event.startTimeStr,
+                            event.endTimeStr
+                    );
+                    importedTask.setPriority(Task.PRIORITY_MED);
+                    importedTask.setDeferralHours(0);
+
+                    TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {
+                        if (rowId != null && rowId > 0 && isAdded()) {
+                            if (indexOfWeekDate(event.dateStr) == selectedDay) {
+                                reloadTasks();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        Toast.makeText(requireContext(), "Sync complete!", Toast.LENGTH_SHORT).show();
     }
 
     private void openTriage() {

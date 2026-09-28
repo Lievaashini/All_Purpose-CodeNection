@@ -1,6 +1,7 @@
 package com.example.codenection2026_package.api;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -24,7 +25,6 @@ public class CalendarManager {
         this.context = context;
     }
 
-    // DTO to hold structured calendar data
     public static class CalendarEvent {
         public String title;
         public String dateStr;      // "yyyy-MM-dd"
@@ -42,41 +42,54 @@ public class CalendarManager {
     }
 
     /**
-     * Extracts upcoming 7-day events and formats them to match the Room Task entity.
+     * Extracts upcoming 7-day events using CalendarContract.Instances.
+     * Expands recurring events and includes morning events from today.
      */
     public List<CalendarEvent> logUpcomingWeekEvents() {
         List<CalendarEvent> eventsList = new ArrayList<>();
         ContentResolver contentResolver = context.getContentResolver();
-        Uri uri = CalendarContract.Events.CONTENT_URI;
+
+        // 1. Reset to the start of today (00:00:00) so morning events are included
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long startRange = cal.getTimeInMillis();
+
+        cal.add(Calendar.DAY_OF_YEAR, 7);
+        long endRange = cal.getTimeInMillis();
+
+        // 2. Query Instances instead of Events so recurring events are expanded
+        Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
+        ContentUris.appendId(builder, startRange);
+        ContentUris.appendId(builder, endRange);
+        Uri uri = builder.build();
 
         String[] projection = new String[]{
-                CalendarContract.Events._ID,
-                CalendarContract.Events.TITLE,
-                CalendarContract.Events.DTSTART,
-                CalendarContract.Events.DTEND,
-                CalendarContract.Events.ALL_DAY
+                CalendarContract.Instances.EVENT_ID,
+                CalendarContract.Instances.TITLE,
+                CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.END,
+                CalendarContract.Instances.ALL_DAY
         };
 
-        Calendar now = Calendar.getInstance();
-        long startTime = now.getTimeInMillis();
-        now.add(Calendar.DAY_OF_YEAR, 7);
-        long endTime = now.getTimeInMillis();
-
-        String selection = CalendarContract.Events.DTSTART + " >= ? AND " +
-                CalendarContract.Events.DTSTART + " <= ?";
-        String[] selectionArgs = new String[]{String.valueOf(startTime), String.valueOf(endTime)};
-        String sortOrder = CalendarContract.Events.DTSTART + " ASC";
+        String sortOrder = CalendarContract.Instances.BEGIN + " ASC";
 
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
-        try (Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder)) {
+        try (Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder)) {
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
                     String title = cursor.getString(1);
                     long eventStart = cursor.getLong(2);
                     long eventEnd = cursor.getLong(3);
                     boolean isAllDay = cursor.getInt(4) == 1;
+
+                    if (title == null || title.trim().isEmpty()) {
+                        title = "Untitled Event";
+                    }
 
                     Calendar calStart = Calendar.getInstance();
                     calStart.setTimeInMillis(eventStart);
