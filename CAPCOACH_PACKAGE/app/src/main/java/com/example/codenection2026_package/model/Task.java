@@ -25,6 +25,14 @@ public class Task {
     public static final String PRIORITY_MED = "MED";
     public static final String PRIORITY_LOW = "LOW";
 
+    /**
+     * The same three levels on the integer scale the ML load shedder expects as its
+     * {@code taskPriorityWeight} input: 3 High, 2 Medium, 1 Low.
+     */
+    public static final int WEIGHT_HIGH = 3;
+    public static final int WEIGHT_MED = 2;
+    public static final int WEIGHT_LOW = 1;
+
     /** Default deferral window, in hours, of a sheddable task. */
     public static final int DEFAULT_DEFERRAL_HOURS = 48;
 
@@ -153,6 +161,33 @@ public class Task {
 
     public void setPriority(String priority) {
         this.priority = priority;
+    }
+
+    /**
+     * @return this task's priority as the ML model's integer input:
+     *         {@link #WEIGHT_HIGH} (3), {@link #WEIGHT_MED} (2) or {@link #WEIGHT_LOW} (1).
+     *         Feed this straight into the load shedder's {@code taskPriorityWeight}, so the
+     *         High/Med/Low the user picked in the Add Activity sheet reaches the model.
+     */
+    public int getPriorityWeight() {
+        if (PRIORITY_HIGH.equals(priority)) {
+            return WEIGHT_HIGH;
+        }
+        if (PRIORITY_LOW.equals(priority)) {
+            return WEIGHT_LOW;
+        }
+        return WEIGHT_MED;
+    }
+
+    /** Stores a priority given on the model's integer scale: 3 High, 2 Medium, 1 Low. */
+    public void setPriorityWeight(int weight) {
+        if (weight >= WEIGHT_HIGH) {
+            priority = PRIORITY_HIGH;
+        } else if (weight <= WEIGHT_LOW) {
+            priority = PRIORITY_LOW;
+        } else {
+            priority = PRIORITY_MED;
+        }
     }
 
     // Deferral window
