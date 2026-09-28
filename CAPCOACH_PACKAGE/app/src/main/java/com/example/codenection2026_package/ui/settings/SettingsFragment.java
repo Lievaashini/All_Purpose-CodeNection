@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
+import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
@@ -60,17 +61,11 @@ public class SettingsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         ScreenNav.bindNav(this, view, ScreenNav.Tab.SETTINGS);
-        ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
 
-        // The header logo is an animated GIF. The layout keeps android:src purely so the
-        // Android Studio preview pane still renders something, but that path decodes only
-        // the first frame - so the sprite is loaded through Glide here to actually animate.
-        android.widget.ImageView headerDino = view.findViewById(R.id.headerDino);
-        if (headerDino != null && isAdded()) {
-            com.bumptech.glide.Glide.with(this)
-                    .load(R.drawable.dino_happy)
-                    .into(headerDino);
-        }
+        // The shared top bar. AppHeader starts the header mascot's GIF too, so this screen
+        // no longer loads it itself - the header is now identical to Dashboard's and
+        // Biometrics', including the Offline ML pill that used to sit in it being gone.
+        AppHeader.bind(this, view, R.string.settings_title);
 
         themeNightButton = view.findViewById(R.id.themeNightButton);
         themeBrightButton = view.findViewById(R.id.themeBrightButton);

@@ -22,7 +22,7 @@ import androidx.fragment.app.Fragment;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.HealthConnectManager;
 import com.example.codenection2026_package.model.Biometrics;
-import com.example.codenection2026_package.ui.onboarding.ThemeController;
+import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 
 import java.util.Collections;
@@ -108,7 +108,7 @@ public class BiometricsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         ScreenNav.bindNav(this, view, ScreenNav.Tab.BIOMETRICS);
-        ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
+        AppHeader.bind(this, view, R.string.nav_biometrics);
 
         penaltyTrack = view.findViewById(R.id.penaltyTrack);
         penaltyBar = view.findViewById(R.id.penaltyBar);
