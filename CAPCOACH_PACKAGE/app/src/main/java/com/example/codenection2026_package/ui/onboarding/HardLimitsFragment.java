@@ -183,13 +183,20 @@ public class HardLimitsFragment extends Fragment {
 
     private void runCalendarTest() {
         try {
-            calendarManager.logUpcomingWeekEvents();
+            // 1. Test Writing
             calendarManager.blockRecoveryTime("Mandatory Brain Rest", 4);
-            android.util.Log.d("CapCoachAPI", "Calendar automated test complete. Check Logcat.");
+
+            // 2. Test Reading
+            java.util.List<CalendarManager.CalendarEvent> events = calendarManager.logUpcomingWeekEvents();
+            android.util.Log.d("CapCoachAPI", "Found " + events.size() + " calendar events.");
+            for (CalendarManager.CalendarEvent event : events) {
+                android.util.Log.d("CapCoachAPI", "Event: " + event.title + " on " + event.dateStr + " from " + event.startTimeStr + " to " + event.endTimeStr);
+            }
         } catch (Exception e) {
             android.util.Log.e("CapCoachAPI", "Calendar Test failed: " + e.getMessage());
         }
     }
+
 
     private void wireThemePreview() {
         if (dinoGuardAvatar != null) {
