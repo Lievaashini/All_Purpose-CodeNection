@@ -31,7 +31,7 @@ import com.example.codenection2026_package.model.Task;
  */
 @Database(
         entities = {Task.class, Category.class, Biometrics.class},
-        version = 2,
+        version = 3,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {

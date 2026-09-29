@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
 import com.example.codenection2026_package.model.Task;
@@ -156,6 +157,9 @@ public class DashboardFragment extends Fragment {
 
     private final Runnable hideToast = this::dismissRebalanceToast;
 
+    // API INJECTION
+    private CalendarManager calendarManager;
+
     public DashboardFragment() {
         super(R.layout.fragment_dashboard);
     }
@@ -173,6 +177,7 @@ public class DashboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         bindViews(view);
+        calendarManager = new CalendarManager(requireContext());
 
         // Shared shell: bottom nav selection, theme toggle, week strip, chart.
         ScreenNav.bindNav(this, view, ScreenNav.Tab.HOME);
@@ -638,7 +643,16 @@ public class DashboardFragment extends Fragment {
         // The filter chips read the category straight off the row.
         row.setTag(R.id.taskAccent, category);
 
+        // Store the whole Task object so toggleDone can save it later!
+        row.setTag(task);
+
         taskRows.add(row);
+
+        // If the task was already completed in the DB, strike it out immediately upon loading
+        if (task.isCompleted()) {
+            toggleDone(row); // This visually checks it off
+        }
+
         return row;
     }
 
@@ -685,9 +699,15 @@ public class DashboardFragment extends Fragment {
         return R.color.status_amber;
     }
 
-    /** Check-off: strike the title, tick the box, drop the row to 65% alpha. */
+    /** Check-off: strike the title, tick the box, drop the row to 65% alpha, and save to Room. */
     private void toggleDone(@NonNull View row) {
         boolean nowDone = !doneRows.contains(row);
+
+        // 1. Get the actual Task object from the view's data
+        // (Assuming we store the Task object in the row's tag earlier, or we can fetch it)
+        // Since the current inflateTaskRow doesn't store the Task object itself, let's just
+        // update the visual state first.
+
         if (nowDone) {
             doneRows.add(row);
         } else {
@@ -718,8 +738,19 @@ public class DashboardFragment extends Fragment {
         }
 
         updateCounterAndChips();
-    }
 
+        // 2. Save the change to the database
+        Object tag = row.getTag();
+        if (tag instanceof Task) {
+            Task task = (Task) tag;
+            task.setCompleted(nowDone);
+            TaskRepository.update(requireContext(), task, success -> {
+                if (!Boolean.TRUE.equals(success)) {
+                    android.util.Log.e("CapCoachAPI", "Failed to save checkmark state to DB.");
+                }
+            });
+        }
+    }
     /**
      * Counter and "All (n)" chip both count VISIBLE rows only, so a filter narrows
      * the numbers the same way it narrows the feed.
@@ -840,10 +871,74 @@ public class DashboardFragment extends Fragment {
         click(view, R.id.weeklyPopupButton, () -> ScreenNav.showFeast(this));
         click(view, R.id.addTaskFab, this::openAddTask);
         click(view, R.id.toastClose, this::dismissRebalanceToast);
-        click(view, R.id.syncNowButton, () ->
-                Toast.makeText(requireContext(), R.string.dash_synced_ago, Toast.LENGTH_SHORT).show());
+
+        // WIRE CALENDAR MANAGER HERE
+        click(view, R.id.syncNowButton, this::syncCalendar);
     }
 
+    /**
+     * Pulls the user's native Google Calendar events and maps them directly
+     * into Lieva's Room database via TaskRepository, with de-duplication.
+     */
+    private void syncCalendar() {
+        Toast.makeText(requireContext(), "Syncing Google Calendar...", Toast.LENGTH_SHORT).show();
+
+        List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
+
+        if (nativeEvents == null || nativeEvents.isEmpty()) {
+            Toast.makeText(requireContext(), "No upcoming events found.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Context appContext = requireContext().getApplicationContext();
+
+        for (CalendarManager.CalendarEvent event : nativeEvents) {
+
+            // TO BE DELETED LOGCAT TEST LINE:
+            android.util.Log.d("CapCoachAPI", "Syncing Event: " + event.title + " | ID: " + event.eventId + " | Date: " + event.dateStr);
+
+            // Search the database for this exact Google Calendar ID ON THIS EXACT Date and Time
+            TaskRepository.findByCalendarIdAndDateAndTime(appContext, event.eventId, event.dateStr, event.startTimeStr, existingTask -> {
+                if (existingTask != null) {
+                    // THE EVENT ALREADY EXISTS!
+                    // Update its times in case the user rescheduled it in Google Calendar
+                    existingTask.setDate(event.dateStr);
+                    existingTask.setStartTime(event.startTimeStr);
+                    existingTask.setEndTime(event.endTimeStr);
+                    existingTask.setTaskName(event.title);
+
+                    TaskRepository.update(appContext, existingTask, success -> {
+                        if (Boolean.TRUE.equals(success) && isAdded()) {
+                            reloadTasks(); // Refresh UI in case it moved to the currently viewed day
+                        }
+                    });
+
+                } else {
+                    // IT DOES NOT EXIST. Insert a new row.
+                    Task importedTask = new Task(
+                            "INFLEXIBLE",
+                            event.title,
+                            null,
+                            event.dateStr,
+                            event.startTimeStr,
+                            event.endTimeStr
+                    );
+                    importedTask.setPriority(Task.PRIORITY_MED);
+                    importedTask.setDeferralHours(0);
+                    importedTask.setCalendarEventId(event.eventId); // SAVE THE STABLE ID
+
+                    TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {
+                        if (rowId != null && rowId > 0 && isAdded()) {
+                            if (indexOfWeekDate(event.dateStr) == selectedDay) {
+                                reloadTasks();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        Toast.makeText(requireContext(), "Sync complete!", Toast.LENGTH_SHORT).show();
+    }
     private void openTriage() {
         TriageSheetFragment sheet = new TriageSheetFragment();
         sheet.setOnRebalanceAccepted(this::showRebalanceToast);

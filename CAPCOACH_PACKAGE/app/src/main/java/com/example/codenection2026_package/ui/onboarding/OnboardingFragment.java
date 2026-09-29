@@ -1,8 +1,6 @@
 package com.example.codenection2026_package.ui.onboarding;
 
 import android.os.Bundle;
-import android.speech.RecognitionListener;
-import android.speech.SpeechRecognizer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +15,9 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.HealthConnectManager;
-import com.example.codenection2026_package.api.VoiceManager;
 import com.example.codenection2026_package.model.ToneType;
 import com.google.android.material.card.MaterialCardView;
 
-import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * SCREEN 1 - Onboarding. Port of {@code prototype/onboarding.html}.
@@ -41,7 +36,6 @@ public class OnboardingFragment extends Fragment {
     private boolean healthConnectGranted = false;
 
     // --- API INJECTIONS ---
-    private VoiceManager voiceManager;
     private HealthConnectManager healthManager;
 
     private final androidx.activity.result.ActivityResultLauncher<java.util.Set<String>> requestHealthPermissionLauncher =
@@ -85,12 +79,6 @@ public class OnboardingFragment extends Fragment {
                     }
             );
 
-    private final androidx.activity.result.ActivityResultLauncher<String> requestMicPermissionLauncher =
-            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (Boolean.TRUE.equals(isGranted) && voiceManager != null) {
-                    voiceManager.startListening();
-                }
-            });
     // -------------------------------
 
     public OnboardingFragment() {
@@ -128,35 +116,6 @@ public class OnboardingFragment extends Fragment {
         // --- Theme toggle (same helper is used on Screen 2) ---
         healthManager = new HealthConnectManager(requireContext());
 
-        voiceManager = new VoiceManager(requireContext(), new RecognitionListener() {
-            @Override public void onReadyForSpeech(Bundle params) {
-                if (dinoDialogue != null) dinoDialogue.setText("Listening...");
-            }
-            @Override public void onBeginningOfSpeech() {}
-            @Override public void onRmsChanged(float rmsdB) {}
-            @Override public void onBufferReceived(byte[] buffer) {}
-            @Override public void onEndOfSpeech() {}
-            @Override public void onError(int error) {
-                if (dinoDialogue != null) dinoDialogue.setText("I didn't quite catch that.");
-            }
-            @Override public void onResults(Bundle results) {
-                if (results != null) {
-                    ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                    if (matches != null && !matches.isEmpty() && dinoDialogue != null) {
-                        String spokenText = matches.get(0);
-                        dinoDialogue.setText("You said: " + spokenText);
-
-                        // --- WEEK 2 ML BINDING (PATH A) ---
-                        // TODO: Route parsed spokenText into Task properties, then call:
-                        // int decision = LoadShedder_generated.predictTaskAction(...);
-                        android.util.Log.d("CapCoachAPI", "Voice captured, ready for Java ML Shedder routing.");
-                    }
-                }
-            }
-            @Override public void onPartialResults(Bundle partialResults) {}
-            @Override public void onEvent(int eventType, Bundle params) {}
-        });
-
         // --- Theme toggle ---
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
 
@@ -184,18 +143,19 @@ public class OnboardingFragment extends Fragment {
         }
 
         // --- Mic button ---
-        // Opens the simplified Dino-focused voice popup for a focused exchange, and also
-        // keeps the original in-place listening behaviour so the page's own Dino dialogue
-        // still updates behind the dialog.
         View.OnClickListener micTrigger = v -> {
             if (isAdded()) {
-                new com.example.codenection2026_package.ui.companion.VoiceDinoDialogFragment()
-                        .show(getParentFragmentManager(), "voice_dino");
-            }
-            if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                if (voiceManager != null) voiceManager.startListening();
-            } else {
-                requestMicPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO);
+                com.example.codenection2026_package.ui.companion.VoiceDinoDialogFragment dialog =
+                        new com.example.codenection2026_package.ui.companion.VoiceDinoDialogFragment();
+
+                // Receive the text from the dialog and update the Onboarding screen
+                dialog.setOnVoiceResultListener((raw, clean) -> {
+                    if (dinoDialogue != null) {
+                        dinoDialogue.setText("You said: " + clean);
+                    }
+                });
+
+                dialog.show(getParentFragmentManager(), "voice_dino");
             }
         };
 
@@ -306,6 +266,5 @@ public class OnboardingFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (voiceManager != null) voiceManager.destroy();
     }
 }

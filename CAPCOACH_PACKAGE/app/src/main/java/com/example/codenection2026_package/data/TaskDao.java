@@ -21,6 +21,10 @@ public interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY date ASC, startTime ASC")
     List<Task> getAll();
 
+    // Find a specific occurrence of a Calendar Event (solves recurring event collisions)
+    @Query("SELECT * FROM tasks WHERE calendar_event_id = :calendarEventId AND date = :date AND startTime = :startTime LIMIT 1")
+    Task findByCalendarEventIdAndDateAndTime(Long calendarEventId, String date, String startTime);
+
     // Find a task by its ID
     @Query("SELECT * FROM tasks WHERE id = :id LIMIT 1")
     Task findById(long id);
