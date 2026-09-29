@@ -38,7 +38,7 @@
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/gutter"
             android:paddingTop="@dimen/content_top_inset"
-            android:paddingBottom="@dimen/content_bottom_inset">
+            android:paddingBottom="144dp">
 
             <!-- ============ Capacity summary card ============ -->
             <com.google.android.material.card.MaterialCardView
@@ -457,103 +457,13 @@
         </LinearLayout>
     </com.example.codenection2026_package.ui.widget.ObservableScrollView>
 
-    <!-- ==================== Fixed header ==================== -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/header_height"
-        android:layout_gravity="top"
-        android:background="@drawable/bg_header"
-        android:gravity="center_vertical"
-        android:orientation="vertical"
-        android:paddingHorizontal="@dimen/gutter">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <FrameLayout
-                android:layout_width="@dimen/avatar_size"
-                android:layout_height="@dimen/avatar_size"
-                android:background="@drawable/bg_zone_pill">
-
-                <ImageView
-                    android:id="@+id/headerDino"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/dino_description"
-                    android:src="@drawable/dino_happy" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/space_sm"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        style="@style/Text.Body"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/brand_name"
-                        android:textColor="@color/text_primary_dark"
-                        android:textStyle="bold" />
-
-                    <View
-                        android:layout_width="6dp"
-                        android:layout_height="6dp"
-                        android:layout_marginStart="@dimen/space_xxs"
-                        android:background="@drawable/dot_mint" />
-                </LinearLayout>
-
-                <TextView
-                    style="@style/Text.MicroLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/brand_offline_ml" />
-            </LinearLayout>
-
-            <FrameLayout
-                android:id="@+id/themeToggleButton"
-                android:layout_width="@dimen/icon_button_size"
-                android:layout_height="@dimen/icon_button_size"
-                android:background="@drawable/bg_surface_low"
-                android:clickable="true"
-                android:contentDescription="@string/cd_theme_toggle"
-                android:focusable="true">
-
-                <ImageView
-                    android:id="@+id/themeToggleIcon"
-                    android:layout_width="19dp"
-                    android:layout_height="19dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_light_mode"
-                    app:tint="@color/accent_amber" />
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/avatarBadge"
-                style="@style/Text.MicroLabel"
-                android:layout_width="@dimen/avatar_size"
-                android:layout_height="@dimen/avatar_size"
-                android:layout_marginStart="@dimen/space_sm"
-                android:background="@drawable/bg_circle_mint"
-                android:gravity="center"
-                android:text="@string/avatar_initial"
-                android:textColor="@color/on_brand"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
+    <!-- ==================== Fixed header ====================
+         Shared bar. This screen's version was the one the other two were measured
+         against, so its geometry moved into include_app_header.xml verbatim: 32dp
+         mascot plate, then the brand block, then a 40dp theme toggle and a 32dp
+         profile picture separated by @dimen/space_sm - all pinned to the gutters.
+         DashboardFragment names itself through AppHeader.bind. -->
+    <include layout="@layout/include_app_header" />
 
     <!-- ==================== Rebalance toast ==================== -->
     <LinearLayout

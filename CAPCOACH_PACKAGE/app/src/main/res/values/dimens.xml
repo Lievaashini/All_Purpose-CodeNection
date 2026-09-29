@@ -60,6 +60,20 @@
     <dimen name="avatar_size">32dp</dimen>
     <dimen name="avatar_size_lg">40dp</dimen>
 
+    <!-- ============ Shared top bar (include_app_header) ============
+         Every bottom-nav screen includes the same bar, so these are the single
+         source of truth for where the mascot, the theme toggle and the profile
+         picture sit. Change one here and all three screens move together.
+
+         Geometry comes from Prototype/dashboard.html line 150: a 32px plate
+         holding a 24px mascot on the left, and `gap-2` (8dp) between the toggle
+         and the 32px avatar on the right. The plate and the avatar share
+         @dimen/avatar_size so the bar is symmetric - the mascot's left edge and
+         the avatar's right edge are both exactly one @dimen/gutter in. -->
+    <dimen name="header_mascot_size">24dp</dimen>
+    <dimen name="header_toggle_icon">19dp</dimen>
+    <dimen name="header_avatar_icon">18dp</dimen>
+
     <!-- ============ Dashboard ============ -->
     <dimen name="day_pill_height">58dp</dimen>
     <dimen name="load_chart_height">112dp</dimen>

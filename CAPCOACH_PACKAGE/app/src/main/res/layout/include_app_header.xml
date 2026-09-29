@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SHARED TOP BAR for the three bottom-navigation screens
+  (Dashboard, Biometrics, Settings).
+
+  WHY THIS FILE EXISTS
+  Each of those screens used to carry its own hand-written copy of the bar, and the
+  three copies had drifted apart:
+
+    Dashboard   left: 32dp plate + 24dp mascot   right: toggle -> avatar "M"
+    Biometrics  left: bare "Biometrics" title    right: toggle only, NO avatar
+    Settings    left: 32dp dino image, 2dp pad   right: toggle -> Offline ML pill -> avatar
+
+  Because the right-hand group is laid out from the trailing gutter inwards, every
+  extra or missing child shifted the theme toggle sideways. On Settings the
+  "Offline ML" pill pushed the toggle ~85dp away from where it sits on Dashboard,
+  and Biometrics had no profile picture at all. The mascot had the same problem
+  from the other end: 24dp inside a plate on Dashboard, 28dp flat on Settings.
+
+  There is now exactly one bar. The three screens <include> it rather than
+  describing it again, so the alignment cannot drift a fourth time: the mascot is
+  always at the start of the row and the toggle -> avatar pair is always at the
+  end, at the same sizes and the same @dimen/space_sm gap.
+
+  ORDER IS PART OF THE CONTRACT (left to right):
+    [ mascot plate ][ brand block (weighted) ][ theme toggle ][ profile picture ]
+  The brand block is the only thing that stretches, so it absorbs any difference
+  in title length and nothing else moves. Do not insert a child after the toggle.
+
+  CALLER CONTRACT
+  Bind it with ui/shell/AppHeader.bind(...), which fills in the per-screen subtitle
+  text, starts the animated GIF mascot and wires the theme toggle. A screen that
+  includes this bar without calling it gets no subtitle and a single-frame mascot.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/appHeader"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/header_height"
+    android:layout_gravity="top"
+    android:background="@drawable/bg_header"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="@dimen/gutter">
+
+    <!-- ==================== Left: mascot, always first, always the same size ==================== -->
+    <FrameLayout
+        android:layout_width="@dimen/avatar_size"
+        android:layout_height="@dimen/avatar_size"
+        android:background="@drawable/bg_zone_pill">
+
+        <!-- Animated GIF. The layout keeps android:src purely so the Android Studio
+             preview pane renders something; that path decodes only the first frame,
+             so AppHeader loads it through Glide to actually play. -->
+        <ImageView
+            android:id="@+id/headerDino"
+            android:layout_width="@dimen/header_mascot_size"
+            android:layout_height="@dimen/header_mascot_size"
+            android:layout_gravity="center"
+            android:contentDescription="@string/dino_description"
+            android:src="@drawable/dino_happy" />
+    </FrameLayout>
+
+    <!-- ==================== Brand block: the only child that stretches ==================== -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_sm"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Text.Body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/brand_name"
+                android:textColor="@color/text_primary_dark"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginStart="@dimen/space_xxs"
+                android:background="@drawable/dot_mint" />
+        </LinearLayout>
+
+        <!-- Names the screen, so one bar still tells the three apart.
+             Written by AppHeader.bind. -->
+        <TextView
+            android:id="@+id/headerSubtitle"
+            style="@style/Text.MicroLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Offline ML Active" />
+    </LinearLayout>
+
+    <!-- ==================== Right: theme toggle, then profile picture ====================
+         Nothing may be inserted between these two: the toggle is positioned from
+         the trailing edge, so a new child here is exactly what broke the alignment
+         before. The Offline ML pill that used to sit in this gap is gone. -->
+    <FrameLayout
+        android:id="@+id/themeToggleButton"
+        android:layout_width="@dimen/icon_button_size"
+        android:layout_height="@dimen/icon_button_size"
+        android:background="@drawable/bg_surface_low"
+        android:clickable="true"
+        android:contentDescription="@string/cd_theme_toggle"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/themeToggleIcon"
+            android:layout_width="@dimen/header_toggle_icon"
+            android:layout_height="@dimen/header_toggle_icon"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_light_mode"
+            app:tint="@color/accent_amber" />
+    </FrameLayout>
+
+    <!-- Profile picture. One identical plate on every screen, per the agreed design.
+         The glyph is tinted @color/on_brand rather than @color/bg_dark: bg_dark is
+         the app BACKGROUND and flips to near-white in bright mode, which is why the
+         old Settings avatar drew a washed-out white person on a mint circle.
+         on_brand is deliberately identical in both palettes. -->
+    <FrameLayout
+        android:id="@+id/avatarBadge"
+        android:layout_width="@dimen/avatar_size"
+        android:layout_height="@dimen/avatar_size"
+        android:layout_marginStart="@dimen/space_sm"
+        android:background="@drawable/bg_circle_mint"
+        android:contentDescription="@string/cd_brand_avatar">
+
+        <ImageView
+            android:layout_width="@dimen/header_avatar_icon"
+            android:layout_height="@dimen/header_avatar_icon"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_person"
+            app:tint="@color/on_brand" />
+    </FrameLayout>
+</LinearLayout>
