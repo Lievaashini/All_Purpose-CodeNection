@@ -79,4 +79,24 @@ public class HealthConnectReader {
             return 0.0;
         }
     }
+
+    /**
+     * Converts a raw sleep deficit (in hours) into a 0-100 Recovery Debt Score.
+     * @param hasData Pass false if the Health Connect list was empty.
+     */
+    public static int calculateRecoveryDebtScore(double sleepDeficitHours, boolean hasData) {
+        if (!hasData) {
+            return 50; // Neutral baseline for emulators and missing data
+        }
+
+        if (sleepDeficitHours <= 0) {
+            return 0; // Fully rested
+        }
+
+        // Adjusted to a softer scale (15 points per hour instead of 25)
+        double score = sleepDeficitHours * 15.0;
+
+        if (score > 100) return 100;
+        return (int) Math.round(score);
+    }
 }
