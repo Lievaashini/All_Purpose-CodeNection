@@ -26,7 +26,8 @@ import com.example.codenection2026_package.data.TaskRepository;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
-import com.example.codenection2026_package.ui.onboarding.ThemeController;
+import com.example.codenection2026_package.ui.shell.AppHeader;
+import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.widget.LoadChartView;
 
@@ -179,17 +180,10 @@ public class DashboardFragment extends Fragment {
         bindViews(view);
         calendarManager = new CalendarManager(requireContext());
 
-        // Shared shell: bottom nav selection, theme toggle, week strip, chart.
+        // Shared shell: bottom nav selection, then the shared top bar (mascot, theme
+        // toggle, profile picture). AppHeader also starts the header mascot's GIF.
         ScreenNav.bindNav(this, view, ScreenNav.Tab.HOME);
-        ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
-
-        // The header brand mark is an animated GIF. The layout keeps android:src only so
-        // the Studio preview renders something; that path decodes a single frame, so the
-        // sprite is loaded through Glide here to actually animate.
-        ImageView headerDino = view.findViewById(R.id.headerDino);
-        if (headerDino != null) {
-            Glide.with(this).load(R.drawable.dino_happy).into(headerDino);
-        }
+        AppHeader.bind(this, view, R.string.brand_offline_ml);
 
         buildWeek();
         setupWeekStrip();
