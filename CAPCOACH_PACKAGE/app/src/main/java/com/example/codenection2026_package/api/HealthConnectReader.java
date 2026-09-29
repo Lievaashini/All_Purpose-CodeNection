@@ -79,4 +79,21 @@ public class HealthConnectReader {
             return 0.0;
         }
     }
+
+    /**
+     * Converts a raw sleep deficit (in hours) into a 0-100 Recovery Debt Score for the ML Model.
+     * Assumes a deficit of 0 hours = 0 score (perfect).
+     * Assumes a deficit of 4+ hours = 100 score (maximum burnout).
+     */
+    public static int calculateRecoveryDebtScore(double sleepDeficitHours) {
+        if (sleepDeficitHours <= 0) {
+            return 0; // Fully rested
+        }
+
+        // Linear scale: every 1 hour of missing sleep adds 25 points to the debt score
+        double score = sleepDeficitHours * 25.0;
+
+        if (score > 100) return 100;
+        return (int) Math.round(score);
+    }
 }

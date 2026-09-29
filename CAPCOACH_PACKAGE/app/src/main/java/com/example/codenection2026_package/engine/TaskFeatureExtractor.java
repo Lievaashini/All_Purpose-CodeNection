@@ -25,10 +25,6 @@ public class TaskFeatureExtractor {
         }
     }
 
-    /**
-     * Calculates duration in minutes. Clamps to [30, 180] and rounds
-     * to the nearest 30-minute block to bypass the off-grid training defect.
-     */
     public static int calculateDurationMinutes(String startTime, String endTime) {
         try {
             LocalTime start = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm"));
@@ -40,12 +36,10 @@ public class TaskFeatureExtractor {
                 minutes += 1440;
             }
 
-            // Round to nearest 30 to fix Defect #2
-            int rounded = Math.round(minutes / 30.0f) * 30;
-
-            if (rounded < 30) return 30;
-            if (rounded > 180) return 180;
-            return rounded;
+            // Updated boundaries matching the ML training data (15 to 240)
+            if (minutes < 15) return 15;
+            if (minutes > 240) return 240;
+            return (int) minutes;
 
         } catch (Exception e) {
             return 60; // Default fallback
