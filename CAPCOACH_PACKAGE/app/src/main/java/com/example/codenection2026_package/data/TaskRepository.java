@@ -199,4 +199,46 @@ public final class TaskRepository {
         CategoryRepository.ensureBaseline(db.categoryDao());
         categoriesSeeded = true;
     }
+
+    /**
+     * Checks if a specific occurrence of a Google Calendar event already exists in the database.
+     */
+    public static void findByCalendarIdAndDateAndTime(@NonNull Context context,
+                                                      @NonNull Long calendarEventId,
+                                                      @NonNull String date,
+                                                      @NonNull String startTime,
+                                                      @NonNull Callback<Task> callback) {
+        final Context appContext = context.getApplicationContext();
+        IO.execute(() -> {
+            Task task;
+            try {
+                AppDatabase db = AppDatabase.get(appContext);
+                task = db.taskDao().findByCalendarEventIdAndDateAndTime(calendarEventId, date, startTime);
+            } catch (RuntimeException e) {
+                task = null;
+            }
+            final Task result = task;
+            MAIN.post(() -> callback.onResult(result));
+        });
+    }
+
+    /**
+     * Updates an existing task in the database.
+     */
+    public static void update(@NonNull Context context,
+                              @NonNull Task task,
+                              @NonNull Callback<Boolean> callback) {
+        final Context appContext = context.getApplicationContext();
+        IO.execute(() -> {
+            boolean success = true;
+            try {
+                AppDatabase db = AppDatabase.get(appContext);
+                db.taskDao().update(task);
+            } catch (RuntimeException e) {
+                success = false;
+            }
+            final Boolean result = success;
+            MAIN.post(() -> callback.onResult(result));
+        });
+    }
 }

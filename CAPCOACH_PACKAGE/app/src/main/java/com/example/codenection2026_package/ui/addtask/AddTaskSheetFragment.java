@@ -25,6 +25,8 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.api.CalendarManager;
+import com.example.codenection2026_package.api.VoiceManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
 import com.example.codenection2026_package.model.Task;
@@ -73,6 +75,8 @@ import java.util.Locale;
  */
 public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
+    private CalendarManager calendarManager;
+
     /** Tag used by DashboardFragment when it shows this sheet. */
     public static final String TAG = "add_task";
 
@@ -96,6 +100,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
     /** The prototype's "48h max", which is also {@link Task#DEFAULT_DEFERRAL_HOURS}. */
     private static final int DEFAULT_DEFERRAL_INDEX = 3;
+    private VoiceManager voiceManager;
 
     /** Tells the dashboard a row landed, so it can refresh the day it belongs to. */
     public interface OnTaskSavedListener {
@@ -177,6 +182,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        calendarManager = new CalendarManager(requireContext());
         root = view;
 
         bindViews(view);
@@ -185,6 +191,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         setupPriority();
         setupTimes();
         setupActions(view);
+        setupVoice();
 
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
 
@@ -200,6 +207,11 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
     @Override
     public void onDestroyView() {
+        if (voiceManager != null) {
+            voiceManager.destroy();
+            voiceManager = null;
+        }
+
         root = null;
         taskNameInput = null;
         categorySpinner = null;
@@ -229,6 +241,52 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         panelWorkCap = null;
         panelCognitiveBuffer = null;
         super.onDestroyView();
+    }
+
+    // ==================================================================
+    // Voice Dictation
+    // ==================================================================
+
+    private void setupVoice() {
+        if (!android.speech.SpeechRecognizer.isRecognitionAvailable(requireContext())) {
+            return;
+        }
+
+        voiceManager = new VoiceManager(requireContext(), new android.speech.RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+                if (taskNameInput != null) {
+                    taskNameInput.setHint("Listening...");
+                }
+            }
+
+            @Override public void onBeginningOfSpeech() {}
+            @Override public void onRmsChanged(float rmsdB) {}
+            @Override public void onBufferReceived(byte[] buffer) {}
+            @Override public void onEndOfSpeech() {}
+
+            @Override
+            public void onError(int error) {
+                if (taskNameInput != null) {
+                    taskNameInput.setHint("Didn't catch that. Try again.");
+                }
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                if (results != null) {
+                    java.util.ArrayList<String> matches = results.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+                    if (matches != null && !matches.isEmpty() && taskNameInput != null) {
+                        String cleanTitle = com.example.codenection2026_package.api.VoiceInputFormatter.formatTaskTitle(matches.get(0));
+                        taskNameInput.setText(cleanTitle);
+                        taskNameInput.setSelection(cleanTitle.length());
+                    }
+                }
+            }
+
+            @Override public void onPartialResults(Bundle partialResults) {}
+            @Override public void onEvent(int eventType, Bundle params) {}
+        });
     }
 
     // ==================================================================
@@ -357,8 +415,17 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         click(view, R.id.sheetClose, this::dismiss);
         click(view, R.id.cancelButton, this::dismiss);
 
-        click(view, R.id.dictateButton, () ->
-                Toast.makeText(requireContext(), R.string.voice_unavailable, Toast.LENGTH_SHORT).show());
+        click(view, R.id.dictateButton, () -> {
+            if (voiceManager != null) {
+                if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    voiceManager.startListening();
+                } else {
+                    Toast.makeText(requireContext(), "Microphone permission required.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(requireContext(), R.string.voice_unavailable, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         click(view, R.id.dateButton, this::pickDate);
         click(view, R.id.startTimeButton, () -> pickTime(true));
@@ -816,7 +883,6 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
         String name = taskNameInput == null ? "" : taskNameInput.getText().toString().trim();
         if (name.isEmpty()) {
-            // Fall back to the category's example name rather than saving a blank row.
             name = defaultNameFor(category);
             if (name.isEmpty()) {
                 Toast.makeText(requireContext(), R.string.addtask_name_required, Toast.LENGTH_SHORT).show();
@@ -836,13 +902,29 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         // spinner says: the scheduler reads the row, not the screen.
         task.setDeferralHours(flexible ? selectedDeferralHours() : 0);
 
+        // --- TWO-WAY SYNC LOGIC ---
+        // If it is an INFLEXIBLE work shift, push it to Android Calendar
+        if (!flexible) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(ISO_PATTERN + " HH:mm", Locale.US);
+                Date startDate = sdf.parse(dateIso + " " + formatMinutes(startMinutes));
+                Date endDate = sdf.parse(dateIso + " " + formatMinutes(endMinutes));
+
+                if (startDate != null && endDate != null) {
+                    // Push to Android Calendar and get the ID back
+                    Long newCalendarId = calendarManager.writeShiftToCalendar(name, startDate.getTime(), endDate.getTime());
+                    task.setCalendarEventId(newCalendarId); // Save the external ID to Room!
+                }
+            } catch (ParseException e) {
+                android.util.Log.e(TAG, "Failed to parse dates for Calendar sync.");
+            }
+        }
+
         Context appContext = requireContext().getApplicationContext();
         setSaving(true);
 
         final String savedCategory = category;
         TaskRepository.save(appContext, task, category, rowId -> {
-            // Room needs a background thread, so this arrives after the sheet may
-            // already be gone. isAdded() guards the views and the toasts.
             if (!isAdded()) {
                 return;
             }

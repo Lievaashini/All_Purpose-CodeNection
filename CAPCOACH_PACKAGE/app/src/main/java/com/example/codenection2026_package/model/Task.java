@@ -39,6 +39,9 @@ public class Task {
     @PrimaryKey(autoGenerate = true)
     private long id;
 
+    @ColumnInfo(name = "calendar_event_id")
+    private Long calendarEventId;
+
     // "FLEXIBLE" or "INFLEXIBLE"
     private String classification;
 
@@ -66,6 +69,10 @@ public class Task {
     // task may not be deferred at all.
     @ColumnInfo(name = "deferral_hours", defaultValue = "48")
     private int deferralHours = DEFAULT_DEFERRAL_HOURS;
+
+    // Tracks whether the user has checked off the task in the dashboard
+    @ColumnInfo(name = "is_completed", defaultValue = "0")
+    private boolean isCompleted = false;
 
     public Task(
             String classification,
@@ -199,4 +206,15 @@ public class Task {
     public void setDeferralHours(int deferralHours) {
         this.deferralHours = deferralHours;
     }
+
+    public Long getCalendarEventId() {
+        return calendarEventId;
+    }
+
+    public void setCalendarEventId(Long calendarEventId) {
+        this.calendarEventId = calendarEventId;
+    }
+
+    public boolean isCompleted(){return this.isCompleted;};
+    public void setCompleted(boolean completed){this.isCompleted=completed;}
 }

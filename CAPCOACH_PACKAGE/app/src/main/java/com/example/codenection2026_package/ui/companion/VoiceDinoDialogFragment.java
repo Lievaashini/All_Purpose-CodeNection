@@ -57,6 +57,17 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
     /** The team's speech wrapper. Created here, destroyed in onDestroyView. */
     private VoiceManager voiceManager;
 
+    // Define a callback interface
+    public interface OnVoiceResultListener {
+        void onVoiceSpoken(String rawTranscript, String cleanTranscript);
+    }
+
+    private OnVoiceResultListener listener;
+
+    public void setOnVoiceResultListener(OnVoiceResultListener listener) {
+        this.listener = listener;
+    }
+
     /** The prototype's browser microphone prompt, as an Android runtime request. */
     private final ActivityResultLauncher<String> requestMicPermissionLauncher =
             registerForActivityResult(
@@ -189,7 +200,6 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
 
         @Override
         public void onResults(Bundle results) {
-            // Recognisers do not always deliver onEndOfSpeech, so stop here too.
             stopPulse();
             if (voiceStatusText != null) {
                 voiceStatusText.setText(R.string.voice_status_ready);
@@ -208,6 +218,15 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
             if (voiceBubble != null) {
                 voiceBubble.setText("\"" + transcript + "\"");
             }
+
+            // Format with your VoiceInputFormatter
+            String cleanTitle = com.example.codenection2026_package.api.VoiceInputFormatter.formatTaskTitle(transcript);
+
+            // Notify the parent OnboardingFragment to update its dialogue bubble too!
+            if (listener != null) {
+                listener.onVoiceSpoken(transcript, cleanTitle);
+            }
+
             handleTranscript(transcript);
         }
 

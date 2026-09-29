@@ -1,6 +1,7 @@
 package com.example.codenection2026_package.api;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -8,71 +9,150 @@ import android.net.Uri;
 import android.provider.CalendarContract;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class CalendarManager {
 
     private final Context context;
+    private static final String TAG = "CapCoachAPI";
 
     public CalendarManager(Context context) {
         this.context = context;
     }
 
-    /**
-     * Queries the local device for all calendar events happening in the next 7 days.
-     * Prints results to Logcat so the backend team can verify the data pull.
-     */
-    public void logUpcomingWeekEvents() {
-        ContentResolver contentResolver = context.getContentResolver();
-        Uri uri = CalendarContract.Events.CONTENT_URI;
+    public static class CalendarEvent {
 
-        String[] projection = new String[]{
-                CalendarContract.Events._ID,
-                CalendarContract.Events.TITLE,
-                CalendarContract.Events.DTSTART,
-                CalendarContract.Events.DTEND
-        };
+        public long eventId;
 
-        Calendar now = Calendar.getInstance();
-        long startTime = now.getTimeInMillis();
+        public String title;
+        public String dateStr;      // "yyyy-MM-dd"
+        public String startTimeStr; // "HH:mm"
+        public String endTimeStr;   // "HH:mm"
+        public boolean isAllDay;
 
-        now.add(Calendar.DAY_OF_YEAR, 7);
-        long endTime = now.getTimeInMillis();
-
-        String selection = CalendarContract.Events.DTSTART + " >= ? AND " +
-                CalendarContract.Events.DTSTART + " <= ?";
-        String[] selectionArgs = new String[]{String.valueOf(startTime), String.valueOf(endTime)};
-        String sortOrder = CalendarContract.Events.DTSTART + " ASC";
-
-        try (Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder)) {
-            if (cursor != null && cursor.getCount() > 0) {
-                Log.d("CapCoachAPI", "Found " + cursor.getCount() + " calendar events for the upcoming week.");
-
-                while (cursor.moveToNext()) {
-                    String title = cursor.getString(1);
-                    long eventStart = cursor.getLong(2);
-                    long eventEnd = cursor.getLong(3);
-
-                    double durationHours = (eventEnd - eventStart) / (1000.0 * 60 * 60);
-                    Log.d("CapCoachAPI", "Event: " + title + " | Duration: " + String.format("%.1f", durationHours) + " hours");
-                }
-            } else {
-                Log.d("CapCoachAPI", "No upcoming events found in the local calendar.");
-            }
-        } catch (SecurityException e) {
-            Log.e("CapCoachAPI", "Calendar permission not granted: " + e.getMessage());
+        public CalendarEvent(long eventId, String title, String dateStr, String startTimeStr, String endTimeStr, boolean isAllDay) {
+            this.eventId=eventId;
+            this.title = title;
+            this.dateStr = dateStr;
+            this.startTimeStr = startTimeStr;
+            this.endTimeStr = endTimeStr;
+            this.isAllDay = isAllDay;
         }
     }
 
     /**
-     * Triage System: Writes a recovery block to the local calendar.
-     * The Android OS will automatically sync this to the cloud in the background.
+     * Extracts upcoming 7-day events using CalendarContract.Instances.
+     * Expands recurring events and includes morning events from today.
      */
-    public void blockRecoveryTime(String title, int durationHours) {
+    public List<CalendarEvent> logUpcomingWeekEvents() {
+        List<CalendarEvent> eventsList = new ArrayList<>();
         ContentResolver contentResolver = context.getContentResolver();
 
-        // 1. Find the user's primary calendar account
+        // 1. Reset to the start of today (00:00:00) so morning events are included
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long startRange = cal.getTimeInMillis();
+
+        cal.add(Calendar.DAY_OF_YEAR, 7);
+        long endRange = cal.getTimeInMillis();
+
+        // 2. Query Instances instead of Events so recurring events are expanded
+        Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
+        ContentUris.appendId(builder, startRange);
+        ContentUris.appendId(builder, endRange);
+        Uri uri = builder.build();
+
+        String[] projection = new String[]{
+                CalendarContract.Instances.EVENT_ID,
+                CalendarContract.Instances.TITLE,
+                CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.END,
+                CalendarContract.Instances.ALL_DAY
+        };
+
+        String sortOrder = CalendarContract.Instances.BEGIN + " ASC";
+
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+        try (Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder)) {
+            if (cursor != null && cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    long eventId = cursor.getLong(0);
+                    String title = cursor.getString(1);
+                    long eventStart = cursor.getLong(2);
+                    long eventEnd = cursor.getLong(3);
+                    boolean isAllDay = cursor.getInt(4) == 1;
+
+                    if (title == null || title.trim().isEmpty()) {
+                        title = "Untitled Event";
+                    }
+
+                    Calendar calStart = Calendar.getInstance();
+                    calStart.setTimeInMillis(eventStart);
+
+                    Calendar calEnd = Calendar.getInstance();
+                    calEnd.setTimeInMillis(eventEnd);
+
+                    String dateStr = dateFormatter.format(calStart.getTime());
+                    String startTimeStr = timeFormatter.format(calStart.getTime());
+                    String endTimeStr = timeFormatter.format(calEnd.getTime());
+
+                    eventsList.add(new CalendarEvent(eventId, title, dateStr, startTimeStr, endTimeStr, isAllDay));
+                }
+            }
+        } catch (SecurityException e) {
+            Log.e(TAG, "Calendar permission not granted: " + e.getMessage());
+        }
+        return eventsList;
+    }
+
+    public void blockRecoveryTime(String title, int durationHours) {
+        ContentResolver contentResolver = context.getContentResolver();
+        Uri calendarsUri = CalendarContract.Calendars.CONTENT_URI;
+        String[] projection = new String[]{CalendarContract.Calendars._ID};
+        String selection = CalendarContract.Calendars.IS_PRIMARY + " = 1";
+
+        try (Cursor cursor = contentResolver.query(calendarsUri, projection, selection, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                long calendarId = cursor.getLong(0);
+                Calendar now = Calendar.getInstance();
+                long startMillis = now.getTimeInMillis();
+                now.add(Calendar.HOUR_OF_DAY, durationHours);
+                long endMillis = now.getTimeInMillis();
+
+                ContentValues values = new ContentValues();
+                values.put(CalendarContract.Events.DTSTART, startMillis);
+                values.put(CalendarContract.Events.DTEND, endMillis);
+                values.put(CalendarContract.Events.TITLE, "CapCoach Triage: " + title);
+                values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
+                values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
+
+                Uri uri = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values);
+                if (uri == null) Log.e(TAG, "Failed to write triage block.");
+            }
+        } catch (SecurityException e) {
+            Log.e(TAG, "Calendar write permission denied: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Writes a user-created inflexible shift to the native Android Calendar.
+     * @return The newly generated Google Calendar EVENT_ID, or null if it failed.
+     */
+    @Nullable
+    public Long writeShiftToCalendar(String title, long startMillis, long endMillis) {
+        ContentResolver contentResolver = context.getContentResolver();
         Uri calendarsUri = CalendarContract.Calendars.CONTENT_URI;
         String[] projection = new String[]{CalendarContract.Calendars._ID};
         String selection = CalendarContract.Calendars.IS_PRIMARY + " = 1";
@@ -81,33 +161,23 @@ public class CalendarManager {
             if (cursor != null && cursor.moveToFirst()) {
                 long calendarId = cursor.getLong(0);
 
-                // 2. Set the time block (Starting now)
-                Calendar now = Calendar.getInstance();
-                long startMillis = now.getTimeInMillis();
-                now.add(Calendar.HOUR_OF_DAY, durationHours);
-                long endMillis = now.getTimeInMillis();
-
-                // 3. Package the event details
                 ContentValues values = new ContentValues();
                 values.put(CalendarContract.Events.DTSTART, startMillis);
                 values.put(CalendarContract.Events.DTEND, endMillis);
-                values.put(CalendarContract.Events.TITLE, "CapCoach Triage: " + title);
+                values.put(CalendarContract.Events.TITLE, title);
                 values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
                 values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
 
-                // 4. Inject it into the system database
                 Uri uri = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values);
                 if (uri != null) {
-                    Log.d("CapCoachAPI", "Triage block written successfully! " + uri.toString());
-                } else {
-                    Log.e("CapCoachAPI", "Failed to write triage block. Database returned null.");
+                    return Long.parseLong(uri.getLastPathSegment()); // Return the new Calendar ID!
                 }
-
-            } else {
-                Log.e("CapCoachAPI", "No primary calendar found on device.");
             }
         } catch (SecurityException e) {
-            Log.e("CapCoachAPI", "Calendar write permission denied: " + e.getMessage());
+            Log.e(TAG, "Calendar write permission denied: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Failed to parse new Calendar ID.");
         }
+        return null;
     }
 }

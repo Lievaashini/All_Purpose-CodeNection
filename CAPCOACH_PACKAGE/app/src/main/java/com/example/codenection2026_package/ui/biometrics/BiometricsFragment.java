@@ -1,6 +1,7 @@
 package com.example.codenection2026_package.ui.biometrics;
 
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,14 +19,18 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.health.connect.client.records.SleepSessionRecord;
 
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.HealthConnectManager;
+import com.example.codenection2026_package.api.HealthConnectReader;
 import com.example.codenection2026_package.model.Biometrics;
 import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,21 +51,39 @@ public class BiometricsFragment extends Fragment {
      * Swap-in point for AppDatabase once it lands.
      */
     private interface BiometricsSource {
-        List<Biometrics> loadAll();
+        List<Biometrics> loadAll(Context context);
     }
 
     /**
-     * Placeholder source used until the shared database exists.
+     * API DIRECT SOURCE (Replaces EmptyBiometricsSource)
      *
-     * <p>Room wiring goes here: once the app database singleton lands, return the
-     * BiometricsDao from it and read getAll() inside loadAll(). Nothing else in this screen
-     * has to change, because every displayed number is derived below.
+     * <p>Bypasses the unmerged Room database and feeds data directly from the
+     * Health Connect API into the UI.
      */
-    private static final class EmptyBiometricsSource implements BiometricsSource {
+    private static final class ApiBiometricsSource implements BiometricsSource {
         @NonNull
         @Override
-        public List<Biometrics> loadAll() {
-            return Collections.emptyList();
+        public List<Biometrics> loadAll(Context context) {
+            // 1. Fetch real rolling 24-hour sleep sessions from your API
+            List<SleepSessionRecord> sessions = HealthConnectReader.getSleepSessionsLast24Hours(context);
+
+            // 2. Calculate the total sleep time in hours, then convert to minutes for the UI model
+            double totalHours = HealthConnectReader.calculateTotalSleepHours(sessions);
+            int sleepMinutes = (int) (totalHours * 60);
+
+            // 3. Fetch the real rolling 24-hour HRV
+            double hrv = HealthConnectReader.getAverageHrvLast24Hours(context);
+
+            // If the API returns 0 (meaning no permissions or no data), fall back to empty list so UI uses prototype defaults
+            if (sleepMinutes <= 0) {
+                return Collections.emptyList();
+            }
+
+            // Map the API results to the UI's expected format
+            String todayIso = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+            Biometrics liveData = new Biometrics(todayIso, sleepMinutes, hrv);
+
+            return Collections.singletonList(liveData);
         }
     }
 
@@ -116,13 +139,14 @@ public class BiometricsFragment extends Fragment {
         eventDot = view.findViewById(R.id.eventDot);
         penaltyDot = view.findViewById(R.id.penaltyDot);
 
-        List<Biometrics> records = createSource().loadAll();
+        // Fetch data from Health Connect directly
+        List<Biometrics> records = createSource().loadAll(requireContext());
         Biometrics newest = newestRecord(records);
 
         LinearLayout metricBars = view.findViewById(R.id.metricBarsContainer);
         addMetricBar(metricBars,
                 R.string.bio_baseline_label,
-                formatHours(averageMinutes(records)),
+                formatHours(FALLBACK_BASELINE_MINUTES), // Baseline remains prototype data until we pull 7-day history
                 R.drawable.dot_mint,
                 R.color.brand_mint,
                 BASELINE_FRACTION);
@@ -133,7 +157,7 @@ public class BiometricsFragment extends Fragment {
                         : newest.getSleepDurationMinutes()),
                 R.drawable.dot_red,
                 R.color.status_red,
-                LAST_NIGHT_FRACTION);
+                newest == null ? LAST_NIGHT_FRACTION : calculateFillFraction(newest.getSleepDurationMinutes()));
 
         TextView hrvValue = view.findViewById(R.id.hrvValue);
         hrvValue.setText(formatHrv(newest));
@@ -151,28 +175,28 @@ public class BiometricsFragment extends Fragment {
     }
 
     /**
+     * Replaces the static fractions with dynamic math when real API data arrives.
+     * Target is 8 hours (480 minutes).
+     */
+    private float calculateFillFraction(int minutes) {
+        float fraction = (float) minutes / 480f;
+        if (fraction > 1.0f) return 1.0f;
+        if (fraction < 0.1f) return 0.1f;
+        return fraction;
+    }
+
+    /**
      * The one place that knows how to read biometric records. Swap the returned
      * implementation for the Room backed one when the shared database lands.
      */
     @NonNull
     private BiometricsSource createSource() {
-        return new EmptyBiometricsSource();
+        return new ApiBiometricsSource();
     }
 
     // ==================================================================
     // Derivation from the stored records (with prototype fallbacks)
     // ==================================================================
-
-    private static int averageMinutes(@NonNull List<Biometrics> records) {
-        if (records.isEmpty()) {
-            return FALLBACK_BASELINE_MINUTES;
-        }
-        long total = 0L;
-        for (Biometrics record : records) {
-            total += record.getSleepDurationMinutes();
-        }
-        return (int) Math.round((double) total / records.size());
-    }
 
     /** Newest record by its yyyy-MM-dd date, or null when nothing is stored. */
     @Nullable
@@ -201,7 +225,7 @@ public class BiometricsFragment extends Fragment {
     @NonNull
     private String formatHrv(@Nullable Biometrics newest) {
         Double hrv = newest == null ? null : newest.getHrv();
-        if (hrv == null) {
+        if (hrv == null || hrv <= 0) {
             // No record at all still shows the prototype figure; a record with a null HRV
             // is reported honestly as not recorded.
             return newest == null
