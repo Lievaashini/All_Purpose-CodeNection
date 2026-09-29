@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 8 - SETTINGS  (port of Prototype/settings.html)
 
@@ -281,107 +281,14 @@
         </LinearLayout>
     </com.example.codenection2026_package.ui.widget.ObservableScrollView>
 
-    <!-- ============ Fixed header ============ -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/header_height"
-        android:layout_gravity="top"
-        android:background="@drawable/bg_header"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="@dimen/gutter">
-
-        <ImageView
-            android:id="@+id/headerDino"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="@drawable/bg_zone_pill"
-            android:contentDescription="@string/dino_description"
-            android:padding="2dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/dino_happy" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/space_sm"
-            android:orientation="vertical">
-
-            <TextView
-                style="@style/Text.MicroLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/brand_name"
-                android:textAllCaps="true"
-                android:textColor="@color/brand_mint"
-                android:textStyle="bold" />
-
-            <TextView
-                style="@style/Text.Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_title" />
-        </LinearLayout>
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <FrameLayout
-            android:id="@+id/themeToggleButton"
-            android:layout_width="@dimen/icon_button_size"
-            android:layout_height="@dimen/icon_button_size"
-            android:background="@drawable/bg_surface_low"
-            android:clickable="true"
-            android:contentDescription="@string/cd_theme_toggle"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/themeToggleIcon"
-                android:layout_width="19dp"
-                android:layout_height="19dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_light_mode"
-                app:tint="@color/accent_amber" />
-        </FrameLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/space_xs"
-            android:background="@drawable/bg_pill_dark"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="@dimen/space_sm"
-            android:paddingVertical="@dimen/space_xxs">
-
-            <View
-                android:layout_width="6dp"
-                android:layout_height="6dp"
-                android:background="@drawable/dot_mint" />
-
-            <TextView
-                style="@style/Text.MicroLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/space_xxs"
-                android:text="@string/brand_offline_ml_short"
-                android:textColor="@color/brand_mint" />
-        </LinearLayout>
-
-        <!-- Avatar plate. The person glyph rides on foreground so it stays centred. -->
-        <TextView
-            android:id="@+id/avatarBadge"
-            android:layout_width="@dimen/avatar_size"
-            android:layout_height="@dimen/avatar_size"
-            android:layout_marginStart="@dimen/space_xs"
-            android:background="@drawable/bg_circle_mint"
-            android:contentDescription="@string/cd_brand_avatar"
-            android:foreground="@drawable/ic_person"
-            android:foregroundGravity="center"
-            android:foregroundTint="@color/bg_dark" />
-    </LinearLayout>
+    <!-- ============ Fixed header ============
+         Shared bar. The two things that used to make this screen's bar the odd one
+         out are both gone: the mascot was a bare 32dp ImageView with 2dp of internal
+         padding (a 28dp sprite) instead of a 24dp sprite centred in a plate, and a
+         "Offline ML" pill sat between the theme toggle and the profile picture,
+         shoving the toggle ~85dp left of where Dashboard puts it. SettingsFragment
+         now names itself through AppHeader.bind. -->
+    <include layout="@layout/include_app_header" />
 
     <include
         android:id="@+id/bottomNavInclude"

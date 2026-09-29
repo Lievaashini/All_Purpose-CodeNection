@@ -708,17 +708,22 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     // Priority and deferral
     // ==================================================================
 
-    /** @return "HIGH", "MED" or "LOW" - the value written to the row */
-    @NonNull
-    private String selectedPriority() {
+    /**
+     * Maps the Priority selector to the integers the ML model takes: High 3, Medium 2,
+     * Low 1. {@link Task#setPriorityWeight(int)} turns this back into the stored
+     * "HIGH"/"MED"/"LOW" value, so the row still round-trips through the database.
+     *
+     * @return 3, 2 or 1 - written to the row and fed to the load shedder
+     */
+    private int selectedPriorityWeight() {
         int checked = priorityGroup == null ? View.NO_ID : priorityGroup.getCheckedButtonId();
         if (checked == R.id.priorityHigh) {
-            return Task.PRIORITY_HIGH;
+            return Task.WEIGHT_HIGH;
         }
         if (checked == R.id.priorityLow) {
-            return Task.PRIORITY_LOW;
+            return Task.WEIGHT_LOW;
         }
-        return Task.PRIORITY_MED;
+        return Task.WEIGHT_MED;
     }
 
     @StringRes
@@ -892,7 +897,9 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
                 dateIso,
                 formatMinutes(startMinutes),
                 formatMinutes(endMinutes));
-        task.setPriority(selectedPriority());
+        task.setPriorityWeight(selectedPriorityWeight());
+        // A protected shift can never be deferred, so its window is zero whatever the
+        // spinner says: the scheduler reads the row, not the screen.
         task.setDeferralHours(flexible ? selectedDeferralHours() : 0);
 
         // --- TWO-WAY SYNC LOGIC ---
