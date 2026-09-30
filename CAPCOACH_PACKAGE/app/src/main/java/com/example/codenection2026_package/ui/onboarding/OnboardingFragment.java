@@ -227,6 +227,14 @@ public class OnboardingFragment extends Fragment {
         // harmless - it stores the value that was just read.
         OnboardingPrefs.saveTone(requireContext(), tone);
 
+        // Re-word the rest of the screen straight away. Picking a tone IS the interaction on
+        // this screen, so leaving the title, section label and footnote in the previous voice
+        // until the screen is reopened would read as the choice not having taken effect.
+        // Harmless on the initial restore, which simply sets the tone it just read.
+        if (getView() != null) {
+            bindToneCopy(getView());
+        }
+
         applyToneCard(cardHype, tone == ToneType.HYPE, R.color.brand_mint);
         applyToneCard(cardChill, tone == ToneType.CHILL, R.color.secondary_blue);
         applyToneCard(cardPlain, tone == ToneType.PLAIN, R.color.tertiary_gold_container);
