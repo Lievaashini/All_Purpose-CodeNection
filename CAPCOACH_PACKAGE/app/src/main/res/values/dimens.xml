@@ -80,6 +80,11 @@
     <dimen name="task_check_size">20dp</dimen>
     <dimen name="task_accent_width">4dp</dimen>
 
+    <!-- ============ Settings ============ -->
+    <!-- Preview circle in the Profile card. Bigger than @dimen/avatar_size so the user can
+         actually see the picture they picked, which is a 32dp dot in the top bar. -->
+    <dimen name="profile_avatar_size">64dp</dimen>
+
     <!-- ============ Biometrics ============ -->
     <dimen name="metric_bar_height">12dp</dimen>
     <dimen name="trend_chart_height">48dp</dimen>

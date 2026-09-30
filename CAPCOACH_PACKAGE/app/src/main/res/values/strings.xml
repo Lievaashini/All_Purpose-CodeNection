@@ -115,6 +115,8 @@
     <string name="cd_cocurricular_slider">Co-curricular hours per week</string>
     <string name="cd_sync_calendar_switch">Enable calendar sync</string>
     <string name="cd_display_name_input">Your name, used in your morning greeting</string>
+    <string name="cd_profile_photo">Your profile picture</string>
+    <string name="cd_avatar_preview">Profile picture preview</string>
 
     <!-- ==================================================================
          SHARED SHELL - added with Screens 3-9. Nothing above changed.
@@ -384,6 +386,22 @@
          SCREEN 8 - SETTINGS  (port of Prototype/settings.html)
          ================================================================== -->
     <string name="settings_title">Settings</string>
+
+    <!-- Profile. The name edits the same preference Screen 2 fills in, so the morning
+         greeting on Daily Harvest follows whatever is typed here. -->
+    <string name="settings_profile">PROFILE</string>
+    <string name="settings_profile_hint">You</string>
+    <string name="settings_photo_title">Profile Photo</string>
+    <string name="settings_photo_sub">Shown in the top bar on every screen</string>
+    <string name="settings_change_photo">Change Photo</string>
+    <string name="settings_remove_photo">Remove</string>
+    <string name="settings_display_name_label">DISPLAY NAME</string>
+    <string name="settings_display_name_hint">Used in your morning greeting</string>
+
+    <string name="settings_tone">COACH TONE</string>
+    <string name="settings_tone_hint">Voice</string>
+    <string name="settings_tone_preview">Dino says: %1$s</string>
+
     <string name="settings_appearance">APPEARANCE</string>
     <string name="settings_appearance_hint">Display</string>
     <string name="settings_theme_mode">Theme Mode</string>

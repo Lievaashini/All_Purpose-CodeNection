@@ -2,12 +2,18 @@ package com.example.codenection2026_package.ui.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,11 +21,18 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.ObjectKey;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
+import com.example.codenection2026_package.ui.profile.ProfileStore;
 import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
+
+import java.io.File;
 
 /**
  * SCREEN 8 - SETTINGS (port of Prototype/settings.html).
@@ -28,6 +41,10 @@ import com.google.android.material.materialswitch.MaterialSwitch;
  * institutional toggle purely decorative. Here the theme switch drives
  * {@link AppCompatDelegate} (through the shared {@link ThemeController}) and the telemetry
  * switch persists a real preference that repaints the academic link status.
+ *
+ * <p>Profile and Coach Tone were added afterwards. Both write through
+ * {@link OnboardingPrefs}: the name here is the same value Screen 2 collects, and the tone
+ * is the value Screen 1 collects, so no screen owns a private copy of either.
  */
 public class SettingsFragment extends Fragment {
 
@@ -45,8 +62,34 @@ public class SettingsFragment extends Fragment {
 
     private MaterialSwitch telemetrySwitch;
 
+    private ImageView avatarPreviewPhoto;
+    private ImageView avatarPreviewGlyph;
+    private MaterialButton changePhotoButton;
+    private MaterialButton removePhotoButton;
+    private EditText nameInput;
+
+    private ToneSelector toneSelector;
+
     /** Guards the checked change listener while the saved value is being restored. */
     private boolean restoringTelemetry;
+
+    /**
+     * Android's system photo picker.
+     *
+     * <p>Chosen over {@code ACTION_GET_CONTENT} because it requires no permission at any API
+     * level: on API 33+ it is part of the OS and returns only the one item the user tapped,
+     * and below that androidx falls back to the Storage Access Framework, which is also
+     * grant-per-URI and permission-free. {@code PickVisualMedia} needs androidx.activity 1.7+
+     * and this project is on 1.8.0.
+     */
+    private final ActivityResultLauncher<PickVisualMediaRequest> avatarPicker =
+            registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+                if (uri == null || !isAdded()) {
+                    // Null means the user backed out of the picker; nothing to do.
+                    return;
+                }
+                ProfileStore.saveAvatar(requireContext(), uri, this::renderProfile);
+            });
 
     @Nullable
     @Override
@@ -76,6 +119,12 @@ public class SettingsFragment extends Fragment {
         linkStatusText = view.findViewById(R.id.linkStatusText);
         telemetrySwitch = view.findViewById(R.id.telemetrySwitch);
 
+        avatarPreviewPhoto = view.findViewById(R.id.avatarPreviewPhoto);
+        avatarPreviewGlyph = view.findViewById(R.id.avatarPreviewGlyph);
+        changePhotoButton = view.findViewById(R.id.changePhotoButton);
+        removePhotoButton = view.findViewById(R.id.removePhotoButton);
+        nameInput = view.findViewById(R.id.settingsNameInput);
+
         themeNightButton.setOnClickListener(v -> {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             refreshThemeSegment();
@@ -86,6 +135,9 @@ public class SettingsFragment extends Fragment {
         });
         refreshThemeSegment();
         bindTelemetrySwitch();
+        bindProfile();
+        toneSelector = new ToneSelector(this, view);
+        toneSelector.bind();
     }
 
     @Override
@@ -171,8 +223,124 @@ public class SettingsFragment extends Fragment {
         return requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
+    // ==================================================================
+    // Profile - photo and display name
+    // ==================================================================
+
+    private void bindProfile() {
+        if (changePhotoButton != null) {
+            changePhotoButton.setOnClickListener(v -> pickPhoto());
+        }
+        if (removePhotoButton != null) {
+            removePhotoButton.setOnClickListener(v -> {
+                ProfileStore.clearAvatar(requireContext());
+                renderProfile();
+            });
+        }
+        bindNameField();
+        renderProfile();
+    }
+
+    private void pickPhoto() {
+        avatarPicker.launch(new PickVisualMediaRequest.Builder()
+                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                .build());
+    }
+
+    /**
+     * Repaints both the preview and the shared top bar.
+     *
+     * <p>The preview and the bar are separate ImageViews, so a change has to be pushed to
+     * both. Called again from the background copy's completion callback, which is why it
+     * re-checks that the screen is still alive before touching any view.
+     */
+    private void renderProfile() {
+        if (!isAdded() || getContext() == null) {
+            return;
+        }
+        File file = ProfileStore.avatarFile(requireContext());
+
+        if (avatarPreviewPhoto != null && avatarPreviewGlyph != null) {
+            boolean hasPhoto = file != null;
+            avatarPreviewPhoto.setVisibility(hasPhoto ? View.VISIBLE : View.GONE);
+            avatarPreviewGlyph.setVisibility(hasPhoto ? View.GONE : View.VISIBLE);
+
+            if (file != null) {
+                Glide.with(this)
+                        .load(file)
+                        .signature(new ObjectKey(ProfileStore.avatarVersion(requireContext())))
+                        .circleCrop()
+                        .into(avatarPreviewPhoto);
+            }
+        }
+
+        if (removePhotoButton != null) {
+            // Gone rather than disabled: with no picture stored there is nothing to remove,
+            // and an inert button next to the live one just invites a pointless tap.
+            removePhotoButton.setVisibility(file != null ? View.VISIBLE : View.GONE);
+        }
+
+        View root = getView();
+        if (root != null) {
+            AppHeader.bindAvatar(this, root);
+        }
+    }
+
+    /**
+     * Wires the display-name field.
+     *
+     * <p>There is no Save button, matching the theme switch above - the value is committed
+     * as soon as the field loses focus, and again from {@link #onPause()} and
+     * {@link #onDestroyView()} so navigating away or backgrounding the app cannot drop an
+     * edit.
+     *
+     * <p><b>Why not save on every keystroke:</b> doing that looked simpler, but backspacing
+     * a name away saves each intermediate value on the way down, so clearing the field left
+     * the first letter stored ("Wei Ling" -> ... -> "W"). Committing once, on the way out,
+     * means an abandoned edit simply never lands: an empty field is discarded and the stored
+     * name is put back, so what is shown and what is stored cannot disagree.
+     */
+    private void bindNameField() {
+        if (nameInput == null || getContext() == null) {
+            return;
+        }
+        nameInput.setText(OnboardingPrefs.getDisplayName(requireContext()));
+        nameInput.setSelection(nameInput.getText().length());
+        nameInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                commitName();
+            }
+        });
+    }
+
+    /** Commits the field, or restores the stored name when the user emptied it. */
+    private void commitName() {
+        if (nameInput == null || getContext() == null) {
+            return;
+        }
+        String typed = nameInput.getText().toString().trim();
+        if (!typed.isEmpty()) {
+            OnboardingPrefs.saveName(requireContext(), typed);
+            return;
+        }
+        nameInput.setText(OnboardingPrefs.getDisplayName(requireContext()));
+        nameInput.setSelection(nameInput.getText().length());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Backgrounding does not destroy the view, so the edit would otherwise sit in a
+        // field the user may never come back to.
+        commitName();
+    }
+
     @Override
     public void onDestroyView() {
+        // Last chance before the views go: covers leaving via the bottom nav, where the
+        // blur may not have been reported.
+        commitName();
+
         themeNightButton = null;
         themeBrightButton = null;
         themeNightLabel = null;
@@ -181,6 +349,12 @@ public class SettingsFragment extends Fragment {
         linkStatusDot = null;
         linkStatusText = null;
         telemetrySwitch = null;
+        avatarPreviewPhoto = null;
+        avatarPreviewGlyph = null;
+        changePhotoButton = null;
+        removePhotoButton = null;
+        nameInput = null;
+        toneSelector = null;
 
         super.onDestroyView();
     }

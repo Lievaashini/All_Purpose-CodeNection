@@ -128,7 +128,10 @@ public class OnboardingFragment extends Fragment {
         bindToneCard(cardChill, ToneType.CHILL);
         bindToneCard(cardPlain, ToneType.PLAIN);
 
-        selectTone(ToneType.HYPE, false);
+        // Opens on the tone already stored rather than always on Hype, so a user who picked
+        // Chill in Settings finds Chill selected here. On a first run nothing is stored yet
+        // and this falls back to Hype, which is the prototype's default.
+        selectTone(OnboardingPrefs.getTone(requireContext()), false);
 
         // --- Health Connect card ---
         View healthCard = view.findViewById(R.id.healthConnectCard);
@@ -190,6 +193,12 @@ public class OnboardingFragment extends Fragment {
 
     private void selectTone(@NonNull ToneType tone, boolean animateDialogue) {
         selectedTone = tone;
+
+        // Persisted here so the choice survives this screen: OnboardingPrefs.saveTone was
+        // written for exactly this call and had no caller, which is why a tone picked on
+        // this screen never reached Settings. Writing during the restore above too is
+        // harmless - it stores the value that was just read.
+        OnboardingPrefs.saveTone(requireContext(), tone);
 
         applyToneCard(cardHype, tone == ToneType.HYPE, R.color.brand_mint);
         applyToneCard(cardChill, tone == ToneType.CHILL, R.color.secondary_blue);

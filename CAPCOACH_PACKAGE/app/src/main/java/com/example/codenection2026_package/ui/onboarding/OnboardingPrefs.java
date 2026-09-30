@@ -114,4 +114,15 @@ public final class OnboardingPrefs {
     public static void saveTone(@NonNull Context c, @NonNull ToneType tone) {
         prefs(c).edit().putString(KEY_TONE, tone.storageValue).apply();
     }
+
+    /**
+     * Persists a new display name without touching anything else, so Settings can edit the
+     * name on its own. Blank falls back to {@link #DEFAULT_NAME}, matching {@link #save}.
+     */
+    public static void saveName(@NonNull Context c, @Nullable String displayName) {
+        String name = displayName == null || displayName.trim().isEmpty()
+                ? DEFAULT_NAME
+                : displayName.trim();
+        prefs(c).edit().putString(KEY_NAME, name).apply();
+    }
 }

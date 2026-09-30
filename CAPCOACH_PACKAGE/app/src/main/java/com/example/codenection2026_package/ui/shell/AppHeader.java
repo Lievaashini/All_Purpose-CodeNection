@@ -10,8 +10,12 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.ObjectKey;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
+import com.example.codenection2026_package.ui.profile.ProfileStore;
+
+import java.io.File;
 
 /**
  * Wires the shared top bar ({@code layout/include_app_header.xml}) for a bottom-nav screen.
@@ -56,7 +60,41 @@ public final class AppHeader {
                             @StringRes int subtitleRes) {
         updateSubtitle(host, root, subtitleRes);
         loadMascot(host, root);
+        bindAvatar(host, root);
         ThemeController.bind(root, R.id.themeToggleButton, R.id.themeToggleIcon);
+    }
+
+    /**
+     * Paints the profile picture, falling back to the person glyph when there is none.
+     *
+     * <p>Called by {@link #bind}, and again by Settings after the user changes or removes
+     * their photo so its own bar updates without a full re-bind.
+     *
+     * <p>The photo is loaded with {@code signature(...)} because every saved picture
+     * overwrites the same file: Glide keys its cache on the path, so without a changing
+     * signature the bar would keep showing the picture the user just replaced.
+     */
+    public static void bindAvatar(@NonNull Fragment host, @NonNull View root) {
+        ImageView photo = root.findViewById(R.id.avatarPhoto);
+        ImageView glyph = root.findViewById(R.id.avatarGlyph);
+        if (photo == null || glyph == null || !host.isAdded()) {
+            return;
+        }
+
+        File file = ProfileStore.avatarFile(host.requireContext());
+        if (file == null) {
+            photo.setVisibility(View.GONE);
+            glyph.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        glyph.setVisibility(View.GONE);
+        photo.setVisibility(View.VISIBLE);
+        Glide.with(host)
+                .load(file)
+                .signature(new ObjectKey(ProfileStore.avatarVersion(host.requireContext())))
+                .circleCrop()
+                .into(photo);
     }
 
     /** Names the current screen in the bar. Blank text collapses the row instead of leaving a gap. */
