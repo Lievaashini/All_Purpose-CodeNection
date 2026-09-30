@@ -22,6 +22,15 @@
 
   Hype is the default tone and keeps the prototype's wording verbatim, so the
   app as designed is what a user sees unless they choose otherwise.
+
+  LITERAL PERCENT SIGNS
+  Some slots contain a percent sign as prose ("100% Satiated"). Those slots are
+  handed straight to setText and never passed through String.format, so they are
+  marked formatted="false". Without it aapt reads "% S" as a broken format
+  specifier and lint fails the build. Do not "fix" one by doubling the percent:
+  %% only collapses inside String.format, so it would reach the screen as a
+  literal %%. The one slot that IS formatted, harvest_toast_sub, keeps both a
+  real %% and a %1$d and is deliberately left alone.
 -->
 <resources>
 
@@ -40,13 +49,13 @@
     <string name="dino_feast_hungry_hype">"Om nom! I\'m starving! Feed me!"</string>
     <string name="dino_feast_all_hype">"WHOAAAA! ALL OF THEM AT ONCE?! YES!"</string>
     <string name="dino_feast_hug_hype">"I love you! You preserved my rest this week!"</string>
-    <string name="dino_feast_done_hype">"100% Satiated! Ready to crush Midterms!"</string>
+    <string name="dino_feast_done_hype" formatted="false">"100% Satiated! Ready to crush Midterms!"</string>
     <string name="dino_feast_quote_1_hype">"CRUNCH! So sweet &amp; crunchy!"</string>
     <string name="dino_feast_quote_2_hype">"YUUUM! Midterm stress dissolved!"</string>
     <string name="dino_feast_quote_3_hype">"Nom nom! Protected sleep tastes good!"</string>
     <string name="dino_feast_quote_4_hype">"BURP! Best Sunday feast ever!"</string>
     <string name="dino_feast_quote_5_hype">"Full energy! Ready for next week!"</string>
-    <string name="dino_addtask_guard_hype">"Locking shift. 0% chance of study-hall collisions."</string>
+    <string name="dino_addtask_guard_hype" formatted="false">"Locking shift. 0% chance of study-hall collisions."</string>
     <string name="dino_addtask_sched_hype">Shedding buffer: %1$s. Priority %2$s is held back from the shed list!</string>
 
     <!-- ==================================================================
@@ -93,7 +102,7 @@
     <string name="dash_no_tasks_hype">No tasks yet. Tap Add Task to create one.</string>
     <string name="dash_saved_other_week_hype">Saved for %1$s, which is outside this week.</string>
     <string name="triage_title_hype">Overload Prevention Action</string>
-    <string name="triage_load_sub_hype">Crash risk drops to 0%</string>
+    <string name="triage_load_sub_hype" formatted="false">Crash risk drops to 0%</string>
     <string name="triage_sleep_sub_hype">Recovery window locked</string>
     <string name="triage_kept_sub_hype">Condensed to 45m focused sprint</string>
     <string name="triage_postponed_sub_hype">Moved to Thu 10:00 AM low-fatigue block</string>
@@ -101,7 +110,7 @@
     <string name="triage_accept_hype">Accept Rebalance &amp; Rest</string>
     <string name="triage_dismiss_hype">Dismiss for Now</string>
     <string name="toast_rebalanced_title_hype">Schedule Rebalanced &amp; Rest Protected</string>
-    <string name="toast_rebalanced_sub_hype">-55% cognitive load | +3.5h rest locked</string>
+    <string name="toast_rebalanced_sub_hype" formatted="false">-55% cognitive load | +3.5h rest locked</string>
     <string name="dash_sync_starting_hype">Syncing Google Calendar...</string>
     <string name="dash_sync_none_hype">No upcoming events found.</string>
     <string name="dash_sync_done_hype">Sync complete!</string>
@@ -164,7 +173,7 @@
     <string name="feast_tray_title_hype">Tap apples to feed one-by-one:</string>
     <string name="feast_full_toast_hype">Dino\'s belly is completely full! Great work this week!</string>
     <string name="feast_complete_toast_hype">Weekly Feast Complete! Dino at Max Stamina (+400 XP)</string>
-    <string name="feast_complete_hype">Feast Complete! Dino 100% Recharged</string>
+    <string name="feast_complete_hype" formatted="false">Feast Complete! Dino 100% Recharged</string>
 
     <!-- ==================================================================
          SCREEN 8 - SETTINGS

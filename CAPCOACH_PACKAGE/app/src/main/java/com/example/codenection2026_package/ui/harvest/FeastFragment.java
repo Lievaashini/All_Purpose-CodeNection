@@ -547,7 +547,7 @@ public class FeastFragment extends Fragment {
 
         int percent = Math.round(eatenApples * 100f / TOTAL_APPLES);
         if (satietyPercentage != null) {
-            satietyPercentage.setText(percent + "%");
+            satietyPercentage.setText(getString(R.string.percent_value, percent));
         }
         if (progressText != null) {
             progressText.setText(getString(R.string.feast_progress_text, eatenApples, TOTAL_APPLES));

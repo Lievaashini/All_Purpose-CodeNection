@@ -76,7 +76,7 @@ public class HardLimitsFragment extends Fragment {
                 if (Boolean.TRUE.equals(readGranted) && Boolean.TRUE.equals(writeGranted)) {
                     runCalendarTest();
                 } else {
-                    Toast.makeText(getContext(), "Calendar access is required.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.limits_calendar_permission_required, Toast.LENGTH_SHORT).show();
                 }
             });
     // -------------------------------
@@ -215,7 +215,7 @@ public class HardLimitsFragment extends Fragment {
     private void runCalendarTest() {
         try {
             // 1. Test Writing
-            calendarManager.blockRecoveryTime("Mandatory Brain Rest", 4);
+            calendarManager.blockRecoveryTime(getString(R.string.limits_recovery_block_title), 4);
 
             // 2. Test Reading
             java.util.List<CalendarManager.CalendarEvent> events = calendarManager.logUpcomingWeekEvents();
@@ -275,7 +275,7 @@ public class HardLimitsFragment extends Fragment {
                     displayNameInput == null ? null : displayNameInput.getText().toString());
 
             Toast.makeText(requireContext(),
-                    "Baseline saved", Toast.LENGTH_SHORT).show();
+                    R.string.limits_baseline_saved, Toast.LENGTH_SHORT).show();
 
             // Setup is complete, so hand off to the dashboard. This is the ONE line added
             // to a teammate file, approved in advance; everything else in wireSaveButton
@@ -340,9 +340,14 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (workBadge != null) {
-            workBadge.setText(work <= LoadZones.WORK_CAP_HOURS
-                    ? getString(R.string.work_badge_prefix) + work + "h"
-                    : (band == LoadZones.WorkBand.CAUTION ? "Caution: " : "High Risk: ") + work + "h");
+            // One whole string per band, so the hours and the "h" unit sit inside the
+            // resource and a translator can move them.
+            workBadge.setText(getString(work <= LoadZones.WORK_CAP_HOURS
+                            ? R.string.work_badge_protected
+                            : (band == LoadZones.WorkBand.CAUTION
+                                    ? R.string.work_badge_caution
+                                    : R.string.work_badge_risk),
+                    work));
             workBadge.setTextColor(accent);
         }
 

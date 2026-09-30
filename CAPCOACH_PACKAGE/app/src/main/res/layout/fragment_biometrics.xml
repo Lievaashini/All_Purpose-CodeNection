@@ -132,7 +132,7 @@
                             android:backgroundTint="@color/status_red"
                             android:gravity="center"
                             android:includeFontPadding="false"
-                            android:text="!"
+                            android:text="@string/bio_anomaly_badge"
                             android:textColor="@color/on_brand"
                             android:textSize="11sp"
                             android:textStyle="bold" />

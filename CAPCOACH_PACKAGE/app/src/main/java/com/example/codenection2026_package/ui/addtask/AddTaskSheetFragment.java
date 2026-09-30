@@ -285,7 +285,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onReadyForSpeech(Bundle params) {
                 if (taskNameInput != null) {
-                    taskNameInput.setHint("Listening...");
+                    taskNameInput.setHint(R.string.addtask_dictation_listening);
                 }
             }
 
@@ -297,7 +297,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onError(int error) {
                 if (taskNameInput != null) {
-                    taskNameInput.setHint("Didn't catch that. Try again.");
+                    taskNameInput.setHint(R.string.addtask_dictation_error);
                 }
             }
 
@@ -449,7 +449,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
                 if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                     voiceManager.startListening();
                 } else {
-                    Toast.makeText(requireContext(), "Microphone permission required.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), R.string.addtask_mic_permission_required, Toast.LENGTH_SHORT).show();
                 }
             } else {
                 // Same line the Companion screens use for the same condition, so the two

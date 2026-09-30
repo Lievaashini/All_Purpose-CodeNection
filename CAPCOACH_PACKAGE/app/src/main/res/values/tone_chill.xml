@@ -97,7 +97,7 @@
     <string name="triage_dismiss_chill">Not Now</string>
 
     <string name="toast_rebalanced_title_chill">Rebalanced. Rest protected.</string>
-    <string name="toast_rebalanced_sub_chill">-55% load | +3.5h rest kept</string>
+    <string name="toast_rebalanced_sub_chill" formatted="false">-55% load | +3.5h rest kept</string>
 
     <string name="dash_sync_starting_chill">Syncing your calendar...</string>
     <string name="dash_sync_none_chill">Nothing coming up in your calendar.</string>

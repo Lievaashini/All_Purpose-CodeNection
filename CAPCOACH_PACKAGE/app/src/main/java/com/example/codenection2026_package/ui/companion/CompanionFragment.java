@@ -239,7 +239,7 @@ public class CompanionFragment extends Fragment {
 
             String transcript = matches.get(0).trim();
             if (commandBubble != null) {
-                commandBubble.setText("\"" + transcript + "\"");
+                commandBubble.setText(getString(R.string.voice_transcript_quoted, transcript));
             }
             handleTranscript(transcript);
         }

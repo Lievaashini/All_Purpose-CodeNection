@@ -11,6 +11,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.example.codenection2026_package.R;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -95,7 +97,7 @@ public class CalendarManager {
                     boolean isAllDay = cursor.getInt(4) == 1;
 
                     if (title == null || title.trim().isEmpty()) {
-                        title = "Untitled Event";
+                        title = context.getString(R.string.calendar_untitled_event);
                     }
 
                     Calendar calStart = Calendar.getInstance();
@@ -134,7 +136,8 @@ public class CalendarManager {
                 ContentValues values = new ContentValues();
                 values.put(CalendarContract.Events.DTSTART, startMillis);
                 values.put(CalendarContract.Events.DTEND, endMillis);
-                values.put(CalendarContract.Events.TITLE, "CapCoach Triage: " + title);
+                values.put(CalendarContract.Events.TITLE,
+                        context.getString(R.string.calendar_triage_prefix, title));
                 values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
                 values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
 

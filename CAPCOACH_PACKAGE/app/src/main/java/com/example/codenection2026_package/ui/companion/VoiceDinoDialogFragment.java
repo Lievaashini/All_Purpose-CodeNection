@@ -241,7 +241,7 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
 
             String transcript = matches.get(0).trim();
             if (voiceBubble != null) {
-                voiceBubble.setText("\"" + transcript + "\"");
+                voiceBubble.setText(getString(R.string.voice_transcript_quoted, transcript));
             }
 
             // Format with your VoiceInputFormatter

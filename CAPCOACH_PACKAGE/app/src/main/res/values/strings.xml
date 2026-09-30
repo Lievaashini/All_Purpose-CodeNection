@@ -61,7 +61,12 @@
     <string name="work_title">Weekly Shift Ceiling</string>
     <string name="work_subtitle">Work &amp; gigs</string>
     <string name="work_locked_cap">LOCKED CAP</string>
-    <string name="work_badge_prefix">Protected:\n</string>
+    <!-- The work-hours badge, one whole string per band. It used to be a
+         "Protected:\n" prefix with the hours and the "h" unit glued on in Java,
+         which left the hours' position untranslatable. -->
+    <string name="work_badge_protected">Protected:\n%1$dh</string>
+    <string name="work_badge_caution">Caution: %1$dh</string>
+    <string name="work_badge_risk">High Risk: %1$dh</string>
     <string name="work_min_label">0 hrs</string>
     <string name="work_limit_label">20h Limit</string>
     <string name="work_max_label">40 hrs</string>
@@ -337,4 +342,56 @@
     <string name="voice_command_default">"Hey Dino, reschedule my shift"</string>
     <string name="voice_status_ready">VOICE READY</string>
     <string name="voice_status_listening">LISTENING</string>
+    <!-- ==================================================================
+         CHROME LIFTED OUT OF JAVA
+         These were string literals inside setText / setHint / Toast calls, where
+         no translator can reach them and lint reports them. They are deliberately
+         tone neutral, because tone_hype.xml's header classes units, field labels
+         and permission messages as fixed chrome rather than coach voice.
+         ================================================================== -->
+
+    <!-- Unit formatting. The Biometrics penalty bar, the Feast satiety ring and the
+         Daily Harvest progress ring each print a bare percentage. -->
+    <string name="percent_value">%1$d%%</string>
+
+    <!-- A task row's "09:00 - 10:30". The separator is typographic, not something
+         the user typed. -->
+    <string name="dash_task_time_range">%1$s - %2$s</string>
+
+    <!-- The Companion screens echo the user's own words back inside quotes. -->
+    <string name="voice_transcript_quoted">\"%1$s\"</string>
+
+    <!-- Dictation field hint in the Add Task sheet. -->
+    <string name="addtask_dictation_listening">Listening\u2026</string>
+    <string name="addtask_dictation_error">Didn\'t catch that. Try again.</string>
+
+    <!-- Permission and availability messages. -->
+    <string name="addtask_mic_permission_required">Microphone permission required.</string>
+    <string name="limits_calendar_permission_required">Calendar access is required.</string>
+    <string name="bio_health_connect_unavailable">%1$s unavailable on this device</string>
+    <string name="onboard_health_connect_missing">Health Connect is not installed on this device.</string>
+
+    <!-- Shown once Set Limits has written the baseline. -->
+    <string name="limits_baseline_saved">Baseline saved</string>
+
+    <!-- Titles this app writes into the device calendar. -->
+    <string name="limits_recovery_block_title">Mandatory Brain Rest</string>
+    <string name="calendar_untitled_event">Untitled Event</string>
+    <string name="calendar_triage_prefix">CapCoach Triage: %1$s</string>
+
+    <!-- The red "!" dot on the Biometrics anomaly card. A glyph, but it is still
+         on-screen text and lint counts it. -->
+    <string name="bio_anomaly_badge">!</string>
+
+    <!-- Week-strip day letters, Monday first. Was a String[] literal in
+         DashboardFragment, shared with the load chart's axis. -->
+    <string-array name="day_letters">
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+        <item>S</item>
+    </string-array>
                 </resources>

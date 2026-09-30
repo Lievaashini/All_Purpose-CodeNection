@@ -31,7 +31,7 @@
     <string name="dino_feast_hungry_plain">"Stamina depleted. Apples required."</string>
     <string name="dino_feast_all_plain">"Full basket received. Stamina recalculating."</string>
     <string name="dino_feast_hug_plain">"Rest preserved. Baseline holding."</string>
-    <string name="dino_feast_done_plain">"Satiety 100%. Capacity restored."</string>
+    <string name="dino_feast_done_plain" formatted="false">"Satiety 100%. Capacity restored."</string>
 
     <string name="dino_feast_quote_1_plain">"Apple consumed. +25 stamina."</string>
     <string name="dino_feast_quote_2_plain">"Stress index unchanged. Intake logged."</string>
@@ -88,7 +88,7 @@
     <string name="dash_saved_other_week_plain">Saved to %1$s. Outside current week.</string>
 
     <string name="triage_title_plain">Load Shedding Proposal</string>
-    <string name="triage_load_sub_plain">Crash risk to 0%</string>
+    <string name="triage_load_sub_plain" formatted="false">Crash risk to 0%</string>
     <string name="triage_sleep_sub_plain">Recovery window reserved</string>
     <string name="triage_kept_sub_plain">Reduced to a 45m block</string>
     <string name="triage_postponed_sub_plain">Moved to Thu 10:00 AM. Low-fatigue slot.</string>
@@ -97,7 +97,7 @@
     <string name="triage_dismiss_plain">Cancel</string>
 
     <string name="toast_rebalanced_title_plain">Rebalance applied. Rest reserved.</string>
-    <string name="toast_rebalanced_sub_plain">-55% load | +3.5h reserved</string>
+    <string name="toast_rebalanced_sub_plain" formatted="false">-55% load | +3.5h reserved</string>
 
     <string name="dash_sync_starting_plain">Syncing calendar.</string>
     <string name="dash_sync_none_plain">No upcoming events.</string>
@@ -164,7 +164,7 @@
     <string name="feast_tray_title_plain">Select apples to feed one-by-one:</string>
     <string name="feast_full_toast_plain">Capacity reached. Stamina at maximum.</string>
     <string name="feast_complete_toast_plain">Weekly Feast complete. Max stamina (+400 XP)</string>
-    <string name="feast_complete_plain">Feast complete. Dino 100% charged</string>
+    <string name="feast_complete_plain" formatted="false">Feast complete. Dino 100% charged</string>
 
     <!-- ==================================================================
          SCREEN 8 - SETTINGS

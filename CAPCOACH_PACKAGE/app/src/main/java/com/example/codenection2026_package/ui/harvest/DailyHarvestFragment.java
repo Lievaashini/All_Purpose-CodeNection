@@ -286,7 +286,7 @@ public class DailyHarvestFragment extends Fragment {
 
         int percent = Math.min(100, Math.round(stash * 100f / FEAST_GOAL));
         if (progressPercentage != null) {
-            progressPercentage.setText(percent + "%");
+            progressPercentage.setText(getString(R.string.percent_value, percent));
         }
         if (progressRatio != null) {
             progressRatio.setText(getString(R.string.harvest_progress_ratio, stash, FEAST_GOAL));

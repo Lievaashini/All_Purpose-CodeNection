@@ -147,7 +147,7 @@ public class OnboardingFragment extends Fragment {
                 if (healthManager.isClientAvailable()) {
                     requestHealthPermissionLauncher.launch(healthManager.getRequiredPermissions());
                 } else {
-                    toast("Health Connect is not installed on this device.");
+                    toast(getString(R.string.onboard_health_connect_missing));
                 }
             });
         }

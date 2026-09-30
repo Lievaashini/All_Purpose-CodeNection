@@ -411,7 +411,7 @@ public class BiometricsFragment extends Fragment {
             penaltyBar.setBackgroundResource(fill);
         }
 
-        penaltyPercent.setText(Math.round(fraction * 100) + "%");
+        penaltyPercent.setText(getString(R.string.percent_value, Math.round(fraction * 100)));
     }
 
     // ==================================================================
@@ -451,14 +451,16 @@ public class BiometricsFragment extends Fragment {
             HealthConnectManager manager = new HealthConnectManager(requireContext());
             if (!manager.isClientAvailable()) {
                 Toast.makeText(requireContext(),
-                        getString(R.string.bio_health_connect) + " unavailable on this device",
+                        getString(R.string.bio_health_connect_unavailable,
+                                getString(R.string.bio_health_connect)),
                         Toast.LENGTH_SHORT).show();
             }
         } catch (RuntimeException e) {
             // Health Connect is not installable on every device; the screen still works
             // from stored records, so a missing provider is not fatal.
             Toast.makeText(requireContext(),
-                    getString(R.string.bio_health_connect) + " unavailable on this device",
+                    getString(R.string.bio_health_connect_unavailable,
+                            getString(R.string.bio_health_connect)),
                     Toast.LENGTH_SHORT).show();
         }
     }

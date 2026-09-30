@@ -279,7 +279,6 @@
                             style="@style/Text.Metric"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="50"
                             tools:text="50" />
 
                         <TextView
@@ -381,7 +380,6 @@
                             style="@style/Text.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="24"
                             android:textColor="@color/brand_mint"
                             tools:text="24" />
 
@@ -510,7 +508,6 @@
                         android:gravity="center"
                         android:paddingHorizontal="@dimen/space_sm"
                         android:paddingVertical="@dimen/space_xxs"
-                        android:text="Protected: 20h"
                         android:textColor="@color/brand_mint"
                         android:textStyle="bold"
                         tools:text="Protected: 20h" />
@@ -535,7 +532,6 @@
                             style="@style/Text.Metric"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="20"
                             android:textSize="@dimen/text_metric_lg"
                             tools:text="20" />
 
@@ -717,7 +713,6 @@
                             style="@style/Text.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="6"
                             android:textColor="@color/brand_mint"
                             tools:text="6" />
 

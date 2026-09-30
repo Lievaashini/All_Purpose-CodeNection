@@ -98,9 +98,6 @@ public class DashboardFragment extends Fragment {
     private static final int CRASH_CEILING_PERCENT = 90;
     private static final long TOAST_VISIBLE_MS = 4200L;
 
-    /** Narrow day letters, Monday first. Matches the prototype's M T W T F S S. */
-    private static final String[] DAY_LETTERS = {"M", "T", "W", "T", "F", "S", "S"};
-
     private static final String ISO_PATTERN = "yyyy-MM-dd";
 
     private TextView stateLabel;
@@ -337,11 +334,21 @@ public class DashboardFragment extends Fragment {
         renderChart();
     }
 
+    /**
+     * Narrow day letters, Monday first, read from strings.xml so they can be
+     * translated. A fresh array every call: the load chart keeps whatever it is
+     * handed, which is why the old static was cloned on the way in.
+     */
+    @NonNull
+    private String[] dayLetters() {
+        return getResources().getStringArray(R.array.day_letters);
+    }
+
     private void renderChart() {
         if (loadChart == null) {
             return;
         }
-        loadChart.setLoads(WEEK_LOADS.clone(), DAY_LETTERS.clone(), selectedDay, heavyIndex);
+        loadChart.setLoads(WEEK_LOADS.clone(), dayLetters(), selectedDay, heavyIndex);
     }
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */
@@ -368,6 +375,9 @@ public class DashboardFragment extends Fragment {
         int todayLetter = ContextCompat.getColor(requireContext(), R.color.brand_mint);
         int idleNumber = ContextCompat.getColor(requireContext(), R.color.text_primary_dark);
 
+        // Read once for the whole strip rather than once per pill.
+        String[] letters = dayLetters();
+
         for (int i = 0; i < weekStrip.getChildCount(); i++) {
             View pill = weekStrip.getChildAt(i);
             boolean active = i == selectedDay;
@@ -382,7 +392,7 @@ public class DashboardFragment extends Fragment {
             if (letter != null) {
                 // Only the real today says TODAY. Any other cell keeps its own letter,
                 // so selecting Thursday cannot turn Thursday into today.
-                letter.setText(today ? getString(R.string.dash_today) : DAY_LETTERS[i]);
+                letter.setText(today ? getString(R.string.dash_today) : letters[i]);
                 letter.setTextColor(active ? activeText : (today ? todayLetter : idleLetter));
                 letter.setTypeface(null, active || today
                         ? android.graphics.Typeface.BOLD
@@ -605,7 +615,7 @@ public class DashboardFragment extends Fragment {
             title.setText(task.getTaskName());
         }
         if (time != null) {
-            time.setText(task.getStartTime() + " - " + task.getEndTime());
+            time.setText(getString(R.string.dash_task_time_range, task.getStartTime(), task.getEndTime()));
         }
 
         // The tag names the user's own category. It used to print "Work"/"Classes" off
