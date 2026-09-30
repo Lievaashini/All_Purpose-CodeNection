@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 
@@ -81,6 +82,7 @@ public class DailyHarvestFragment extends Fragment {
     private TextView progressRatio;
     private TextView dinoChatBubble;
     private TextView collectButton;
+    private TextView greetingText;
     private View feastProgressBar;
     private View harvestToast;
     private ViewGroup appleContainer;
@@ -111,6 +113,10 @@ public class DailyHarvestFragment extends Fragment {
         feastProgressBar = view.findViewById(R.id.feastProgressBar);
         harvestToast = view.findViewById(R.id.harvestToast);
         collectButton = view.findViewById(R.id.collectButton);
+        greetingText = view.findViewById(R.id.greetingText);
+        if (greetingText != null) {
+            greetingText.setText(getString(R.string.harvest_greeting, displayName()));
+        }
 
         View apples = view.findViewById(R.id.appleContainer);
         if (apples instanceof ViewGroup) {
@@ -169,6 +175,20 @@ public class DailyHarvestFragment extends Fragment {
             dinoChatBubble.setText(getResources().getQuantityString(
                     R.plurals.harvest_dino_bubble_apples, APPLES_GROWN, APPLES_GROWN));
         }
+    }
+
+    /**
+     * The name this screen greets the user by, as entered on Screen 2.
+     *
+     * <p>Read from prefs rather than a literal because "Good Morning, Maya!" and
+     * "Start Maya's Day" are the two places the app addresses the user by name. A user
+     * who left the field alone keeps the prototype's "Maya"; anyone else gets their own
+     * name in both, consistently - greeting one name and buttoning another would read as
+     * a bug.
+     */
+    @NonNull
+    private String displayName() {
+        return OnboardingPrefs.getDisplayName(requireContext());
     }
 
     // ==================================================================
@@ -388,7 +408,7 @@ public class DailyHarvestFragment extends Fragment {
         renderCounters(total);
 
         if (collectButton != null) {
-            collectButton.setText(R.string.harvest_start_day);
+            collectButton.setText(getString(R.string.harvest_start_day, displayName()));
         }
 
         // The tree itself is a fixed blank vector and is deliberately left alone here.

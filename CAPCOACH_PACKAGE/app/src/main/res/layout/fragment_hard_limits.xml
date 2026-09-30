@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 2 - SET LIMITS / HARD LIMITS  (port of prototype/hard-limits.html)
 
@@ -817,6 +817,31 @@
                     android:checked="false"
                     android:contentDescription="@string/cd_sync_calendar_switch" />
             </LinearLayout>
+
+            <!-- ==================== Display name ==================== -->
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg"
+                android:text="@string/limits_name_label" />
+
+            <EditText
+                android:id="@+id/displayNameInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target_min"
+                android:layout_marginTop="@dimen/space_sm"
+                android:background="@drawable/bg_input"
+                android:contentDescription="@string/cd_display_name_input"
+                android:importantForAutofill="no"
+                android:inputType="textCapWords"
+                android:maxLines="1"
+                android:paddingStart="@dimen/space_md"
+                android:paddingEnd="@dimen/space_md"
+                android:text="@string/limits_name_default"
+                android:textColor="@color/text_primary_dark"
+                android:textColorHint="@color/text_dim_dark"
+                android:textSize="@dimen/text_body" />
 
             <!-- ==================== Primary CTA ==================== -->
             <com.google.android.material.button.MaterialButton

@@ -94,13 +94,14 @@
             </FrameLayout>
 
             <TextView
+                android:id="@+id/greetingText"
                 style="@style/Text.Heading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_sm"
                 android:gravity="center"
-                android:text="@string/harvest_greeting"
-                android:textColor="@color/text_primary_dark" />
+                android:textColor="@color/text_primary_dark"
+                tools:text="Good Morning, Maya!" />
 
             <TextView
                 style="@style/Text.Body"

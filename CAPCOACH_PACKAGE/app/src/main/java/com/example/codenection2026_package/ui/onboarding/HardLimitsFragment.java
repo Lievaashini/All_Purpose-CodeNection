@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,6 +58,7 @@ public class HardLimitsFragment extends Fragment {
     private View dinoStatusDot;
 
     private MaterialSwitch calendarSyncSwitch;
+    private EditText displayNameInput;
 
     private boolean initialized = false;
 
@@ -129,6 +131,7 @@ public class HardLimitsFragment extends Fragment {
         dinoStatusDot = view.findViewById(R.id.dinoStatusDot);
 
         calendarSyncSwitch = view.findViewById(R.id.calendarSyncSwitch);
+        displayNameInput = view.findViewById(R.id.displayNameInput);
     }
 
     private void restoreSavedValues() {
@@ -140,6 +143,12 @@ public class HardLimitsFragment extends Fragment {
         cocurricularSlider.setValue(OnboardingPrefs.getCocurricularHours(requireContext()));
         if (calendarSyncSwitch != null) {
             calendarSyncSwitch.setChecked(OnboardingPrefs.isCalendarSynced(requireContext()));
+        }
+        if (displayNameInput != null) {
+            displayNameInput.setText(OnboardingPrefs.getDisplayName(requireContext()));
+            // setText leaves the caret at index 0, so typing straight into the pre-filled
+            // "Maya" would produce "AMaya". Park it at the end instead.
+            displayNameInput.setSelection(displayNameInput.getText().length());
         }
     }
 
@@ -240,7 +249,8 @@ public class HardLimitsFragment extends Fragment {
                     (int) studySlider.getValue(),
                     (int) workSlider.getValue(),
                     (int) cocurricularSlider.getValue(),
-                    calendarSyncSwitch != null && calendarSyncSwitch.isChecked());
+                    calendarSyncSwitch != null && calendarSyncSwitch.isChecked(),
+                    displayNameInput == null ? null : displayNameInput.getText().toString());
 
             Toast.makeText(requireContext(),
                     "Baseline saved", Toast.LENGTH_SHORT).show();

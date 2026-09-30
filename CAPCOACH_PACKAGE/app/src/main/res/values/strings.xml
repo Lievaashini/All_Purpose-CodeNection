@@ -100,6 +100,11 @@
     <string name="limits_cta">Save &amp; Launch</string>
     <string name="limits_footnote">Editable anytime from triage.</string>
 
+    <!-- Display name. Screen 2 pre-fills the field with "Maya" so this question can be
+         answered by simply not answering it. -->
+    <string name="limits_name_label">WHAT SHOULD WE CALL YOU?</string>
+    <string name="limits_name_default">Maya</string>
+
     <!-- Accessibility -->
     <string name="cd_theme_toggle">Toggle night and bright theme</string>
     <string name="cd_mic_button">Talk to CapCoach</string>
@@ -109,6 +114,7 @@
     <string name="cd_study_slider">Study and classes hours per week</string>
     <string name="cd_cocurricular_slider">Co-curricular hours per week</string>
     <string name="cd_sync_calendar_switch">Enable calendar sync</string>
+    <string name="cd_display_name_input">Your name, used in your morning greeting</string>
 
     <!-- ==================================================================
          SHARED SHELL - added with Screens 3-9. Nothing above changed.
@@ -303,7 +309,7 @@
          SCREEN 6 - DAILY HARVEST  (port of Prototype/daily-harvest.html)
          ================================================================== -->
     <string name="harvest_streak_badge">MORNING HARVEST - DAY %1$d</string>
-    <string name="harvest_greeting">Good Morning, Maya!</string>
+    <string name="harvest_greeting">Good Morning, %1$s!</string>
     <string name="harvest_subtitle">Look what grew overnight on your tree.</string>
     <string name="harvest_tooltip">1 Apple = 1 Task completed yesterday</string>
     <string name="harvest_tooltip_badge">+%1$d</string>
@@ -328,7 +334,7 @@
         <item quantity="one">Collect %1$d Apple</item>
         <item quantity="other">Collect %1$d Apples</item>
     </plurals>
-    <string name="harvest_start_day">Start Maya\'s Day</string>
+    <string name="harvest_start_day">Start %1$s\'s Day</string>
     <string name="harvest_launch">Launch Dashboard</string>
     <string name="harvest_skip">Skip for now</string>
     <string name="harvest_skip_confirm">Skip collecting your overnight harvest for now?</string>
