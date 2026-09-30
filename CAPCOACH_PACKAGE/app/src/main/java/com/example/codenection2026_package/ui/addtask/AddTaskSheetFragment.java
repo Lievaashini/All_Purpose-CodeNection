@@ -29,7 +29,10 @@ import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.api.VoiceManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
+import com.example.codenection2026_package.model.DinoVoice;
 import com.example.codenection2026_package.model.Task;
+import com.example.codenection2026_package.model.ToneType;
+import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
@@ -672,13 +675,19 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             return;
         }
         if (!flexible) {
-            dinoMessage.setText(R.string.addtask_dino_guard_speech);
+            dinoMessage.setText(DinoVoice.Quote.ADDTASK_GUARD.pick(tone()));
             return;
         }
         dinoMessage.setText(getString(
-                R.string.addtask_dino_scheduler_speech_fmt,
+                DinoVoice.Quote.ADDTASK_SCHED.pick(tone()),
                 deferralSummary(),
                 getString(priorityLabelRes())));
+    }
+
+    /** The coaching tone chosen in onboarding or Settings. */
+    @NonNull
+    private ToneType tone() {
+        return OnboardingPrefs.getTone(requireContext());
     }
 
     /** The example name each category starts with, or "" when it has none. */

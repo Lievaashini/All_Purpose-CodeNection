@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.model.DinoVoice;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
@@ -173,7 +174,8 @@ public class DailyHarvestFragment extends Fragment {
         }
         if (dinoChatBubble != null) {
             dinoChatBubble.setText(getResources().getQuantityString(
-                    R.plurals.harvest_dino_bubble_apples, APPLES_GROWN, APPLES_GROWN));
+                    DinoVoice.harvestApples(OnboardingPrefs.getTone(requireContext())),
+                    APPLES_GROWN, APPLES_GROWN));
         }
     }
 

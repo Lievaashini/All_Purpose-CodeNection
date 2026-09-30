@@ -900,6 +900,9 @@
                     android:textColor="@color/brand_mint"
                     android:textStyle="bold" />
 
+                <!-- Design-time text only. The real line repeats the chosen deferral window
+                     and priority, and its wording depends on the coaching tone, so
+                     AddTaskSheetFragment sets it from DinoVoice. -->
                 <TextView
                     android:id="@+id/dinoMessage"
                     style="@style/Text.MicroLabel"
@@ -908,8 +911,8 @@
                     android:layout_marginTop="2dp"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:text="@string/addtask_dino_scheduler_speech"
-                    android:textColor="@color/text_muted_dark" />
+                    android:textColor="@color/text_muted_dark"
+                    tools:text="Shedding buffer: 48h. Priority High is held back." />
             </LinearLayout>
         </LinearLayout>
 

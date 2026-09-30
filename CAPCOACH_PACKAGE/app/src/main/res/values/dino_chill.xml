@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================================
+  DINO QUOTES - CHILL tone
+  ============================================================================
+
+  See dino_hype.xml for the file layout and the placeholder conventions. This
+  file holds the same slot names as the other two, so a slot can never exist in
+  one tone and be missing from another.
+
+  Chill is calm and unpushy: it acknowledges, reassures and never alarms. Where
+  Hype shouts and Plain reports, Chill talks like a tired friend who is on your
+  side.
+-->
+<resources>
+
+    <string name="dino_onboarding_chill">"Smooth pacing, calm focus."</string>
+
+    <string name="dino_work_safe_chill">"%1$dh is your line. The rest of the week stays yours."</string>
+    <string name="dino_work_caution_chill">"This is edging past comfortable. Mind the recovery windows."</string>
+    <string name="dino_work_risk_chill">"That\'s a lot for one week. Let\'s shed something together."</string>
+
+    <plurals name="dino_harvest_apples_chill">
+        <item quantity="one">"One apple grew back overnight."</item>
+        <item quantity="other">"%1$d apples grew back overnight."</item>
+    </plurals>
+
+    <string name="dino_feast_hungry_chill">"Whenever you\'re ready, I could eat."</string>
+    <string name="dino_feast_all_chill">"All at once? That\'s generous of you."</string>
+    <string name="dino_feast_hug_chill">"Thank you. You protected your rest this week."</string>
+    <string name="dino_feast_done_chill">"Fully rested. Let\'s keep the pace gentle."</string>
+
+    <string name="dino_feast_quote_1_chill">"Crunch. That hit the spot."</string>
+    <string name="dino_feast_quote_2_chill">"Mm. The week is settling already."</string>
+    <string name="dino_feast_quote_3_chill">"Good sleep makes a good apple."</string>
+    <string name="dino_feast_quote_4_chill">"That was a calm, satisfying one."</string>
+    <string name="dino_feast_quote_5_chill">"Steady energy. No rush."</string>
+
+    <string name="dino_addtask_guard_chill">"Shift locked in. Nothing collides with study time."</string>
+    <string name="dino_addtask_sched_chill">Shedding buffer: %1$s. %2$s stays off the shed list.</string>
+
+</resources>

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.model.DinoVoice;
 
 /**
  * Zone grading for the "Total Committed Load" banner.
@@ -114,17 +115,17 @@ public final class LoadZones {
     public enum WorkBand {
         SAFE(R.string.work_status_safe,
                 R.string.work_warning_safe,
-                R.string.dino_work_safe_speech,
+                DinoVoice.Quote.WORK_SAFE,
                 R.color.status_green),
 
         CAUTION(R.string.work_status_caution,
                 R.string.work_warning_caution,
-                R.string.dino_work_caution_speech,
+                DinoVoice.Quote.WORK_CAUTION,
                 R.color.status_amber),
 
         RISK(R.string.work_status_risk,
                 R.string.work_warning_risk,
-                R.string.dino_work_risk_speech,
+                DinoVoice.Quote.WORK_RISK,
                 R.color.status_red);
 
         @StringRes
@@ -133,19 +134,23 @@ public final class LoadZones {
         @StringRes
         public final int warningTextRes;
 
-        @StringRes
-        public final int dinoSpeechRes;
+        /**
+         * The guard's line for this band. A slot rather than a string resource, because the
+         * wording depends on the user's coaching tone as well as the band.
+         */
+        @NonNull
+        public final DinoVoice.Quote dinoQuote;
 
         @ColorRes
         public final int colorRes;
 
         WorkBand(@StringRes int statusLabelRes,
                  @StringRes int warningTextRes,
-                 @StringRes int dinoSpeechRes,
+                 @NonNull DinoVoice.Quote dinoQuote,
                  @ColorRes int colorRes) {
             this.statusLabelRes = statusLabelRes;
             this.warningTextRes = warningTextRes;
-            this.dinoSpeechRes = dinoSpeechRes;
+            this.dinoQuote = dinoQuote;
             this.colorRes = colorRes;
         }
     }

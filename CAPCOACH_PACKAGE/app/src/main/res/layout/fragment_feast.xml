@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 7 - WEEKLY FEAST  (port of Prototype/feast.html)
 
@@ -132,14 +132,16 @@
                     android:paddingHorizontal="@dimen/space_md"
                     android:paddingVertical="@dimen/space_xxs">
 
+                    <!-- Design-time text only. The real opening line depends on the coaching
+                         tone, so FeastFragment sets it from DinoVoice. -->
                     <TextView
                         android:id="@+id/dinoBubble"
                         style="@style/Text.MicroLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feast_bubble_hungry"
                         android:textColor="@color/brand_mint"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        tools:text="&quot;Om nom! I'm starving! Feed me!&quot;" />
                 </LinearLayout>
 
                 <FrameLayout

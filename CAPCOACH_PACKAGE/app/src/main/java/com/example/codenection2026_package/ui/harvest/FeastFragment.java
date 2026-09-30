@@ -19,6 +19,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.model.DinoVoice;
+import com.example.codenection2026_package.model.ToneType;
+import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 
@@ -88,6 +91,12 @@ public class FeastFragment extends Fragment {
         dinoMouthClosed = view.findViewById(R.id.dinoMouthClosed);
         dinoMouthOpen = view.findViewById(R.id.dinoMouthOpen);
         dinoBubble = view.findViewById(R.id.dinoBubble);
+        if (dinoBubble != null) {
+            // The opening line arrives from the layout, which cannot know the coaching tone,
+            // so it is set here instead. Every later line on this screen already goes
+            // through DinoVoice.
+            dinoBubble.setText(DinoVoice.Quote.FEAST_HUNGRY.pick(tone()));
+        }
         applesRemainingCount = view.findViewById(R.id.applesRemainingCount);
         satietyPercentage = view.findViewById(R.id.satietyPercentage);
         progressText = view.findViewById(R.id.progressText);
@@ -238,7 +247,7 @@ public class FeastFragment extends Fragment {
 
         isEating = true;
         if (dinoBubble != null) {
-            dinoBubble.setText(R.string.feast_bubble_all);
+            dinoBubble.setText(DinoVoice.Quote.FEAST_ALL.pick(tone()));
         }
         leanIn();
         openMouth();
@@ -483,7 +492,7 @@ public class FeastFragment extends Fragment {
     /** Port of triggerDinoHug(), for tapping a Dino with an empty basket. */
     private void triggerDinoHug() {
         if (dinoBubble != null) {
-            dinoBubble.setText(R.string.feast_bubble_hug);
+            dinoBubble.setText(DinoVoice.Quote.FEAST_HUG.pick(tone()));
         }
         createFloatingXp("+1 LOVE");
         if (feastDino != null) {
@@ -502,21 +511,21 @@ public class FeastFragment extends Fragment {
     /** Port of triggerFullFeastCelebration(). */
     private void triggerFullFeastCelebration() {
         if (dinoBubble != null) {
-            dinoBubble.setText(R.string.feast_bubble_done);
+            dinoBubble.setText(DinoVoice.Quote.FEAST_DONE.pick(tone()));
         }
         showToast(getString(R.string.feast_complete_toast));
     }
 
     @NonNull
     private String randomHappyQuote() {
-        int[] quotes = {
-                R.string.feast_quote_1,
-                R.string.feast_quote_2,
-                R.string.feast_quote_3,
-                R.string.feast_quote_4,
-                R.string.feast_quote_5
-        };
+        int[] quotes = DinoVoice.feastQuotes(tone());
         return getString(quotes[random.nextInt(quotes.length)]);
+    }
+
+    /** The coaching tone chosen in onboarding or Settings. */
+    @NonNull
+    private ToneType tone() {
+        return OnboardingPrefs.getTone(requireContext());
     }
 
     // ==================================================================

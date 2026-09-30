@@ -334,9 +334,12 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (dinoGuardSpeech != null) {
+            // The band picks the line, the tone picks the wording. Only the safe band's copy
+            // names the number, so only that one takes the hours.
+            int line = band.dinoQuote.pick(OnboardingPrefs.getTone(requireContext()));
             dinoGuardSpeech.setText(band == LoadZones.WorkBand.SAFE
-                    ? getString(band.dinoSpeechRes, work)
-                    : getString(band.dinoSpeechRes));
+                    ? getString(line, work)
+                    : getString(line));
         }
         if (dinoGuardAvatar != null) {
             loadDinoSprite(dinoGuardAvatar, avatarFor(band));

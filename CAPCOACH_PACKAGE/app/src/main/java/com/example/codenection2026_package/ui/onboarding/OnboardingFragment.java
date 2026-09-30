@@ -154,7 +154,10 @@ public class OnboardingFragment extends Fragment {
                 // Receive the text from the dialog and update the Onboarding screen
                 dialog.setOnVoiceResultListener((raw, clean) -> {
                     if (dinoDialogue != null) {
-                        dinoDialogue.setText("You said: " + clean);
+                        // Was a hard-coded English prefix in Java. Extracted so it is
+                        // translatable; it stays tone-neutral because it is the app echoing
+                        // the user's own words back, not the Dino speaking.
+                        dinoDialogue.setText(getString(R.string.dino_you_said, clean));
                     }
                 });
 
@@ -205,7 +208,8 @@ public class OnboardingFragment extends Fragment {
         applyToneCard(cardPlain, tone == ToneType.PLAIN, R.color.tertiary_gold_container);
 
         if (dinoDialogue != null) {
-            dinoDialogue.setText(tone.speechRes);
+            dinoDialogue.setText(
+                    com.example.codenection2026_package.model.DinoVoice.Quote.ONBOARDING.pick(tone));
             if (animateDialogue) {
                 dinoDialogue.setAlpha(0f);
                 dinoDialogue.animate().alpha(1f).setDuration(180L).start();

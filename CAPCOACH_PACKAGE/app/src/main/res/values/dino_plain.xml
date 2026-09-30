@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================================
+  DINO QUOTES - PLAIN tone
+  ============================================================================
+
+  See dino_hype.xml for the file layout and the placeholder conventions. This
+  file holds the same slot names as the other two, so a slot can never exist in
+  one tone and be missing from another.
+
+  Plain is terse telemetry: no encouragement, no exclamation, and no second
+  person. It reports state and stops.
+-->
+<resources>
+
+    <string name="dino_onboarding_plain">"Telemetry active. Zero fluff."</string>
+
+    <string name="dino_work_safe_plain">"%1$dh committed. Overruns are deferred automatically."</string>
+    <string name="dino_work_caution_plain">"Above the recovery threshold. Sleep buffer is shrinking."</string>
+    <string name="dino_work_risk_plain">"Burnout risk. Shedding required to hold the baseline."</string>
+
+    <plurals name="dino_harvest_apples_plain">
+        <item quantity="one">"1 apple logged yesterday."</item>
+        <item quantity="other">"%1$d apples logged yesterday."</item>
+    </plurals>
+
+    <string name="dino_feast_hungry_plain">"Stamina depleted. Apples required."</string>
+    <string name="dino_feast_all_plain">"Full basket received. Stamina recalculating."</string>
+    <string name="dino_feast_hug_plain">"Rest preserved. Baseline holding."</string>
+    <string name="dino_feast_done_plain">"Satiety 100%. Capacity restored."</string>
+
+    <string name="dino_feast_quote_1_plain">"Apple consumed. +25 stamina."</string>
+    <string name="dino_feast_quote_2_plain">"Stress index unchanged. Intake logged."</string>
+    <string name="dino_feast_quote_3_plain">"Sleep debt offset. Continuing."</string>
+    <string name="dino_feast_quote_4_plain">"Intake complete."</string>
+    <string name="dino_feast_quote_5_plain">"Stamina restored. Resuming."</string>
+
+    <string name="dino_addtask_guard_plain">"Shift locked. No conflicts detected."</string>
+    <string name="dino_addtask_sched_plain">Buffer: %1$s. Priority %2$s excluded from shedding.</string>
+
+</resources>

@@ -10,24 +10,26 @@
     <string name="onboarding_synced">SYNCED</string>
     <string name="dino_description">CapCoach pixel dinosaur mascot</string>
     <string name="dino_dialogue_default">"Ready to protect your schedule!"</string>
+    <!-- What the Dino says when the voice button echoes the user's own words back. Tone
+         neutral on purpose: this is the app repeating input, not the Dino coaching. -->
+    <string name="dino_you_said">You said: %1$s</string>
 
+    <!-- The tone cards. Their copy names the tone, so it does not change with it; the Dino's
+         actual dialogue lives in dino_hype.xml / dino_chill.xml / dino_plain.xml. -->
     <string name="tone_section_label">Choose Dino Coaching Tone</string>
     <string name="tone_section_hint">SELECT 1</string>
 
     <string name="tone_hype_title">Hype</string>
     <string name="tone_hype_tag">Energetic</string>
     <string name="tone_hype_desc">Energetic sleep protector</string>
-    <string name="tone_hype_speech">"Energetic sleep protector ready!"</string>
 
     <string name="tone_chill_title">Chill</string>
     <string name="tone_chill_tag">Gentle</string>
     <string name="tone_chill_desc">Gentle mindful pacing</string>
-    <string name="tone_chill_speech">"Smooth pacing, calm focus."</string>
 
     <string name="tone_plain_title">Plain</string>
     <string name="tone_plain_tag">Facts Only</string>
     <string name="tone_plain_desc">Direct data analytics</string>
-    <string name="tone_plain_speech">"Telemetry active. Zero fluff."</string>
 
     <string name="health_connect_title">Connect Android Health</string>
     <string name="health_connect_subtitle">Sync Sleep &amp; HRV</string>
@@ -44,11 +46,8 @@
     <string name="dino_guard_label">DEMCHING DINO</string>
     <string name="dino_guard_suffix">- GUARDIAN AI</string>
     <string name="dino_guard_speech_default">"20h cap locked."</string>
-    <!-- Dino dialogue on the limits screen, by work-hour band.
-         The "safe" variant is formatted with the slider value. -->
-    <string name="dino_work_safe_speech">"%1$dh cap locked. I\'ll auto-deflect exam week overruns!"</string>
-    <string name="dino_work_caution_speech">"Careful! We are eating into deep recovery windows."</string>
-    <string name="dino_work_risk_speech">"Red Alert! Demching Dino initiating emergency offloading!"</string>
+    <!-- The limits-screen guard dialogue is per coaching tone, in the dino_*.xml files.
+         LoadZones.WorkBand carries the slot and HardLimitsFragment resolves it. -->
 
     <string name="profile_label">STUDENT PROFILE</string>
     <string name="profile_value">Full-Time Undergrad</string>
@@ -264,11 +263,10 @@
     <string name="addtask_buffer_effort">Effort</string>
     <string name="addtask_buffer_effort_value">45m</string>
     <string name="addtask_dino_guard_label">CapCoach Dino Guard</string>
-    <string name="addtask_dino_guard_speech">"Locking shift. 0% chance of study-hall collisions."</string>
     <string name="addtask_dino_scheduler_label">CapCoach ML Scheduler</string>
-    <string name="addtask_dino_scheduler_speech">"Shedding buffer allocated: 48h elasticity active for neuro exam prep."</string>
-    <!-- Echoes the two values the user just picked, so the sheet proves it read them. -->
-    <string name="addtask_dino_scheduler_speech_fmt">Shedding buffer: %1$s. Priority %2$s is held back from the shed list.</string>
+    <!-- The two Dino lines under the sheet are per coaching tone, in the dino_*.xml files.
+         The scheduler variant echoes the deferral window and priority, so it stays a
+         format string: %1$s window, %2$s priority label. -->
     <string name="addtask_save_work">Save &amp; Shield Shift</string>
     <string name="addtask_save_academic">Save Academic Task</string>
     <string name="addtask_save_category">Save %1$s Task</string>
@@ -315,12 +313,9 @@
     <string name="harvest_subtitle">Look what grew overnight on your tree.</string>
     <string name="harvest_tooltip">1 Apple = 1 Task completed yesterday</string>
     <string name="harvest_tooltip_badge">+%1$d</string>
-    <!-- Both of these name the size of the crop, so both follow APPLES_GROWN. The
-         singular matters: a one-task day must not read "Collect 1 Apples". -->
-    <plurals name="harvest_dino_bubble_apples">
-        <item quantity="one">"1 ripe apple! Yum!"</item>
-        <item quantity="other">"%1$d ripe apples! Yum!"</item>
-    </plurals>
+    <!-- The Dino's bubble here is per coaching tone, in the dino_*.xml files as
+         dino_harvest_apples_*. It is a plural in every tone, because the singular
+         matters: a one-task day must not read "1 apples". -->
     <string name="harvest_yesterday">Yesterday</string>
     <string name="harvest_yesterday_pct">100%</string>
     <string name="harvest_yesterday_more">+2 more logged</string>
@@ -352,10 +347,9 @@
     <string name="feast_pill">SUNDAY FEAST - DAY %1$d</string>
     <string name="feast_title">Feed Coach Dino!</string>
     <string name="feast_subtitle">You harvested %1$d apples from completing %1$d study &amp; shift blocks this week!</string>
-    <string name="feast_bubble_hungry">"Om nom! I\'m starving! Feed me!"</string>
-    <string name="feast_bubble_all">"WHOAAAA! ALL OF THEM AT ONCE?! YES!"</string>
-    <string name="feast_bubble_done">"100% Satiated! Ready to crush Midterms!"</string>
-    <string name="feast_bubble_hug">"I love you! You preserved my rest this week!"</string>
+    <!-- Every Dino bubble on this screen is per coaching tone, in the dino_*.xml files:
+         dino_feast_hungry_*, dino_feast_all_*, dino_feast_done_*, dino_feast_hug_* and the
+         five idle lines dino_feast_quote_1..5_*. -->
     <string name="feast_stash_label">BASKET STASH</string>
     <string name="feast_stash_total">/ %1$d apples</string>
     <string name="feast_satiety_label">DINO SATIETY</string>
@@ -374,11 +368,6 @@
     <string name="feast_done">Done for now - Head to Dashboard</string>
     <string name="feast_full_toast">Dino\'s belly is completely full! Great work this week!</string>
     <string name="feast_complete_toast">Weekly Feast Complete! Dino at Max Stamina (+400 XP)</string>
-    <string name="feast_quote_1">"CRUNCH! So sweet &amp; crunchy!"</string>
-    <string name="feast_quote_2">"YUUUM! Midterm stress dissolved!"</string>
-    <string name="feast_quote_3">"Nom nom! Protected sleep tastes good!"</string>
-    <string name="feast_quote_4">"BURP! Best Sunday feast ever!"</string>
-    <string name="feast_quote_5">"Full energy! Ready for next week!"</string>
     <string name="cd_feast_dino">CapCoach Dino waiting to be fed</string>
     <string name="cd_feed_apple">Feed one apple to the Dino</string>
 

@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.model.DinoVoice;
 import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.google.android.material.card.MaterialCardView;
@@ -95,7 +96,8 @@ final class ToneSelector {
 
         if (previewText != null) {
             previewText.setText(host.getString(
-                    R.string.settings_tone_preview, host.getString(selected.speechRes)));
+                    R.string.settings_tone_preview,
+                    host.getString(DinoVoice.Quote.ONBOARDING.pick(selected))));
         }
     }
 

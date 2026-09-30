@@ -1,9 +1,6 @@
 package com.example.codenection2026_package.model;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-
-import com.example.codenection2026_package.R;
 
 /**
  * The three coaching tones from {@code onboarding.html}.
@@ -11,29 +8,29 @@ import com.example.codenection2026_package.R;
  * <p>The tone changes the Dino's dialogue only - it is a presentation preference, so it
  * lives here rather than in the engine. Role 1 persists the chosen id on the
  * {@code User} entity as {@code coachingTone}.
+ *
+ * <p>This enum is deliberately just an identity: it says WHICH tone, never what the tone
+ * says. The wording lives in {@link DinoVoice}, which maps each dialogue slot to one string
+ * per tone, so adding a line means touching the three {@code dino_*.xml} files and
+ * {@code DinoVoice} rather than this class.
  */
 public enum ToneType {
 
     /** Bright, energetic, exclamation-heavy. Default selection in the prototype. */
-    HYPE("HYPE", R.string.tone_hype_speech),
+    HYPE("HYPE"),
 
     /** Calm, gentle pacing. */
-    CHILL("CHILL", R.string.tone_chill_speech),
+    CHILL("CHILL"),
 
     /** Terse telemetry, no encouragement. */
-    PLAIN("PLAIN", R.string.tone_plain_speech);
+    PLAIN("PLAIN");
 
     /** Value written to the database. Must match TEAM_HANDSHAKE.md section 5.1. */
     @NonNull
     public final String storageValue;
 
-    /** Dialogue the Dino speaks when this tone is selected. */
-    @StringRes
-    public final int speechRes;
-
-    ToneType(@NonNull String storageValue, @StringRes int speechRes) {
+    ToneType(@NonNull String storageValue) {
         this.storageValue = storageValue;
-        this.speechRes = speechRes;
     }
 
     /** Parses a stored value, defaulting to {@link #HYPE} for anything unknown. */
