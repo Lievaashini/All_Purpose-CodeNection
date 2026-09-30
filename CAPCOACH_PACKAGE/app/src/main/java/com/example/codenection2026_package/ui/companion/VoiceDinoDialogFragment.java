@@ -22,8 +22,12 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.VoiceManager;
+import com.example.codenection2026_package.model.CoachVoice;
+import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
+import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.ArrayList;
@@ -76,7 +80,7 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
                         if (Boolean.TRUE.equals(isGranted)) {
                             startListening();
                         } else if (voiceBubble != null) {
-                            voiceBubble.setText(R.string.voice_unavailable);
+                            voiceBubble.setText(CoachVoice.Line.VOICE_UNAVAILABLE.pick(tone()));
                         }
                     });
 
@@ -108,7 +112,26 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
             closeButton.setOnClickListener(v -> dismiss());
         }
 
+        // The layout cannot know the coaching tone, so the Dino's prompt and CTA are
+        // resolved here. The layout keeps the Hype variant as preview and fallback.
+        ToneCopy.on(view, tone())
+                .set(R.id.voiceHint, CoachVoice.Line.VOICE_INSTRUCTION)
+                .set(R.id.voiceReadyText, CoachVoice.Line.VOICE_CTA);
+
         setUpVoice();
+    }
+
+    /**
+     * The coaching tone chosen in onboarding or Settings.
+     *
+     * <p>Null once the fragment is detached, which is reachable here because the permission
+     * result and the recogniser callbacks can both outlive the view. A null tone is Hype in
+     * {@link CoachVoice.Line#pick}, so a late callback falls back to the default voice
+     * rather than throwing.
+     */
+    @Nullable
+    private ToneType tone() {
+        return isAdded() ? OnboardingPrefs.getTone(requireContext()) : null;
     }
 
     // ==================================================================
@@ -118,11 +141,13 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
     private void setUpVoice() {
         if (!SpeechRecognizer.isRecognitionAvailable(requireContext())) {
             if (voiceBubble != null) {
-                voiceBubble.setText(R.string.voice_unavailable);
+                voiceBubble.setText(CoachVoice.Line.VOICE_UNAVAILABLE.pick(tone()));
             }
             if (voiceMicButton != null) {
                 voiceMicButton.setOnClickListener(v -> Toast
-                        .makeText(requireContext(), R.string.voice_unavailable, Toast.LENGTH_SHORT)
+                        .makeText(requireContext(),
+                                CoachVoice.Line.VOICE_UNAVAILABLE.pick(tone()),
+                                Toast.LENGTH_SHORT)
                         .show());
             }
             return;
@@ -151,7 +176,7 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
         } catch (RuntimeException e) {
             // Some devices throw when the recogniser service is busy or was just cancelled.
             if (voiceBubble != null) {
-                voiceBubble.setText(R.string.voice_retry);
+                voiceBubble.setText(CoachVoice.Line.VOICE_RETRY.pick(tone()));
             }
         }
     }
@@ -165,7 +190,7 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
                 voiceStatusText.setText(R.string.voice_status_listening);
             }
             if (voiceReadyText != null) {
-                voiceReadyText.setText(R.string.voice_cta);
+                voiceReadyText.setText(CoachVoice.Line.VOICE_CTA.pick(tone()));
             }
             startPulse();
         }
@@ -194,7 +219,7 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
                 voiceStatusText.setText(R.string.voice_status_ready);
             }
             if (voiceBubble != null) {
-                voiceBubble.setText(R.string.voice_retry);
+                voiceBubble.setText(CoachVoice.Line.VOICE_RETRY.pick(tone()));
             }
         }
 
@@ -209,7 +234,7 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
                     results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             if (matches == null || matches.isEmpty()) {
                 if (voiceBubble != null) {
-                    voiceBubble.setText(R.string.voice_retry);
+                    voiceBubble.setText(CoachVoice.Line.VOICE_RETRY.pick(tone()));
                 }
                 return;
             }

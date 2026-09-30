@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================================
+  HYPE TONE - everything the app says to the user in this voice
+  ============================================================================
+
+  One file per coaching tone: tone_hype.xml, tone_chill.xml, tone_plain.xml.
+  Every file holds the SAME slot names, differing only in the tone suffix, so a
+  slot can never exist in one tone and be missing from another. Rewriting one
+  character's whole personality means editing one file.
+
+  The slot names are resolved by model/CoachVoice.java, which is the only thing
+  that knows all three suffixes at once. Add a slot there and in all three files.
+
+  WHAT VARIES AND WHAT DOES NOT
+  Tone reaches the copy that READS as the app talking: state pills, headlines,
+  empty states, warnings, confirmations, toasts, prompts and the Dino. It
+  deliberately does not reach functional chrome - nav names, field labels, units,
+  category and priority names, button verbs and content descriptions all stay
+  fixed, in strings.xml. "HRS / WEEK" reading differently per tone would make the
+  app harder to scan, not more personable.
+
+  Hype is the default tone and keeps the prototype's wording verbatim, so the
+  app as designed is what a user sees unless they choose otherwise.
+-->
+<resources>
+
+    <!-- ==================================================================
+         DINO DIALOGUE
+         ================================================================== -->
+
+    <string name="dino_onboarding_hype">"Energetic sleep protector ready!"</string>
+    <string name="dino_work_safe_hype">"%1$dh cap locked. I\'ll auto-deflect exam week overruns!"</string>
+    <string name="dino_work_caution_hype">"Careful! We are eating into deep recovery windows."</string>
+    <string name="dino_work_risk_hype">"Red Alert! Demching Dino initiating emergency offloading!"</string>
+    <plurals name="dino_harvest_apples_hype">
+        <item quantity="one">"1 ripe apple! Yum!"</item>
+        <item quantity="other">"%1$d ripe apples! Yum!"</item>
+    </plurals>
+    <string name="dino_feast_hungry_hype">"Om nom! I\'m starving! Feed me!"</string>
+    <string name="dino_feast_all_hype">"WHOAAAA! ALL OF THEM AT ONCE?! YES!"</string>
+    <string name="dino_feast_hug_hype">"I love you! You preserved my rest this week!"</string>
+    <string name="dino_feast_done_hype">"100% Satiated! Ready to crush Midterms!"</string>
+    <string name="dino_feast_quote_1_hype">"CRUNCH! So sweet &amp; crunchy!"</string>
+    <string name="dino_feast_quote_2_hype">"YUUUM! Midterm stress dissolved!"</string>
+    <string name="dino_feast_quote_3_hype">"Nom nom! Protected sleep tastes good!"</string>
+    <string name="dino_feast_quote_4_hype">"BURP! Best Sunday feast ever!"</string>
+    <string name="dino_feast_quote_5_hype">"Full energy! Ready for next week!"</string>
+    <string name="dino_addtask_guard_hype">"Locking shift. 0% chance of study-hall collisions."</string>
+    <string name="dino_addtask_sched_hype">Shedding buffer: %1$s. Priority %2$s is held back from the shed list!</string>
+
+    <!-- ==================================================================
+         SCREEN 1 - ONBOARDING
+         ================================================================== -->
+
+    <string name="onboard_subtitle_hype">Choose your companion tone.</string>
+    <string name="onboard_footnote_hype">Offline &amp; encrypted</string>
+    <string name="tone_section_label_hype">Choose Dino Coaching Tone</string>
+
+    <!-- ==================================================================
+         SCREEN 2 - SET LIMITS
+         ================================================================== -->
+
+    <string name="limits_subtitle_hype">Protect your non-negotiable time.</string>
+    <string name="limits_footnote_hype">Editable anytime from triage.</string>
+    <string name="limits_name_label_hype">WHAT SHOULD WE CALL YOU?</string>
+
+    <!-- Work-band status words and their warnings. The band picks the slot, the tone
+         picks the wording. None of these take a format argument: the wording is fixed
+         per band, and the hours appear elsewhere on the card. -->
+    <string name="work_status_safe_hype">Safe Labor Cap</string>
+    <string name="work_status_caution_hype">Fatigue Warning</string>
+    <string name="work_status_risk_hype">Burnout Risk &gt; 20h</string>
+    <string name="work_warning_safe_hype">Shielded up to 20h. Overages trigger alert.</string>
+    <string name="work_warning_caution_hype">Caution: Beyond 20 weekly hours, sleep buffers and academic grades face risk.</string>
+    <string name="work_warning_risk_hype">Severe risk of academic collision. Shift shedding will trigger on deadlines.</string>
+
+    <!-- Total-committed-load zone grading. -->
+    <string name="zone_safe_hype">SAFE ZONE / BALANCED</string>
+    <string name="zone_elevated_hype">ELEVATED CAPACITY</string>
+    <string name="zone_overload_hype">OVERLOAD WARNING</string>
+
+    <!-- ==================================================================
+         SCREEN 3 - DASHBOARD
+         ================================================================== -->
+
+    <string name="dash_state_optimal_hype">OPTIMAL</string>
+    <string name="dash_state_elevated_hype">ELEVATED</string>
+    <string name="dash_state_overload_hype">OVERLOAD</string>
+    <string name="dash_headline_balanced_hype">"All balanced today."</string>
+    <string name="dash_headline_elevated_hype">"Running warm - watch tonight."</string>
+    <string name="dash_headline_overload_hype">"Overload risk. Let me shed something."</string>
+    <string name="dash_no_tasks_hype">No tasks yet. Tap Add Task to create one.</string>
+    <string name="dash_saved_other_week_hype">Saved for %1$s, which is outside this week.</string>
+    <string name="triage_title_hype">Overload Prevention Action</string>
+    <string name="triage_load_sub_hype">Crash risk drops to 0%</string>
+    <string name="triage_sleep_sub_hype">Recovery window locked</string>
+    <string name="triage_kept_sub_hype">Condensed to 45m focused sprint</string>
+    <string name="triage_postponed_sub_hype">Moved to Thu 10:00 AM low-fatigue block</string>
+    <string name="triage_deferred_sub_hype">Auto-deferred to Saturday afternoon</string>
+    <string name="triage_accept_hype">Accept Rebalance &amp; Rest</string>
+    <string name="triage_dismiss_hype">Dismiss for Now</string>
+    <string name="toast_rebalanced_title_hype">Schedule Rebalanced &amp; Rest Protected</string>
+    <string name="toast_rebalanced_sub_hype">-55% cognitive load | +3.5h rest locked</string>
+    <string name="dash_sync_starting_hype">Syncing Google Calendar...</string>
+    <string name="dash_sync_none_hype">No upcoming events found.</string>
+    <string name="dash_sync_done_hype">Sync complete!</string>
+
+    <!-- ==================================================================
+         SCREEN 4 - ADD ACTIVITY
+         ================================================================== -->
+
+    <string name="addtask_subtitle_work_hype">Inflexible Work Mode Active</string>
+    <string name="addtask_subtitle_academic_hype">Flexible Academic Mode Active</string>
+    <string name="addtask_subtitle_flexible_category_hype">Flexible %1$s Mode Active</string>
+    <string name="addtask_mode_work_desc_hype">Fixed work hours. Never deferred.</string>
+    <string name="addtask_mode_work_badge_hype">Protected under 20h cap</string>
+    <string name="addtask_mode_academic_desc_hype">Eligible for auto-deferral during crunch.</string>
+    <string name="addtask_mode_academic_badge_hype">Auto-deferral active</string>
+    <string name="addtask_hint_sheddable_hype">Auto-Sheddable</string>
+    <string name="addtask_hint_locked_hype">Work Shift Auto-Locked</string>
+    <string name="addtask_cap_footnote_hype">Protected Shift - Never deferred by algorithm.</string>
+    <string name="addtask_buffer_eligible_hype">Eligible for Auto-Shed</string>
+    <string name="addtask_priority_hint_hype">Protects urgent work</string>
+    <string name="addtask_deferral_hint_hype">How late the scheduler may push this activity.</string>
+    <string name="addtask_saved_work_hype">Work shift saved and locked against auto-cancellation!</string>
+    <string name="addtask_saved_academic_hype">Flexible academic task saved and queued for triage!</string>
+    <string name="addtask_saved_category_hype">%1$s task saved and queued for triage!</string>
+    <string name="addtask_save_failed_hype">Could not save the task. Please try again.</string>
+    <string name="addtask_name_required_hype">Give the activity a name before saving.</string>
+
+    <!-- ==================================================================
+         SCREEN 5 - BIOMETRICS
+         ================================================================== -->
+
+    <string name="bio_event_pill_hype">Biometric Event Detected</string>
+    <string name="bio_anomaly_title_hype">Health Connect Alert: &lt; 5 Hours Sleep Detected</string>
+    <string name="bio_anomaly_body_hype">Last night\'s recorded sleep: 4h 18m (Target: 8h 00m). Severe restorative deficit.</string>
+    <string name="bio_hrv_state_hype">Sympathetic Stress</string>
+    <string name="bio_hrv_state_sub_hype">Elevated nervous load</string>
+    <string name="bio_trend_state_hype">Critical Dip</string>
+    <string name="bio_penalty_sub_hype">Applying Biometric Penalty to Today\'s Cognitive Capacity...</string>
+    <string name="bio_penalty_footnote_hype">Calculating Cognitive Load Shedding recommendations via on-device TFLite...</string>
+    <string name="bio_no_data_hype">No biometric records stored yet.</string>
+
+    <!-- ==================================================================
+         SCREEN 6 - DAILY HARVEST
+         ================================================================== -->
+
+    <string name="harvest_greeting_hype">Good Morning, %1$s!</string>
+    <string name="harvest_subtitle_hype">Look what grew overnight on your tree.</string>
+    <string name="harvest_tooltip_hype">1 Apple = 1 Task completed yesterday</string>
+    <string name="harvest_stash_label_hype">Current Stash: %1$s. Feast day is Sunday!</string>
+    <string name="harvest_skip_confirm_hype">Skip collecting your overnight harvest for now?</string>
+    <string name="harvest_toast_title_hype">%1$d Apples Stashed in Basket!</string>
+    <string name="harvest_toast_sub_hype">Dino excitement +100%% | %1$d total</string>
+
+    <!-- ==================================================================
+         SCREEN 7 - WEEKLY FEAST
+         ================================================================== -->
+
+    <string name="feast_title_hype">Feed Coach Dino!</string>
+    <string name="feast_subtitle_hype">You harvested %1$d apples from completing %1$d study &amp; shift blocks this week!</string>
+    <string name="feast_tray_title_hype">Tap apples to feed one-by-one:</string>
+    <string name="feast_full_toast_hype">Dino\'s belly is completely full! Great work this week!</string>
+    <string name="feast_complete_toast_hype">Weekly Feast Complete! Dino at Max Stamina (+400 XP)</string>
+    <string name="feast_complete_hype">Feast Complete! Dino 100% Recharged</string>
+
+    <!-- ==================================================================
+         SCREEN 8 - SETTINGS
+         ================================================================== -->
+
+    <string name="settings_theme_sub_hype">Switch UI between dark contrast &amp; crisp bright surfaces</string>
+    <string name="settings_share_title_hype">Share anonymized burnout data</string>
+    <string name="settings_link_disconnected_hype">Disconnected</string>
+    <string name="settings_link_active_hype">Anonymized Active</string>
+    <string name="settings_link_info_hype">This link is opt-in and off by default. Nothing leaves your device until you enable it, and only aggregated, non-identifying burnout statistics are ever shared.</string>
+
+    <!-- ==================================================================
+         SCREEN 9 - COMPANION / VOICE
+         ================================================================== -->
+
+    <string name="voice_instruction_hype">TAP MICROPHONE TO TALK</string>
+    <string name="voice_cta_hype">READY TO LISTEN</string>
+    <string name="voice_unavailable_hype">"Voice input is unavailable on this device"</string>
+    <string name="voice_retry_hype">"Tap microphone to try again"</string>
+
+</resources>

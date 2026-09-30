@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================================
+  CHILL TONE - everything the app says to the user in this voice
+  ============================================================================
+
+  See tone_hype.xml for the file layout, the slot conventions, and what tone does
+  and does not reach.
+
+  Chill is calm, warm and never alarming. It speaks in the second person, keeps
+  the exclamation marks out, and frames every problem as something the two of you
+  handle together rather than something being done to the user.
+-->
+<resources>
+
+    <!-- ==================================================================
+         DINO DIALOGUE
+         ================================================================== -->
+
+    <string name="dino_onboarding_chill">"Smooth pacing, calm focus."</string>
+
+    <string name="dino_work_safe_chill">"%1$dh is your line. The rest of the week stays yours."</string>
+    <string name="dino_work_caution_chill">"This is edging past comfortable. Mind the recovery windows."</string>
+    <string name="dino_work_risk_chill">"That\'s a lot for one week. Let\'s shed something together."</string>
+
+    <plurals name="dino_harvest_apples_chill">
+        <item quantity="one">"One apple grew back overnight."</item>
+        <item quantity="other">"%1$d apples grew back overnight."</item>
+    </plurals>
+
+    <string name="dino_feast_hungry_chill">"Whenever you\'re ready, I could eat."</string>
+    <string name="dino_feast_all_chill">"All at once? That\'s generous of you."</string>
+    <string name="dino_feast_hug_chill">"Thank you. You protected your rest this week."</string>
+    <string name="dino_feast_done_chill">"Fully rested. Let\'s keep the pace gentle."</string>
+
+    <string name="dino_feast_quote_1_chill">"Crunch. That hit the spot."</string>
+    <string name="dino_feast_quote_2_chill">"Mm. The week is settling already."</string>
+    <string name="dino_feast_quote_3_chill">"Good sleep makes a good apple."</string>
+    <string name="dino_feast_quote_4_chill">"That was a calm, satisfying one."</string>
+    <string name="dino_feast_quote_5_chill">"Steady energy. No rush."</string>
+
+    <string name="dino_addtask_guard_chill">"Shift locked in. Nothing collides with study time."</string>
+    <string name="dino_addtask_sched_chill">Shedding buffer: %1$s. %2$s stays off the shed list.</string>
+
+    <!-- ==================================================================
+         SCREEN 1 - ONBOARDING
+         ================================================================== -->
+
+    <string name="onboard_subtitle_chill">Pick the tone that suits you.</string>
+    <string name="onboard_footnote_chill">Stays offline &amp; encrypted</string>
+    <string name="tone_section_label_chill">Choose Your Coaching Tone</string>
+
+    <!-- ==================================================================
+         SCREEN 2 - SET LIMITS
+         ================================================================== -->
+
+    <string name="limits_subtitle_chill">Hold on to the time that matters.</string>
+    <string name="limits_footnote_chill">Change these anytime from triage.</string>
+    <string name="limits_name_label_chill">WHAT DO YOU GO BY</string>
+
+    <!-- Work-band status words and their warnings. The band picks the slot, the tone
+         picks the wording; the safe warning takes %1$d weekly hours. -->
+    <string name="work_status_safe_chill">Steady Load</string>
+    <string name="work_status_caution_chill">Getting Full</string>
+    <string name="work_status_risk_chill">Stretched &gt; 20h</string>
+    <string name="work_warning_safe_chill">You\'re covered up to 20h. Past that, we check in.</string>
+    <string name="work_warning_caution_chill">Past 20 weekly hours, sleep and grades start to feel it.</string>
+    <string name="work_warning_risk_chill">This is where rest and grades collide. On deadlines, we shed shifts.</string>
+
+    <!-- Total-committed-load zone grading. -->
+    <string name="zone_safe_chill">STEADY / BALANCED</string>
+    <string name="zone_elevated_chill">BUSY BUT BALANCED</string>
+    <string name="zone_overload_chill">STRETCHED THIN</string>
+
+    <!-- ==================================================================
+         SCREEN 3 - DASHBOARD
+         ================================================================== -->
+
+    <string name="dash_state_optimal_chill">STEADY</string>
+    <string name="dash_state_elevated_chill">BUSY</string>
+    <string name="dash_state_overload_chill">STRETCHED</string>
+
+    <string name="dash_headline_balanced_chill">"Everything\'s steady today."</string>
+    <string name="dash_headline_elevated_chill">"A bit full. Keep tonight light."</string>
+    <string name="dash_headline_overload_chill">"That\'s a lot. Let\'s shed something together."</string>
+
+    <string name="dash_no_tasks_chill">Nothing here yet. Add a task whenever you\'re ready.</string>
+    <string name="dash_saved_other_week_chill">Saved for %1$s - outside this week.</string>
+
+    <string name="triage_title_chill">Let\'s Make Room</string>
+    <string name="triage_load_sub_chill">Crash risk eases off</string>
+    <string name="triage_sleep_sub_chill">Recovery window kept</string>
+    <string name="triage_kept_sub_chill">Tightened to a 45m focused block</string>
+    <string name="triage_postponed_sub_chill">Moved to a quieter Thu 10:00 AM slot</string>
+    <string name="triage_deferred_sub_chill">Gently pushed to Saturday afternoon</string>
+    <string name="triage_accept_chill">Accept and Rest</string>
+    <string name="triage_dismiss_chill">Not Now</string>
+
+    <string name="toast_rebalanced_title_chill">Rebalanced. Rest protected.</string>
+    <string name="toast_rebalanced_sub_chill">-55% load | +3.5h rest kept</string>
+
+    <string name="dash_sync_starting_chill">Syncing your calendar...</string>
+    <string name="dash_sync_none_chill">Nothing coming up in your calendar.</string>
+    <string name="dash_sync_done_chill">Calendar\'s up to date.</string>
+
+    <!-- ==================================================================
+         SCREEN 4 - ADD ACTIVITY
+         ================================================================== -->
+
+    <string name="addtask_subtitle_work_chill">Fixed Work Hours</string>
+    <string name="addtask_subtitle_academic_chill">Academic Time Stays Flexible</string>
+    <string name="addtask_subtitle_flexible_category_chill">%1$s Stays Flexible</string>
+    <string name="addtask_mode_work_desc_chill">Fixed hours. We won\'t push these.</string>
+    <string name="addtask_mode_work_badge_chill">Held under the 20h cap</string>
+    <string name="addtask_mode_academic_desc_chill">We may move this in a busy week.</string>
+    <string name="addtask_mode_academic_badge_chill">Can be moved</string>
+    <string name="addtask_hint_sheddable_chill">Can Shed</string>
+    <string name="addtask_hint_locked_chill">Shift Locked In</string>
+    <string name="addtask_cap_footnote_chill">Protected shift. The scheduler leaves it alone.</string>
+    <string name="addtask_buffer_eligible_chill">Available to shed</string>
+    <string name="addtask_priority_hint_chill">Keeps urgent work safe</string>
+    <string name="addtask_deferral_hint_chill">How far we may push this, if needed.</string>
+    <string name="addtask_saved_work_chill">Shift saved and locked. It stays put.</string>
+    <string name="addtask_saved_academic_chill">Saved. We\'ll take a look in triage.</string>
+    <string name="addtask_saved_category_chill">%1$s task saved. Triage will take a look.</string>
+    <string name="addtask_save_failed_chill">We couldn\'t save that. Try again in a moment.</string>
+    <string name="addtask_name_required_chill">Add a name before saving.</string>
+
+    <!-- ==================================================================
+         SCREEN 5 - BIOMETRICS
+         ================================================================== -->
+
+    <string name="bio_event_pill_chill">Something in Your Biometrics</string>
+    <string name="bio_anomaly_title_chill">Health Connect: &lt; 5 Hours Sleep Noted</string>
+    <string name="bio_anomaly_body_chill">Last night\'s sleep: 4h 18m, against a target of 8h 00m. Recovery came up short.</string>
+    <string name="bio_hrv_state_chill">Running Tense</string>
+    <string name="bio_hrv_state_sub_chill">Nervous system is working hard</string>
+    <string name="bio_trend_state_chill">A Real Dip</string>
+    <string name="bio_penalty_sub_chill">Easing today\'s capacity to match your sleep...</string>
+    <string name="bio_penalty_footnote_chill">Working out what to shed, on-device...</string>
+    <string name="bio_no_data_chill">Nothing stored from your health data yet.</string>
+
+    <!-- ==================================================================
+         SCREEN 6 - DAILY HARVEST
+         ================================================================== -->
+
+    <string name="harvest_greeting_chill">Morning, %1$s.</string>
+    <string name="harvest_subtitle_chill">Here\'s what grew overnight.</string>
+    <string name="harvest_tooltip_chill">1 apple for each task you finished yesterday</string>
+    <string name="harvest_stash_label_chill">Stash: %1$s. Feast day is Sunday.</string>
+    <string name="harvest_skip_confirm_chill">Leave your harvest for now?</string>
+    <string name="harvest_toast_title_chill">%1$d apples in the basket</string>
+    <string name="harvest_toast_sub_chill">Dino contentment +100%% | %1$d total</string>
+
+    <!-- ==================================================================
+         SCREEN 7 - WEEKLY FEAST
+         ================================================================== -->
+
+    <string name="feast_title_chill">Feed Coach Dino</string>
+    <string name="feast_subtitle_chill">You gathered %1$d apples from %1$d study &amp; shift blocks this week.</string>
+    <string name="feast_tray_title_chill">Tap an apple to feed one at a time:</string>
+    <string name="feast_full_toast_chill">Dino\'s full. That was a good week.</string>
+    <string name="feast_complete_toast_chill">Feast done. Dino is fully rested (+400 XP)</string>
+    <string name="feast_complete_chill">Feast complete. Dino recharged</string>
+
+    <!-- ==================================================================
+         SCREEN 8 - SETTINGS
+         ================================================================== -->
+
+    <string name="settings_theme_sub_chill">Switch between dark contrast and bright surfaces</string>
+    <string name="settings_share_title_chill">Share anonymized burnout data, if you like</string>
+    <string name="settings_link_disconnected_chill">Not connected</string>
+    <string name="settings_link_active_chill">Sharing anonymously</string>
+    <string name="settings_link_info_chill">This is opt-in and off by default. Nothing leaves your device until you turn it on, and we only share grouped burnout statistics that can\'t identify you.</string>
+
+    <!-- ==================================================================
+         SCREEN 9 - COMPANION / VOICE
+         ================================================================== -->
+
+    <string name="voice_instruction_chill">TAP THE MIC WHEN YOU\'RE READY</string>
+    <string name="voice_cta_chill">LISTENING WHEN YOU ARE</string>
+    <string name="voice_unavailable_chill">"Voice input isn\'t available on this device"</string>
+    <string name="voice_retry_chill">"Tap the microphone when you want to retry"</string>
+
+</resources>

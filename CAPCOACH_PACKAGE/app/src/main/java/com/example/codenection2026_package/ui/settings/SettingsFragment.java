@@ -24,11 +24,13 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.ObjectKey;
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.profile.ProfileStore;
 import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
@@ -125,6 +127,8 @@ public class SettingsFragment extends Fragment {
         removePhotoButton = view.findViewById(R.id.removePhotoButton);
         nameInput = view.findViewById(R.id.settingsNameInput);
 
+        bindToneCopy(view);
+
         themeNightButton.setOnClickListener(v -> {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             refreshThemeSegment();
@@ -137,7 +141,25 @@ public class SettingsFragment extends Fragment {
         bindTelemetrySwitch();
         bindProfile();
         toneSelector = new ToneSelector(this, view);
+        // Changing the tone here has to repaint this screen's own copy straight away - this
+        // is the screen where the choice is made, so leaving it reading in the old voice
+        // until the user navigates away would look broken. The selector owns the cards'
+        // click listeners, so it is the only thing that can report the change.
+        toneSelector.setOnToneChanged(this::refreshToneCopy);
         toneSelector.bind();
+    }
+
+    /** Re-applies every tone-dependent string on this screen for the current tone. */
+    private void refreshToneCopy() {
+        View root = getView();
+        if (root == null || !isAdded() || getContext() == null) {
+            return;
+        }
+        bindToneCopy(root);
+        if (telemetrySwitch != null) {
+            // The link pill's words come from the tone as well as the switch state.
+            applyTelemetryState(telemetrySwitch.isChecked());
+        }
     }
 
     @Override
@@ -211,11 +233,36 @@ public class SettingsFragment extends Fragment {
         linkStatusDot.setBackgroundResource(enabled
                 ? R.drawable.dot_mint
                 : R.drawable.dot_idle);
-        linkStatusText.setText(enabled
-                ? R.string.settings_link_active
-                : R.string.settings_link_disconnected);
+        // The only line on this screen that is both tone-aware and stateful, so it cannot go
+        // through the one-shot pass in bindToneCopy(): the slot has to be chosen from the
+        // switch and then resolved against the tone, which is re-read here so that toggling
+        // the switch agrees with the tone the user has since picked.
+        CoachVoice.Line statusLine = enabled
+                ? CoachVoice.Line.SETTINGS_LINK_ACTIVE
+                : CoachVoice.Line.SETTINGS_LINK_DISCONNECTED;
+        linkStatusText.setText(statusLine.pick(OnboardingPrefs.getTone(requireContext())));
         linkStatusText.setTextColor(ContextCompat.getColor(requireContext(),
                 enabled ? R.color.brand_mint : R.color.text_muted_dark));
+    }
+
+    /**
+     * Rewrites this screen's standing prose in the user's coaching tone.
+     *
+     * <p>The layout carries the Hype wording so the design preview is sensible and a screen
+     * that somehow skipped this pass still reads correctly; this pass is what makes the
+     * wording follow the choice made on the tone cards below.
+     *
+     * <p>The link status pill is deliberately absent here: it depends on the telemetry switch
+     * as well as the tone, so {@link #applyTelemetryState(boolean)} owns it.
+     */
+    private void bindToneCopy(@NonNull View view) {
+        if (getContext() == null) {
+            return;
+        }
+        ToneCopy.on(view, OnboardingPrefs.getTone(requireContext()))
+                .set(R.id.settingsThemeSub, CoachVoice.Line.SETTINGS_THEME_SUB)
+                .set(R.id.settingsShareTitle, CoachVoice.Line.SETTINGS_SHARE_TITLE)
+                .set(R.id.settingsLinkInfo, CoachVoice.Line.SETTINGS_LINK_INFO);
     }
 
     @NonNull

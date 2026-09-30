@@ -311,12 +311,17 @@
                         android:layout_height="wrap_content"
                         android:text="@string/settings_theme_mode" />
 
+                    <!-- Tone-aware prose, like every line the app says in its own voice:
+                         the layout carries the Hype wording as the design-time preview and
+                         the runtime fallback, and SettingsFragment.bindToneCopy() rewrites
+                         it for the tone the user actually picked. -->
                     <TextView
+                        android:id="@+id/settingsThemeSub"
                         style="@style/Text.Body"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="@string/settings_theme_sub" />
+                        android:text="@string/settings_theme_sub_hype" />
 
                     <!-- Segmented control. Repainted by SettingsFragment.refreshThemeSegment(). -->
                     <LinearLayout
@@ -422,10 +427,11 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/settingsShareTitle"
                                 style="@style/Text.Title"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/settings_share_title" />
+                                android:text="@string/settings_share_title_hype" />
 
                             <TextView
                                 style="@style/Text.MicroLabel"
@@ -460,12 +466,13 @@
                             app:tint="@color/text_dim_dark" />
 
                         <TextView
+                            android:id="@+id/settingsLinkInfo"
                             style="@style/Text.MicroLabel"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/space_xs"
                             android:layout_weight="1"
-                            android:text="@string/settings_link_info" />
+                            android:text="@string/settings_link_info_hype" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -499,13 +506,17 @@
                                 android:layout_height="6dp"
                                 android:background="@drawable/dot_idle" />
 
+                            <!-- Tone- and state-aware: the wording is "Disconnected" or
+                                 "Anonymized Active" depending on the switch, in the user's
+                                 coaching tone, so SettingsFragment.applyTelemetryState()
+                                 owns the text and this is only the initial fallback. -->
                             <TextView
                                 android:id="@+id/linkStatusText"
                                 style="@style/Text.MicroLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="@dimen/space_xxs"
-                                android:text="@string/settings_link_disconnected"
+                                android:text="@string/settings_link_disconnected_hype"
                                 android:textColor="@color/text_muted_dark" />
                         </LinearLayout>
                     </LinearLayout>

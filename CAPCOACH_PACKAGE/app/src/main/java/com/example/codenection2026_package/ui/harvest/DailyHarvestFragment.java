@@ -18,10 +18,12 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
-import com.example.codenection2026_package.model.DinoVoice;
+import com.example.codenection2026_package.model.CoachVoice;
+import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 
 /**
  * SCREEN 6 - DAILY HARVEST. Port of Prototype/daily-harvest.html.
@@ -115,8 +117,17 @@ public class DailyHarvestFragment extends Fragment {
         harvestToast = view.findViewById(R.id.harvestToast);
         collectButton = view.findViewById(R.id.collectButton);
         greetingText = view.findViewById(R.id.greetingText);
+
+        // Prose that depends on the coaching tone cannot live in the layout, which has no
+        // way to know which tone the user picked. The layout carries the Hype wording as a
+        // design-time preview and a graceful fallback; this pass rewrites it.
+        ToneCopy.on(view, tone())
+                .set(R.id.harvestSubtitle, CoachVoice.Line.HARVEST_SUBTITLE)
+                .set(R.id.harvestTooltip, CoachVoice.Line.HARVEST_TOOLTIP);
+
         if (greetingText != null) {
-            greetingText.setText(getString(R.string.harvest_greeting, displayName()));
+            greetingText.setText(
+                    getString(CoachVoice.Line.HARVEST_GREETING.pick(tone()), displayName()));
         }
 
         View apples = view.findViewById(R.id.appleContainer);
@@ -174,7 +185,7 @@ public class DailyHarvestFragment extends Fragment {
         }
         if (dinoChatBubble != null) {
             dinoChatBubble.setText(getResources().getQuantityString(
-                    DinoVoice.harvestApples(OnboardingPrefs.getTone(requireContext())),
+                    CoachVoice.harvestApples(OnboardingPrefs.getTone(requireContext())),
                     APPLES_GROWN, APPLES_GROWN));
         }
     }
@@ -269,7 +280,7 @@ public class DailyHarvestFragment extends Fragment {
             basketLabel.setText(String.valueOf(stash));
         }
         if (stashSubtitle != null) {
-            stashSubtitle.setText(getString(R.string.harvest_stash_label,
+            stashSubtitle.setText(getString(CoachVoice.Line.HARVEST_STASH_LABEL.pick(tone()),
                     getString(R.string.harvest_stash_apples, stash)));
         }
 
@@ -427,10 +438,10 @@ public class DailyHarvestFragment extends Fragment {
         TextView title = harvestToast.findViewById(R.id.toastTitle);
         TextView sub = harvestToast.findViewById(R.id.toastSub);
         if (title != null) {
-            title.setText(getString(R.string.harvest_toast_title, APPLES_GROWN));
+            title.setText(getString(CoachVoice.Line.HARVEST_TOAST_TITLE.pick(tone()), APPLES_GROWN));
         }
         if (sub != null) {
-            sub.setText(getString(R.string.harvest_toast_sub, total));
+            sub.setText(getString(CoachVoice.Line.HARVEST_TOAST_SUB.pick(tone()), total));
         }
 
         harvestToast.setVisibility(View.VISIBLE);
@@ -454,11 +465,17 @@ public class DailyHarvestFragment extends Fragment {
     /** The prototype's skipHarvest() - confirm, then go to the dashboard. */
     private void skipHarvest() {
         new AlertDialog.Builder(requireContext())
-                .setMessage(R.string.harvest_skip_confirm)
+                .setMessage(CoachVoice.Line.HARVEST_SKIP_CONFIRM.pick(tone()))
                 .setPositiveButton(R.string.harvest_skip,
                         (dialog, which) -> ScreenNav.showDashboard(this))
                 .setNegativeButton(R.string.addtask_cancel, null)
                 .show();
+    }
+
+    /** The coaching tone chosen in onboarding or Settings. */
+    @NonNull
+    private ToneType tone() {
+        return OnboardingPrefs.getTone(requireContext());
     }
 }
 

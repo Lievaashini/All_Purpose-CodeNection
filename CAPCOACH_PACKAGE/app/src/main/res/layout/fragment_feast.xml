@@ -100,13 +100,16 @@
                     app:tint="@color/text_muted_dark" />
             </LinearLayout>
 
+            <!-- Hype wording: the design-time default, rewritten for the user's tone in
+                 FeastFragment. -->
             <TextView
+                android:id="@+id/feastTitle"
                 style="@style/Text.Heading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_md"
                 android:gravity="center"
-                android:text="@string/feast_title"
+                android:text="@string/feast_title_hype"
                 android:textColor="@color/text_primary_dark" />
 
             <TextView
@@ -362,11 +365,12 @@
                         android:background="@drawable/dot_mint" />
 
                     <TextView
+                        android:id="@+id/feastTrayTitle"
                         style="@style/Text.MicroLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/space_xs"
-                        android:text="@string/feast_tray_title"
+                        android:text="@string/feast_tray_title_hype"
                         android:textColor="@color/text_primary_dark" />
 
                     <View

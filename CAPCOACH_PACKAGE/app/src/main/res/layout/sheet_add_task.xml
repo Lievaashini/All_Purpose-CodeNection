@@ -88,7 +88,7 @@
                     style="@style/Text.MicroLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/addtask_subtitle_academic"
+                    android:text="@string/addtask_subtitle_academic_hype"
                     android:textColor="@color/brand_mint"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -217,11 +217,12 @@
                     </LinearLayout>
 
                     <TextView
+                        android:id="@+id/modeWorkDesc"
                         style="@style/Text.MicroLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="@string/addtask_mode_work_desc" />
+                        android:text="@string/addtask_mode_work_desc_hype" />
                 </LinearLayout>
 
                 <FrameLayout
@@ -262,11 +263,12 @@
                     app:tint="@color/secondary_blue" />
 
                 <TextView
+                    android:id="@+id/modeWorkBadge"
                     style="@style/Text.MicroLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_xxs"
-                    android:text="@string/addtask_mode_work_badge"
+                    android:text="@string/addtask_mode_work_badge_hype"
                     android:textColor="@color/secondary_blue" />
             </LinearLayout>
         </LinearLayout>
@@ -340,11 +342,12 @@
                     </LinearLayout>
 
                     <TextView
+                        android:id="@+id/modeAcademicDesc"
                         style="@style/Text.MicroLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="@string/addtask_mode_academic_desc" />
+                        android:text="@string/addtask_mode_academic_desc_hype" />
                 </LinearLayout>
 
                 <FrameLayout
@@ -384,11 +387,12 @@
                     app:tint="@color/brand_mint" />
 
                 <TextView
+                    android:id="@+id/modeAcademicBadge"
                     style="@style/Text.MicroLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_xxs"
-                    android:text="@string/addtask_mode_academic_badge"
+                    android:text="@string/addtask_mode_academic_badge_hype"
                     android:textColor="@color/brand_mint" />
             </LinearLayout>
         </LinearLayout>
@@ -414,7 +418,7 @@
                 style="@style/Text.MicroLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/addtask_hint_sheddable"
+                android:text="@string/addtask_hint_sheddable_hype"
                 android:textColor="@color/brand_mint"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -504,10 +508,11 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/priorityHint"
                 style="@style/Text.MicroLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/addtask_priority_hint"
+                android:text="@string/addtask_priority_hint_hype"
                 android:textColor="@color/text_muted_dark" />
         </LinearLayout>
 
@@ -736,12 +741,13 @@
                     app:tint="@color/secondary_blue" />
 
                 <TextView
+                    android:id="@+id/capFootnote"
                     style="@style/Text.MicroLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_xxs"
                     android:layout_weight="1"
-                    android:text="@string/addtask_cap_footnote"
+                    android:text="@string/addtask_cap_footnote_hype"
                     android:textColor="@color/secondary_blue" />
             </LinearLayout>
         </LinearLayout>
@@ -774,11 +780,12 @@
                     android:background="@drawable/dot_mint" />
 
                 <TextView
+                    android:id="@+id/bufferEligible"
                     style="@style/Text.MicroLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_xxs"
-                    android:text="@string/addtask_buffer_eligible"
+                    android:text="@string/addtask_buffer_eligible_hype"
                     android:textColor="@color/brand_mint"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -822,11 +829,12 @@
                 </FrameLayout>
 
                 <TextView
+                    android:id="@+id/deferralHint"
                     style="@style/Text.MicroLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xs"
-                    android:text="@string/addtask_deferral_hint"
+                    android:text="@string/addtask_deferral_hint_hype"
                     android:textColor="@color/text_dim_dark" />
 
                 <View

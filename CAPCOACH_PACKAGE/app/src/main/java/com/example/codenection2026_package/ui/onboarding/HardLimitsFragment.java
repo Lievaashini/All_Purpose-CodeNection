@@ -22,6 +22,9 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.CalendarManager;
+import com.example.codenection2026_package.model.CoachVoice;
+import com.example.codenection2026_package.model.ToneType;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 import com.example.codenection2026_package.ui.widget.ObservableScrollView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -92,6 +95,7 @@ public class HardLimitsFragment extends Fragment {
         calendarManager = new CalendarManager(requireContext());
 
         bindViews(view);
+        bindToneCopy(view);
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
         restoreSavedValues();
         wireSliders();
@@ -132,6 +136,24 @@ public class HardLimitsFragment extends Fragment {
 
         calendarSyncSwitch = view.findViewById(R.id.calendarSyncSwitch);
         displayNameInput = view.findViewById(R.id.displayNameInput);
+    }
+
+    /**
+     * Rewrites this screen's static tone-aware prose in the user's coaching tone.
+     *
+     * <p>Only the lines that never change while the screen is open are bound here. The work
+     * status, the work warning and the zone pill also vary with the <i>slider values</i>, so
+     * they are worded in {@link #renderWork(int)} and {@link #renderTotal(int, int, int)},
+     * which run on every change.
+     */
+    private void bindToneCopy(@NonNull View view) {
+        if (getContext() == null) {
+            return;
+        }
+        ToneCopy.on(view, OnboardingPrefs.getTone(requireContext()))
+                .set(R.id.limitsSubtitle, CoachVoice.Line.LIMITS_SUBTITLE)
+                .set(R.id.limitsFootnote, CoachVoice.Line.LIMITS_FOOTNOTE)
+                .set(R.id.limitsNameLabel, CoachVoice.Line.LIMITS_NAME_LABEL);
     }
 
     private void restoreSavedValues() {
@@ -296,6 +318,10 @@ public class HardLimitsFragment extends Fragment {
         LoadZones.WorkBand band = LoadZones.workBand(work);
         int accent = color(workHoursValue, band.colorRes);
 
+        // The band picks the slot, the tone picks the wording. Read once here and reuse it
+        // for every line this pass writes.
+        ToneType tone = OnboardingPrefs.getTone(requireContext());
+
         workHoursValue.setTextColor(accent);
 
         android.content.res.ColorStateList tintList = ContextCompat.getColorStateList(requireContext(), band.colorRes);
@@ -306,7 +332,7 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (workStatusLabel != null) {
-            workStatusLabel.setText(band.statusLabelRes);
+            workStatusLabel.setText(band.statusLabel.pick(tone));
             workStatusLabel.setTextColor(accent);
         }
         if (workStatusDot != null) {
@@ -321,7 +347,9 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (workWarningText != null) {
-            workWarningText.setText(band.warningTextRes);
+            // The warning is a fixed sentence per band and is deliberately not given the
+            // hours - only the Dino's line below takes a value.
+            workWarningText.setText(band.warningText.pick(tone));
         }
         if (workWarningIcon != null && tintList != null) {
             workWarningIcon.setImageTintList(tintList);
@@ -334,9 +362,8 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (dinoGuardSpeech != null) {
-            // The band picks the line, the tone picks the wording. Only the safe band's copy
-            // names the number, so only that one takes the hours.
-            int line = band.dinoQuote.pick(OnboardingPrefs.getTone(requireContext()));
+            // Only the safe band's copy names the number, so only that one takes the hours.
+            int line = band.dinoQuote.pick(tone);
             dinoGuardSpeech.setText(band == LoadZones.WorkBand.SAFE
                     ? getString(line, work)
                     : getString(line));
@@ -358,7 +385,7 @@ public class HardLimitsFragment extends Fragment {
             totalHoursValue.setTextColor(accent);
         }
         if (zoneLabel != null) {
-            zoneLabel.setText(result.zone.labelRes);
+            zoneLabel.setText(result.zone.label.pick(OnboardingPrefs.getTone(requireContext())));
             zoneLabel.setTextColor(accent);
         }
         if (zoneDot != null) {

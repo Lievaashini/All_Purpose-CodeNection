@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.codenection2026_package.R;
-import com.example.codenection2026_package.model.DinoVoice;
+import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.google.android.material.card.MaterialCardView;
@@ -45,12 +45,28 @@ final class ToneSelector {
     @NonNull
     private ToneType selected = ToneType.HYPE;
 
+    /**
+     * Fired after the user picks a different tone.
+     *
+     * <p>This screen is where the tone is chosen, so the rest of its own copy has to follow
+     * immediately - otherwise tapping "Plain" leaves the sections below it reading in Hype
+     * until the screen is left and reopened. The selector owns the cards' click listeners, so
+     * it is the only thing that can tell the fragment a change happened.
+     */
+    @Nullable
+    private Runnable onToneChanged;
+
     ToneSelector(@NonNull Fragment host, @NonNull View root) {
         this.host = host;
         this.hypeCard = root.findViewById(R.id.settingsToneHype);
         this.chillCard = root.findViewById(R.id.settingsToneChill);
         this.plainCard = root.findViewById(R.id.settingsTonePlain);
         this.previewText = root.findViewById(R.id.tonePreviewText);
+    }
+
+    /** Registers a listener run after every tone change. Set this before {@link #bind()}. */
+    void setOnToneChanged(@Nullable Runnable listener) {
+        this.onToneChanged = listener;
     }
 
     /**
@@ -87,6 +103,9 @@ final class ToneSelector {
             OnboardingPrefs.saveTone(host.requireContext(), tone);
         }
         render();
+        if (onToneChanged != null) {
+            onToneChanged.run();
+        }
     }
 
     private void render() {
@@ -97,7 +116,7 @@ final class ToneSelector {
         if (previewText != null) {
             previewText.setText(host.getString(
                     R.string.settings_tone_preview,
-                    host.getString(DinoVoice.Quote.ONBOARDING.pick(selected))));
+                    host.getString(CoachVoice.Line.DINO_ONBOARDING.pick(selected))));
         }
     }
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   Simplified Dino-focused voice popup.
 
@@ -120,7 +120,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_md"
         android:gravity="center"
-        android:text="@string/voice_instruction"
+        android:text="@string/voice_instruction_hype"
         android:textColor="@color/text_primary_dark"
         android:textStyle="bold" />
 
@@ -150,7 +150,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_sm"
-        android:text="@string/voice_cta"
+        android:text="@string/voice_cta_hype"
         android:textColor="@color/text_dim_dark"
         tools:text="READY TO LISTEN" />
 

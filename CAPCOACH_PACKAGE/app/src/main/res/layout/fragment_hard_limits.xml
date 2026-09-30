@@ -100,12 +100,15 @@
                 android:layout_marginTop="@dimen/space_md"
                 android:text="@string/limits_title" />
 
+            <!-- Tone-aware copy: the layout carries the Hype wording as its design-time
+                 default, and HardLimitsFragment rewrites it for the stored tone at runtime. -->
             <TextView
+                android:id="@+id/limitsSubtitle"
                 style="@style/Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_xs"
-                android:text="@string/limits_subtitle" />
+                android:text="@string/limits_subtitle_hype" />
 
             <!-- ==================== Dino guardian card ==================== -->
             <LinearLayout
@@ -313,7 +316,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/space_xxs"
                         android:maxWidth="120dp"
-                        android:text="@string/zone_safe"
+                        android:text="@string/zone_safe_hype"
                         android:textColor="@color/status_green"
                         android:textStyle="bold"
                         tools:text="SAFE ZONE / BALANCED" />
@@ -568,7 +571,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/space_xs"
-                            android:text="@string/work_status_safe"
+                            android:text="@string/work_status_safe_hype"
                             android:textColor="@color/status_green"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -651,7 +654,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/space_sm"
                         android:layout_weight="1"
-                        android:text="@string/work_warning_safe"
+                        android:text="@string/work_warning_safe_hype"
                         android:textSize="@dimen/text_label" />
                 </LinearLayout>
             </LinearLayout>
@@ -820,11 +823,12 @@
 
             <!-- ==================== Display name ==================== -->
             <TextView
+                android:id="@+id/limitsNameLabel"
                 style="@style/Text.MicroLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_lg"
-                android:text="@string/limits_name_label" />
+                android:text="@string/limits_name_label_hype" />
 
             <EditText
                 android:id="@+id/displayNameInput"
@@ -856,12 +860,13 @@
                 app:iconTint="@color/on_brand" />
 
             <TextView
+                android:id="@+id/limitsFootnote"
                 style="@style/Text.MicroLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_sm"
                 android:gravity="center"
-                android:text="@string/limits_footnote" />
+                android:text="@string/limits_footnote_hype" />
 
         </LinearLayout>
     </com.example.codenection2026_package.ui.widget.ObservableScrollView>

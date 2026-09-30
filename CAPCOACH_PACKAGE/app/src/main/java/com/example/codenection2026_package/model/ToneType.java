@@ -10,9 +10,9 @@ import androidx.annotation.NonNull;
  * {@code User} entity as {@code coachingTone}.
  *
  * <p>This enum is deliberately just an identity: it says WHICH tone, never what the tone
- * says. The wording lives in {@link DinoVoice}, which maps each dialogue slot to one string
+ * says. The wording lives in {@link CoachVoice}, which maps each dialogue slot to one string
  * per tone, so adding a line means touching the three {@code dino_*.xml} files and
- * {@code DinoVoice} rather than this class.
+ * {@code CoachVoice} rather than this class.
  */
 public enum ToneType {
 

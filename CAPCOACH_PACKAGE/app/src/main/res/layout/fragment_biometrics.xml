@@ -54,12 +54,13 @@
                         android:background="@drawable/dot_red" />
 
                     <TextView
+                        android:id="@+id/bioEventPill"
                         style="@style/Text.MicroLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/space_xs"
                         android:maxLines="2"
-                        android:text="@string/bio_event_pill"
+                        android:text="@string/bio_event_pill_hype"
                         android:textAllCaps="true"
                         android:textColor="@color/status_red"
                         android:textStyle="bold" />
@@ -172,18 +173,20 @@
                         </LinearLayout>
 
                         <TextView
+                            android:id="@+id/bioAnomalyTitle"
                             style="@style/Text.Title"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="@string/bio_anomaly_title" />
+                            android:text="@string/bio_anomaly_title_hype" />
 
                         <TextView
+                            android:id="@+id/bioAnomalyBody"
                             style="@style/Text.Body"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/space_xxs"
-                            android:text="@string/bio_anomaly_body" />
+                            android:text="@string/bio_anomaly_body_hype" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -299,22 +302,24 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/bioHrvState"
                                 style="@style/Text.MicroLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_tag_red"
                                 android:paddingHorizontal="@dimen/space_sm"
                                 android:paddingVertical="2dp"
-                                android:text="@string/bio_hrv_state"
+                                android:text="@string/bio_hrv_state_hype"
                                 android:textColor="@color/status_red"
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/bioHrvStateSub"
                                 style="@style/Text.MicroLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="@string/bio_hrv_state_sub" />
+                                android:text="@string/bio_hrv_state_sub_hype" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -334,10 +339,11 @@
                             android:text="@string/bio_trend_label" />
 
                         <TextView
+                            android:id="@+id/bioTrendState"
                             style="@style/Text.MicroLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/bio_trend_state"
+                            android:text="@string/bio_trend_state_hype"
                             android:textColor="@color/status_red"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -394,11 +400,12 @@
                     </LinearLayout>
 
                     <TextView
+                        android:id="@+id/bioPenaltySub"
                         style="@style/Text.Body"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_xs"
-                        android:text="@string/bio_penalty_sub" />
+                        android:text="@string/bio_penalty_sub_hype" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -452,12 +459,13 @@
                             android:background="@drawable/dot_mint" />
 
                         <TextView
+                            android:id="@+id/bioPenaltyFootnote"
                             style="@style/Text.MicroLabel"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/space_sm"
                             android:layout_weight="1"
-                            android:text="@string/bio_penalty_footnote" />
+                            android:text="@string/bio_penalty_footnote_hype" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

@@ -15,7 +15,9 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.HealthConnectManager;
+import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.ToneType;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 import com.google.android.material.card.MaterialCardView;
 
 
@@ -102,6 +104,11 @@ public class OnboardingFragment extends Fragment {
         healthStatusDot = view.findViewById(R.id.healthStatusDot);
         healthStatusText = view.findViewById(R.id.healthStatusText);
 
+        // --- Tone-aware prose ---
+        // The layout carries the Hype wording so the preview and a cold first run look
+        // right; this pass swaps in the stored tone's wording.
+        bindToneCopy(view);
+
         // --- Hero Dino sprite ---
         // setImageResource() would freeze an animated GIF on its first frame, so the
         // sprite goes through Glide instead. The layout keeps android:src purely as a
@@ -186,6 +193,23 @@ public class OnboardingFragment extends Fragment {
         }
     }
 
+    /**
+     * Rewrites this screen's tone-aware prose in the user's coaching tone.
+     *
+     * <p>Read once, at creation: the tone cards further down change the <i>stored</i>
+     * preference, and the wording they select shows up the next time this screen or Settings
+     * is opened. The Dino's greeting is the only line that re-words on the tap itself.
+     */
+    private void bindToneCopy(@NonNull View view) {
+        if (getContext() == null) {
+            return;
+        }
+        ToneCopy.on(view, OnboardingPrefs.getTone(requireContext()))
+                .set(R.id.onboardingSubtitle, CoachVoice.Line.ONBOARD_SUBTITLE)
+                .set(R.id.onboardingFootnote, CoachVoice.Line.ONBOARD_FOOTNOTE)
+                .set(R.id.toneSectionLabel, CoachVoice.Line.TONE_SECTION_LABEL);
+    }
+
     private void bindToneCard(@Nullable MaterialCardView card, @NonNull ToneType tone) {
         if (card == null) {
             return;
@@ -209,7 +233,7 @@ public class OnboardingFragment extends Fragment {
 
         if (dinoDialogue != null) {
             dinoDialogue.setText(
-                    com.example.codenection2026_package.model.DinoVoice.Quote.ONBOARDING.pick(tone));
+                    com.example.codenection2026_package.model.CoachVoice.Line.DINO_ONBOARDING.pick(tone));
             if (animateDialogue) {
                 dinoDialogue.setAlpha(0f);
                 dinoDialogue.animate().alpha(1f).setDuration(180L).start();

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ============================================================================
+  PLAIN TONE - everything the app says to the user in this voice
+  ============================================================================
+
+  See tone_hype.xml for the file layout, the slot conventions, and what tone does
+  and does not reach.
+
+  Plain is terse telemetry. Statements, not sentences addressed to anyone: no
+  second person, no encouragement, no exclamation. It reports the state and
+  stops. Where Hype sells the outcome and Chill reassures, Plain just names it.
+-->
+<resources>
+
+    <!-- ==================================================================
+         DINO DIALOGUE
+         ================================================================== -->
+
+    <string name="dino_onboarding_plain">"Telemetry active. Zero fluff."</string>
+
+    <string name="dino_work_safe_plain">"%1$dh committed. Overruns are deferred automatically."</string>
+    <string name="dino_work_caution_plain">"Above the recovery threshold. Sleep buffer is shrinking."</string>
+    <string name="dino_work_risk_plain">"Burnout risk. Shedding required to hold the baseline."</string>
+
+    <plurals name="dino_harvest_apples_plain">
+        <item quantity="one">"1 apple logged yesterday."</item>
+        <item quantity="other">"%1$d apples logged yesterday."</item>
+    </plurals>
+
+    <string name="dino_feast_hungry_plain">"Stamina depleted. Apples required."</string>
+    <string name="dino_feast_all_plain">"Full basket received. Stamina recalculating."</string>
+    <string name="dino_feast_hug_plain">"Rest preserved. Baseline holding."</string>
+    <string name="dino_feast_done_plain">"Satiety 100%. Capacity restored."</string>
+
+    <string name="dino_feast_quote_1_plain">"Apple consumed. +25 stamina."</string>
+    <string name="dino_feast_quote_2_plain">"Stress index unchanged. Intake logged."</string>
+    <string name="dino_feast_quote_3_plain">"Sleep debt offset. Continuing."</string>
+    <string name="dino_feast_quote_4_plain">"Intake complete."</string>
+    <string name="dino_feast_quote_5_plain">"Stamina restored. Resuming."</string>
+
+    <string name="dino_addtask_guard_plain">"Shift locked. No conflicts detected."</string>
+    <string name="dino_addtask_sched_plain">Buffer: %1$s. Priority %2$s excluded from shedding.</string>
+
+    <!-- ==================================================================
+         SCREEN 1 - ONBOARDING
+         ================================================================== -->
+
+    <string name="onboard_subtitle_plain">Companion tone selection.</string>
+    <string name="onboard_footnote_plain">Offline &amp; encrypted</string>
+    <string name="tone_section_label_plain">Dino Coaching Tone</string>
+
+    <!-- ==================================================================
+         SCREEN 2 - SET LIMITS
+         ================================================================== -->
+
+    <string name="limits_subtitle_plain">Non-negotiable time is protected.</string>
+    <string name="limits_footnote_plain">Editable from triage.</string>
+    <string name="limits_name_label_plain">DISPLAY NAME</string>
+
+    <!-- Work-band status words and their warnings. The band picks the slot, the tone
+         picks the wording; the safe warning takes %1$d weekly hours. -->
+    <string name="work_status_safe_plain">Safe Labor Cap</string>
+    <string name="work_status_caution_plain">Fatigue Warning</string>
+    <string name="work_status_risk_plain">Burnout Risk &gt; 20h</string>
+    <string name="work_warning_safe_plain">Cap at 20h. Overages flagged.</string>
+    <string name="work_warning_caution_plain">Past 20 weekly hours, sleep buffers and grades are at risk.</string>
+    <string name="work_warning_risk_plain">Academic collision risk high. Shift shedding triggers on deadlines.</string>
+
+    <!-- Total-committed-load zone grading. -->
+    <string name="zone_safe_plain">SAFE ZONE</string>
+    <string name="zone_elevated_plain">ELEVATED</string>
+    <string name="zone_overload_plain">OVERLOAD</string>
+
+    <!-- ==================================================================
+         SCREEN 3 - DASHBOARD
+         ================================================================== -->
+
+    <string name="dash_state_optimal_plain">NOMINAL</string>
+    <string name="dash_state_elevated_plain">ELEVATED</string>
+    <string name="dash_state_overload_plain">OVERLOAD</string>
+
+    <string name="dash_headline_balanced_plain">"Load within baseline."</string>
+    <string name="dash_headline_elevated_plain">"Load above baseline. Evening buffer reduced."</string>
+    <string name="dash_headline_overload_plain">"Overload. Shedding recommended."</string>
+
+    <string name="dash_no_tasks_plain">No tasks recorded.</string>
+    <string name="dash_saved_other_week_plain">Saved to %1$s. Outside current week.</string>
+
+    <string name="triage_title_plain">Load Shedding Proposal</string>
+    <string name="triage_load_sub_plain">Crash risk to 0%</string>
+    <string name="triage_sleep_sub_plain">Recovery window reserved</string>
+    <string name="triage_kept_sub_plain">Reduced to a 45m block</string>
+    <string name="triage_postponed_sub_plain">Moved to Thu 10:00 AM. Low-fatigue slot.</string>
+    <string name="triage_deferred_sub_plain">Deferred to Saturday afternoon</string>
+    <string name="triage_accept_plain">Apply Shedding</string>
+    <string name="triage_dismiss_plain">Cancel</string>
+
+    <string name="toast_rebalanced_title_plain">Rebalance applied. Rest reserved.</string>
+    <string name="toast_rebalanced_sub_plain">-55% load | +3.5h reserved</string>
+
+    <string name="dash_sync_starting_plain">Syncing calendar.</string>
+    <string name="dash_sync_none_plain">No upcoming events.</string>
+    <string name="dash_sync_done_plain">Sync complete.</string>
+
+    <!-- ==================================================================
+         SCREEN 4 - ADD ACTIVITY
+         ================================================================== -->
+
+    <string name="addtask_subtitle_work_plain">Work Mode: Fixed</string>
+    <string name="addtask_subtitle_academic_plain">Academic Mode: Flexible</string>
+    <string name="addtask_subtitle_flexible_category_plain">%1$s Mode: Flexible</string>
+
+    <string name="addtask_mode_work_desc_plain">Fixed work hours. Not deferred.</string>
+    <string name="addtask_mode_work_badge_plain">Under the 20h cap</string>
+    <string name="addtask_mode_academic_desc_plain">Eligible for auto-deferral during overload.</string>
+    <string name="addtask_mode_academic_badge_plain">Auto-deferral enabled</string>
+
+    <string name="addtask_hint_sheddable_plain">Sheddable</string>
+    <string name="addtask_hint_locked_plain">Shift locked</string>
+    <string name="addtask_cap_footnote_plain">Protected shift. Not deferred.</string>
+    <string name="addtask_buffer_eligible_plain">Shed-eligible</string>
+    <string name="addtask_priority_hint_plain">Protects priority work</string>
+    <string name="addtask_deferral_hint_plain">Maximum deferral window for the scheduler.</string>
+
+    <string name="addtask_saved_work_plain">Work shift saved. Locked.</string>
+    <string name="addtask_saved_academic_plain">Academic task saved. Queued for triage.</string>
+    <string name="addtask_saved_category_plain">%1$s task saved. Queued for triage.</string>
+    <string name="addtask_save_failed_plain">Save failed.</string>
+    <string name="addtask_name_required_plain">Name required.</string>
+
+    <!-- ==================================================================
+         SCREEN 5 - BIOMETRICS
+         ================================================================== -->
+
+    <string name="bio_event_pill_plain">Biometric event detected</string>
+    <string name="bio_anomaly_title_plain">Health Connect: &lt; 5h sleep</string>
+    <string name="bio_anomaly_body_plain">Last night: 4h 18m sleep. Target 8h 00m. Restorative deficit.</string>
+    <string name="bio_hrv_state_plain">Sympathetic stress</string>
+    <string name="bio_hrv_state_sub_plain">Nervous load elevated</string>
+    <string name="bio_trend_state_plain">Critical dip</string>
+    <string name="bio_penalty_sub_plain">Applying biometric penalty to today\'s capacity...</string>
+    <string name="bio_penalty_footnote_plain">Computing load-shedding recommendations on-device (TFLite)...</string>
+    <string name="bio_no_data_plain">No biometric records.</string>
+
+    <!-- ==================================================================
+         SCREEN 6 - DAILY HARVEST
+         ================================================================== -->
+
+    <string name="harvest_greeting_plain">%1$s: morning report.</string>
+    <string name="harvest_subtitle_plain">Overnight growth on the task tree.</string>
+    <string name="harvest_tooltip_plain">1 apple = 1 task completed yesterday</string>
+    <string name="harvest_stash_label_plain">Stash: %1$s. Feast day: Sunday.</string>
+    <string name="harvest_skip_confirm_plain">Skip overnight harvest collection?</string>
+    <string name="harvest_toast_title_plain">%1$d apples stashed.</string>
+    <string name="harvest_toast_sub_plain">Excitement +100%% | %1$d total</string>
+
+    <!-- ==================================================================
+         SCREEN 7 - WEEKLY FEAST
+         ================================================================== -->
+
+    <string name="feast_title_plain">Weekly Feast</string>
+    <string name="feast_subtitle_plain">%1$d apples harvested from %1$d study &amp; shift blocks this week.</string>
+    <string name="feast_tray_title_plain">Select apples to feed one-by-one:</string>
+    <string name="feast_full_toast_plain">Capacity reached. Stamina at maximum.</string>
+    <string name="feast_complete_toast_plain">Weekly Feast complete. Max stamina (+400 XP)</string>
+    <string name="feast_complete_plain">Feast complete. Dino 100% charged</string>
+
+    <!-- ==================================================================
+         SCREEN 8 - SETTINGS
+         ================================================================== -->
+
+    <string name="settings_theme_sub_plain">Switches the UI between dark and bright surfaces.</string>
+    <string name="settings_share_title_plain">Share anonymized burnout data</string>
+    <string name="settings_link_disconnected_plain">Disconnected</string>
+    <string name="settings_link_active_plain">Anonymized sharing active</string>
+    <string name="settings_link_info_plain">Opt-in and off by default. No data leaves the device until enabled. Only aggregated, non-identifying burnout statistics are shared.</string>
+
+    <!-- ==================================================================
+         SCREEN 9 - COMPANION / VOICE
+         ================================================================== -->
+
+    <string name="voice_instruction_plain">MICROPHONE INPUT</string>
+    <string name="voice_cta_plain">AWAITING INPUT</string>
+    <string name="voice_unavailable_plain">"Voice input unavailable on this device."</string>
+    <string name="voice_retry_plain">"Retry requires microphone input."</string>
+
+</resources>

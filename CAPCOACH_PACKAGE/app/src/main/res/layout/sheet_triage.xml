@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   Triage bottom sheet (port of the #triageModal block in dashboard.html).
 
@@ -70,11 +70,14 @@
                     android:textColor="@color/brand_mint"
                     android:textStyle="bold" />
 
+                <!-- Prose on this sheet is written per coaching tone by
+                     TriageSheetFragment.bindToneCopy(); these are design-time values. -->
                 <TextView
+                    android:id="@+id/triageTitle"
                     style="@style/Text.Title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/triage_title" />
+                    tools:text="Overload Prevention Action" />
             </LinearLayout>
 
             <ImageView
@@ -120,11 +123,12 @@
                     android:textColor="@color/brand_mint" />
 
                 <TextView
+                    android:id="@+id/triageMetricLoadSub"
                     style="@style/Text.MicroLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/triage_metric_load_sub"
-                    android:textColor="@color/text_muted_dark" />
+                    android:textColor="@color/text_muted_dark"
+                    tools:text="Crash risk drops to 0%" />
             </LinearLayout>
 
             <LinearLayout
@@ -150,11 +154,12 @@
                     android:textColor="@color/secondary_blue" />
 
                 <TextView
+                    android:id="@+id/triageMetricSleepSub"
                     style="@style/Text.MicroLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/triage_metric_sleep_sub"
-                    android:textColor="@color/text_muted_dark" />
+                    android:textColor="@color/text_muted_dark"
+                    tools:text="Recovery window locked" />
             </LinearLayout>
         </LinearLayout>
 
@@ -251,10 +256,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/triageItemKeptSub"
                     style="@style/Text.MicroLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/triage_item_kept_sub" />
+                    tools:text="Condensed to 45m focused sprint" />
             </LinearLayout>
 
             <TextView
@@ -303,10 +309,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/triageItemPostponedSub"
                     style="@style/Text.MicroLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/triage_item_postponed_sub" />
+                    tools:text="Moved to Thu 10:00 AM low-fatigue block" />
             </LinearLayout>
 
             <TextView
@@ -355,10 +362,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/triageItemDeferredSub"
                     style="@style/Text.MicroLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/triage_item_deferred_sub" />
+                    tools:text="Auto-deferred to Saturday afternoon" />
             </LinearLayout>
 
             <TextView
@@ -381,9 +389,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_md"
-            android:text="@string/triage_accept"
             app:icon="@drawable/ic_done_all"
-            app:iconTint="@color/on_brand" />
+            app:iconTint="@color/on_brand"
+            tools:text="Accept Rebalance &amp; Rest" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/triageDismiss"
@@ -391,8 +399,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_xs"
-            android:text="@string/triage_dismiss"
-            android:textColor="@color/text_muted_dark" />
+            android:textColor="@color/text_muted_dark"
+            tools:text="Dismiss for Now" />
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
