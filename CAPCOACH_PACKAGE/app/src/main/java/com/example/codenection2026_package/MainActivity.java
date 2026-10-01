@@ -10,7 +10,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
-import com.example.codenection2026_package.ui.onboarding.HardLimitsFragment;
+import com.example.codenection2026_package.ui.dashboard.DashboardFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 
@@ -31,8 +31,13 @@ public class MainActivity extends AppCompatActivity {
 
         // UI Teammate: Fragment Routing
         if (savedInstanceState == null) {
+            // An onboarded user opens on the dashboard - the app's home screen. This used to
+            // start HardLimitsFragment (Screen 2 "Set Limits"), an ONBOARDING step, so every
+            // launch after the first dropped the user back into setup and they had to press
+            // "Save & Launch" again to reach their own schedule. Screen 2 is still reachable
+            // deliberately, from Biometrics' "Override Sensor Metric".
             Fragment start = OnboardingPrefs.isOnboardingComplete(this)
-                    ? new HardLimitsFragment()
+                    ? new DashboardFragment()
                     : new OnboardingFragment();
 
             getSupportFragmentManager()

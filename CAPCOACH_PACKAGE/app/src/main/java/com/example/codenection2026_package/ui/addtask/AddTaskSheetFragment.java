@@ -29,8 +29,12 @@ import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.api.VoiceManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
+import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.Task;
+import com.example.codenection2026_package.model.ToneType;
+import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -186,6 +190,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         root = view;
 
         bindViews(view);
+        bindToneCopy(view);
         setupCategorySpinner();
         setupDeferralSpinner();
         setupPriority();
@@ -244,6 +249,30 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     }
 
     // ==================================================================
+    // Coaching tone
+    // ==================================================================
+
+    /**
+     * Rewrites the sheet's fixed prose in the user's coaching tone.
+     *
+     * <p>The lines that follow the classification - the header subtitle and the task name
+     * hint - are deliberately not here: {@link #applyMode()} already picks between their
+     * slots. As in the rest of the shell's binding, a missing id or a non-TextView costs one
+     * line of copy rather than the whole sheet.
+     */
+    private void bindToneCopy(@NonNull View view) {
+        ToneCopy.on(view, tone())
+                .set(R.id.modeWorkDesc, CoachVoice.Line.ADDTASK_MODE_WORK_DESC)
+                .set(R.id.modeWorkBadge, CoachVoice.Line.ADDTASK_MODE_WORK_BADGE)
+                .set(R.id.modeAcademicDesc, CoachVoice.Line.ADDTASK_MODE_ACADEMIC_DESC)
+                .set(R.id.modeAcademicBadge, CoachVoice.Line.ADDTASK_MODE_ACADEMIC_BADGE)
+                .set(R.id.capFootnote, CoachVoice.Line.ADDTASK_CAP_FOOTNOTE)
+                .set(R.id.bufferEligible, CoachVoice.Line.ADDTASK_BUFFER_ELIGIBLE)
+                .set(R.id.priorityHint, CoachVoice.Line.ADDTASK_PRIORITY_HINT)
+                .set(R.id.deferralHint, CoachVoice.Line.ADDTASK_DEFERRAL_HINT);
+    }
+
+    // ==================================================================
     // Voice Dictation
     // ==================================================================
 
@@ -256,7 +285,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onReadyForSpeech(Bundle params) {
                 if (taskNameInput != null) {
-                    taskNameInput.setHint("Listening...");
+                    taskNameInput.setHint(R.string.addtask_dictation_listening);
                 }
             }
 
@@ -268,7 +297,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onError(int error) {
                 if (taskNameInput != null) {
-                    taskNameInput.setHint("Didn't catch that. Try again.");
+                    taskNameInput.setHint(R.string.addtask_dictation_error);
                 }
             }
 
@@ -420,10 +449,14 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
                 if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                     voiceManager.startListening();
                 } else {
-                    Toast.makeText(requireContext(), "Microphone permission required.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), R.string.addtask_mic_permission_required, Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(requireContext(), R.string.voice_unavailable, Toast.LENGTH_SHORT).show();
+                // Same line the Companion screens use for the same condition, so the two
+                // cannot drift apart in wording.
+                Toast.makeText(requireContext(),
+                        CoachVoice.Line.VOICE_UNAVAILABLE.pick(tone()),
+                        Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -602,8 +635,9 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         }
         if (modalSubtitle != null) {
             modalSubtitle.setText(flexible
-                    ? getString(R.string.addtask_subtitle_flexible_category, category)
-                    : getString(R.string.addtask_subtitle_work));
+                    ? getString(CoachVoice.Line.ADDTASK_SUBTITLE_FLEXIBLE_CATEGORY.pick(tone()),
+                            category)
+                    : getString(CoachVoice.Line.ADDTASK_SUBTITLE_WORK.pick(tone())));
             modalSubtitle.setTextColor(color(flexible
                     ? R.color.brand_mint
                     : R.color.secondary_blue));
@@ -612,8 +646,8 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         // Task name hint and default copy, exactly as the prototype swaps its value.
         if (titleHint != null) {
             titleHint.setText(flexible
-                    ? R.string.addtask_hint_sheddable
-                    : R.string.addtask_hint_locked);
+                    ? CoachVoice.Line.ADDTASK_HINT_SHEDDABLE.pick(tone())
+                    : CoachVoice.Line.ADDTASK_HINT_LOCKED.pick(tone()));
             titleHint.setTextColor(color(flexible
                     ? R.color.brand_mint
                     : R.color.secondary_blue));
@@ -672,13 +706,19 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             return;
         }
         if (!flexible) {
-            dinoMessage.setText(R.string.addtask_dino_guard_speech);
+            dinoMessage.setText(CoachVoice.Line.DINO_ADDTASK_GUARD.pick(tone()));
             return;
         }
         dinoMessage.setText(getString(
-                R.string.addtask_dino_scheduler_speech_fmt,
+                CoachVoice.Line.DINO_ADDTASK_SCHED.pick(tone()),
                 deferralSummary(),
                 getString(priorityLabelRes())));
+    }
+
+    /** The coaching tone chosen in onboarding or Settings. */
+    @NonNull
+    private ToneType tone() {
+        return OnboardingPrefs.getTone(requireContext());
     }
 
     /** The example name each category starts with, or "" when it has none. */
@@ -885,7 +925,8 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         if (name.isEmpty()) {
             name = defaultNameFor(category);
             if (name.isEmpty()) {
-                Toast.makeText(requireContext(), R.string.addtask_name_required, Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), CoachVoice.Line.ADDTASK_NAME_REQUIRED.pick(tone()),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -931,7 +972,8 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             setSaving(false);
 
             if (rowId == null || rowId <= 0) {
-                Toast.makeText(requireContext(), R.string.addtask_save_failed, Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), CoachVoice.Line.ADDTASK_SAVE_FAILED.pick(tone()),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -949,12 +991,12 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     @NonNull
     private String savedMessage(boolean flexible, @NonNull String category) {
         if (!flexible) {
-            return getString(R.string.addtask_saved_work);
+            return getString(CoachVoice.Line.ADDTASK_SAVED_WORK.pick(tone()));
         }
         if (CategoryRepository.ACADEMIC.equals(category)) {
-            return getString(R.string.addtask_saved_academic);
+            return getString(CoachVoice.Line.ADDTASK_SAVED_ACADEMIC.pick(tone()));
         }
-        return getString(R.string.addtask_saved_category, category);
+        return getString(CoachVoice.Line.ADDTASK_SAVED_CATEGORY.pick(tone()), category);
     }
 
     /** Locks the save button while the insert is in flight. */

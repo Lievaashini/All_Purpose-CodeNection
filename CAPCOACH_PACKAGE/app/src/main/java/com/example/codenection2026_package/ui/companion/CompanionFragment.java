@@ -25,9 +25,13 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.VoiceManager;
+import com.example.codenection2026_package.model.CoachVoice;
+import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
+import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -67,7 +71,7 @@ public class CompanionFragment extends Fragment {
                         if (Boolean.TRUE.equals(isGranted)) {
                             startListening();
                         } else if (commandBubble != null) {
-                            commandBubble.setText(R.string.voice_unavailable);
+                            commandBubble.setText(CoachVoice.Line.VOICE_UNAVAILABLE.pick(tone()));
                         }
                     });
 
@@ -105,7 +109,26 @@ public class CompanionFragment extends Fragment {
             homeBrandButton.setOnClickListener(v -> ScreenNav.showDashboard(this));
         }
 
+        // The layout cannot know the coaching tone, so the screen's spoken-at-the-user copy
+        // is resolved here. The layout keeps the Hype variant as preview and fallback.
+        ToneCopy.on(view, tone())
+                .set(R.id.voiceInstruction, CoachVoice.Line.VOICE_INSTRUCTION)
+                .set(R.id.readyText, CoachVoice.Line.VOICE_CTA);
+
         setUpVoice();
+    }
+
+    /**
+     * The coaching tone chosen in onboarding or Settings.
+     *
+     * <p>Null once the fragment is detached, which is reachable here because the permission
+     * result and the recogniser callbacks can both outlive the view. A null tone is Hype in
+     * {@link CoachVoice.Line#pick}, so a late callback falls back to the default voice
+     * rather than throwing.
+     */
+    @Nullable
+    private ToneType tone() {
+        return isAdded() ? OnboardingPrefs.getTone(requireContext()) : null;
     }
 
     // ==================================================================
@@ -115,11 +138,13 @@ public class CompanionFragment extends Fragment {
     private void setUpVoice() {
         if (!SpeechRecognizer.isRecognitionAvailable(requireContext())) {
             if (commandBubble != null) {
-                commandBubble.setText(R.string.voice_unavailable);
+                commandBubble.setText(CoachVoice.Line.VOICE_UNAVAILABLE.pick(tone()));
             }
             if (micButton != null) {
                 micButton.setOnClickListener(v -> Toast
-                        .makeText(requireContext(), R.string.voice_unavailable, Toast.LENGTH_SHORT)
+                        .makeText(requireContext(),
+                                CoachVoice.Line.VOICE_UNAVAILABLE.pick(tone()),
+                                Toast.LENGTH_SHORT)
                         .show());
             }
             return;
@@ -148,7 +173,7 @@ public class CompanionFragment extends Fragment {
         } catch (RuntimeException e) {
             // Some devices throw when the recogniser service is busy.
             if (commandBubble != null) {
-                commandBubble.setText(R.string.voice_retry);
+                commandBubble.setText(CoachVoice.Line.VOICE_RETRY.pick(tone()));
             }
         }
     }
@@ -183,7 +208,7 @@ public class CompanionFragment extends Fragment {
         public void onEndOfSpeech() {
             stopPulse();
             if (readyText != null) {
-                readyText.setText(R.string.voice_cta);
+                readyText.setText(CoachVoice.Line.VOICE_CTA.pick(tone()));
             }
         }
 
@@ -191,10 +216,10 @@ public class CompanionFragment extends Fragment {
         public void onError(int error) {
             stopPulse();
             if (readyText != null) {
-                readyText.setText(R.string.voice_cta);
+                readyText.setText(CoachVoice.Line.VOICE_CTA.pick(tone()));
             }
             if (commandBubble != null) {
-                commandBubble.setText(R.string.voice_retry);
+                commandBubble.setText(CoachVoice.Line.VOICE_RETRY.pick(tone()));
             }
         }
 
@@ -207,14 +232,14 @@ public class CompanionFragment extends Fragment {
                     results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             if (matches == null || matches.isEmpty()) {
                 if (commandBubble != null) {
-                    commandBubble.setText(R.string.voice_retry);
+                    commandBubble.setText(CoachVoice.Line.VOICE_RETRY.pick(tone()));
                 }
                 return;
             }
 
             String transcript = matches.get(0).trim();
             if (commandBubble != null) {
-                commandBubble.setText("\"" + transcript + "\"");
+                commandBubble.setText(getString(R.string.voice_transcript_quoted, transcript));
             }
             handleTranscript(transcript);
         }

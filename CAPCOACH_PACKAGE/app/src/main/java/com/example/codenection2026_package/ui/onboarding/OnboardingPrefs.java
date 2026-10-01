@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.codenection2026_package.model.ToneType;
 
@@ -27,11 +28,21 @@ public final class OnboardingPrefs {
     private static final String KEY_COCURRICULAR = "cocurricular_hours_per_week";
     private static final String KEY_CALENDAR_SYNCED = "calendar_synced";
     private static final String KEY_ONBOARDED = "onboarding_complete";
+    private static final String KEY_NAME = "display_name";
 
     // Defaults taken from the prototype's initial slider positions.
     public static final int DEFAULT_STUDY_HOURS = 24;
     public static final int DEFAULT_WORK_HOURS = 20;
     public static final int DEFAULT_COCURRICULAR_HOURS = 6;
+
+    /**
+     * Name the user is greeted by, everywhere the app talks to them personally.
+     *
+     * <p>Screen 2 pre-fills the field with this, so a user who does not care can press
+     * Save &amp; Launch without touching it and still get a name in their morning
+     * greeting rather than a blank "Good Morning, !".
+     */
+    public static final String DEFAULT_NAME = "Maya";
 
     private OnboardingPrefs() {
     }
@@ -62,6 +73,19 @@ public final class OnboardingPrefs {
         return prefs(c).getBoolean(KEY_CALENDAR_SYNCED, false);
     }
 
+    /**
+     * The name to greet the user by. Never returns blank: a user who cleared the field
+     * falls back to {@link #DEFAULT_NAME} rather than being greeted by an empty string.
+     */
+    @NonNull
+    public static String getDisplayName(@NonNull Context c) {
+        String stored = prefs(c).getString(KEY_NAME, DEFAULT_NAME);
+        if (stored == null || stored.trim().isEmpty()) {
+            return DEFAULT_NAME;
+        }
+        return stored.trim();
+    }
+
     public static boolean isOnboardingComplete(@NonNull Context c) {
         return prefs(c).getBoolean(KEY_ONBOARDED, false);
     }
@@ -71,12 +95,17 @@ public final class OnboardingPrefs {
                             int studyHours,
                             int workHours,
                             int cocurricularHours,
-                            boolean calendarSynced) {
+                            boolean calendarSynced,
+                            @Nullable String displayName) {
+        String name = displayName == null || displayName.trim().isEmpty()
+                ? DEFAULT_NAME
+                : displayName.trim();
         prefs(c).edit()
                 .putInt(KEY_STUDY, studyHours)
                 .putInt(KEY_WORK, workHours)
                 .putInt(KEY_COCURRICULAR, cocurricularHours)
                 .putBoolean(KEY_CALENDAR_SYNCED, calendarSynced)
+                .putString(KEY_NAME, name)
                 .putBoolean(KEY_ONBOARDED, true)
                 .apply();
     }
@@ -84,5 +113,16 @@ public final class OnboardingPrefs {
     /** Persists the coaching tone chosen on Screen 1. */
     public static void saveTone(@NonNull Context c, @NonNull ToneType tone) {
         prefs(c).edit().putString(KEY_TONE, tone.storageValue).apply();
+    }
+
+    /**
+     * Persists a new display name without touching anything else, so Settings can edit the
+     * name on its own. Blank falls back to {@link #DEFAULT_NAME}, matching {@link #save}.
+     */
+    public static void saveName(@NonNull Context c, @Nullable String displayName) {
+        String name = displayName == null || displayName.trim().isEmpty()
+                ? DEFAULT_NAME
+                : displayName.trim();
+        prefs(c).edit().putString(KEY_NAME, name).apply();
     }
 }

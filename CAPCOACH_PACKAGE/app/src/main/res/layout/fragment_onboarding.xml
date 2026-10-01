@@ -85,12 +85,15 @@
             android:layout_marginTop="@dimen/space_md"
             android:text="@string/onboarding_title" />
 
+        <!-- Tone-aware copy: the layout carries the Hype wording as its design-time
+             default, and OnboardingFragment rewrites it for the stored tone at runtime. -->
         <TextView
+            android:id="@+id/onboardingSubtitle"
             style="@style/Text.Body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_xs"
-            android:text="@string/onboarding_subtitle" />
+            android:text="@string/onboard_subtitle_hype" />
 
         <!-- ==================== Dino stage ==================== -->
         <com.google.android.material.button.MaterialButton
@@ -214,11 +217,12 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/toneSectionLabel"
                 style="@style/Text.Label"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/tone_section_label"
+                android:text="@string/tone_section_label_hype"
                 android:textAllCaps="true"
                 android:textStyle="bold" />
 
@@ -340,12 +344,13 @@
             app:iconTint="@color/on_brand" />
 
         <TextView
+            android:id="@+id/onboardingFootnote"
             style="@style/Text.MicroLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_sm"
             android:gravity="center"
-            android:text="@string/onboarding_footnote" />
+            android:text="@string/onboard_footnote_hype" />
 
     </LinearLayout>
 </ScrollView>

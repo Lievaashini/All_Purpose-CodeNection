@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 2 - SET LIMITS / HARD LIMITS  (port of prototype/hard-limits.html)
 
@@ -100,12 +100,15 @@
                 android:layout_marginTop="@dimen/space_md"
                 android:text="@string/limits_title" />
 
+            <!-- Tone-aware copy: the layout carries the Hype wording as its design-time
+                 default, and HardLimitsFragment rewrites it for the stored tone at runtime. -->
             <TextView
+                android:id="@+id/limitsSubtitle"
                 style="@style/Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_xs"
-                android:text="@string/limits_subtitle" />
+                android:text="@string/limits_subtitle_hype" />
 
             <!-- ==================== Dino guardian card ==================== -->
             <LinearLayout
@@ -276,7 +279,6 @@
                             style="@style/Text.Metric"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="50"
                             tools:text="50" />
 
                         <TextView
@@ -313,7 +315,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/space_xxs"
                         android:maxWidth="120dp"
-                        android:text="@string/zone_safe"
+                        android:text="@string/zone_safe_hype"
                         android:textColor="@color/status_green"
                         android:textStyle="bold"
                         tools:text="SAFE ZONE / BALANCED" />
@@ -378,7 +380,6 @@
                             style="@style/Text.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="24"
                             android:textColor="@color/brand_mint"
                             tools:text="24" />
 
@@ -507,7 +508,6 @@
                         android:gravity="center"
                         android:paddingHorizontal="@dimen/space_sm"
                         android:paddingVertical="@dimen/space_xxs"
-                        android:text="Protected: 20h"
                         android:textColor="@color/brand_mint"
                         android:textStyle="bold"
                         tools:text="Protected: 20h" />
@@ -532,7 +532,6 @@
                             style="@style/Text.Metric"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="20"
                             android:textSize="@dimen/text_metric_lg"
                             tools:text="20" />
 
@@ -568,7 +567,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/space_xs"
-                            android:text="@string/work_status_safe"
+                            android:text="@string/work_status_safe_hype"
                             android:textColor="@color/status_green"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -651,7 +650,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/space_sm"
                         android:layout_weight="1"
-                        android:text="@string/work_warning_safe"
+                        android:text="@string/work_warning_safe_hype"
                         android:textSize="@dimen/text_label" />
                 </LinearLayout>
             </LinearLayout>
@@ -714,7 +713,6 @@
                             style="@style/Text.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="6"
                             android:textColor="@color/brand_mint"
                             tools:text="6" />
 
@@ -818,6 +816,32 @@
                     android:contentDescription="@string/cd_sync_calendar_switch" />
             </LinearLayout>
 
+            <!-- ==================== Display name ==================== -->
+            <TextView
+                android:id="@+id/limitsNameLabel"
+                style="@style/Text.MicroLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg"
+                android:text="@string/limits_name_label_hype" />
+
+            <EditText
+                android:id="@+id/displayNameInput"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/touch_target_min"
+                android:layout_marginTop="@dimen/space_sm"
+                android:background="@drawable/bg_input"
+                android:contentDescription="@string/cd_display_name_input"
+                android:importantForAutofill="no"
+                android:inputType="textCapWords"
+                android:maxLines="1"
+                android:paddingStart="@dimen/space_md"
+                android:paddingEnd="@dimen/space_md"
+                android:text="@string/limits_name_default"
+                android:textColor="@color/text_primary_dark"
+                android:textColorHint="@color/text_dim_dark"
+                android:textSize="@dimen/text_body" />
+
             <!-- ==================== Primary CTA ==================== -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveAndLaunchButton"
@@ -831,12 +855,13 @@
                 app:iconTint="@color/on_brand" />
 
             <TextView
+                android:id="@+id/limitsFootnote"
                 style="@style/Text.MicroLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_sm"
                 android:gravity="center"
-                android:text="@string/limits_footnote" />
+                android:text="@string/limits_footnote_hype" />
 
         </LinearLayout>
     </com.example.codenection2026_package.ui.widget.ObservableScrollView>

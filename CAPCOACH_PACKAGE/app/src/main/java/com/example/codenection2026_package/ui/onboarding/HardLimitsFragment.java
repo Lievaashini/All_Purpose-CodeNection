@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +22,9 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.CalendarManager;
+import com.example.codenection2026_package.model.CoachVoice;
+import com.example.codenection2026_package.model.ToneType;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 import com.example.codenection2026_package.ui.widget.ObservableScrollView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -57,6 +61,7 @@ public class HardLimitsFragment extends Fragment {
     private View dinoStatusDot;
 
     private MaterialSwitch calendarSyncSwitch;
+    private EditText displayNameInput;
 
     private boolean initialized = false;
 
@@ -71,7 +76,7 @@ public class HardLimitsFragment extends Fragment {
                 if (Boolean.TRUE.equals(readGranted) && Boolean.TRUE.equals(writeGranted)) {
                     runCalendarTest();
                 } else {
-                    Toast.makeText(getContext(), "Calendar access is required.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.limits_calendar_permission_required, Toast.LENGTH_SHORT).show();
                 }
             });
     // -------------------------------
@@ -90,6 +95,7 @@ public class HardLimitsFragment extends Fragment {
         calendarManager = new CalendarManager(requireContext());
 
         bindViews(view);
+        bindToneCopy(view);
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
         restoreSavedValues();
         wireSliders();
@@ -129,6 +135,25 @@ public class HardLimitsFragment extends Fragment {
         dinoStatusDot = view.findViewById(R.id.dinoStatusDot);
 
         calendarSyncSwitch = view.findViewById(R.id.calendarSyncSwitch);
+        displayNameInput = view.findViewById(R.id.displayNameInput);
+    }
+
+    /**
+     * Rewrites this screen's static tone-aware prose in the user's coaching tone.
+     *
+     * <p>Only the lines that never change while the screen is open are bound here. The work
+     * status, the work warning and the zone pill also vary with the <i>slider values</i>, so
+     * they are worded in {@link #renderWork(int)} and {@link #renderTotal(int, int, int)},
+     * which run on every change.
+     */
+    private void bindToneCopy(@NonNull View view) {
+        if (getContext() == null) {
+            return;
+        }
+        ToneCopy.on(view, OnboardingPrefs.getTone(requireContext()))
+                .set(R.id.limitsSubtitle, CoachVoice.Line.LIMITS_SUBTITLE)
+                .set(R.id.limitsFootnote, CoachVoice.Line.LIMITS_FOOTNOTE)
+                .set(R.id.limitsNameLabel, CoachVoice.Line.LIMITS_NAME_LABEL);
     }
 
     private void restoreSavedValues() {
@@ -140,6 +165,12 @@ public class HardLimitsFragment extends Fragment {
         cocurricularSlider.setValue(OnboardingPrefs.getCocurricularHours(requireContext()));
         if (calendarSyncSwitch != null) {
             calendarSyncSwitch.setChecked(OnboardingPrefs.isCalendarSynced(requireContext()));
+        }
+        if (displayNameInput != null) {
+            displayNameInput.setText(OnboardingPrefs.getDisplayName(requireContext()));
+            // setText leaves the caret at index 0, so typing straight into the pre-filled
+            // "Maya" would produce "AMaya". Park it at the end instead.
+            displayNameInput.setSelection(displayNameInput.getText().length());
         }
     }
 
@@ -184,7 +215,7 @@ public class HardLimitsFragment extends Fragment {
     private void runCalendarTest() {
         try {
             // 1. Test Writing
-            calendarManager.blockRecoveryTime("Mandatory Brain Rest", 4);
+            calendarManager.blockRecoveryTime(getString(R.string.limits_recovery_block_title), 4);
 
             // 2. Test Reading
             java.util.List<CalendarManager.CalendarEvent> events = calendarManager.logUpcomingWeekEvents();
@@ -240,10 +271,11 @@ public class HardLimitsFragment extends Fragment {
                     (int) studySlider.getValue(),
                     (int) workSlider.getValue(),
                     (int) cocurricularSlider.getValue(),
-                    calendarSyncSwitch != null && calendarSyncSwitch.isChecked());
+                    calendarSyncSwitch != null && calendarSyncSwitch.isChecked(),
+                    displayNameInput == null ? null : displayNameInput.getText().toString());
 
             Toast.makeText(requireContext(),
-                    "Baseline saved", Toast.LENGTH_SHORT).show();
+                    R.string.limits_baseline_saved, Toast.LENGTH_SHORT).show();
 
             // Setup is complete, so hand off to the dashboard. This is the ONE line added
             // to a teammate file, approved in advance; everything else in wireSaveButton
@@ -286,6 +318,10 @@ public class HardLimitsFragment extends Fragment {
         LoadZones.WorkBand band = LoadZones.workBand(work);
         int accent = color(workHoursValue, band.colorRes);
 
+        // The band picks the slot, the tone picks the wording. Read once here and reuse it
+        // for every line this pass writes.
+        ToneType tone = OnboardingPrefs.getTone(requireContext());
+
         workHoursValue.setTextColor(accent);
 
         android.content.res.ColorStateList tintList = ContextCompat.getColorStateList(requireContext(), band.colorRes);
@@ -296,7 +332,7 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (workStatusLabel != null) {
-            workStatusLabel.setText(band.statusLabelRes);
+            workStatusLabel.setText(band.statusLabel.pick(tone));
             workStatusLabel.setTextColor(accent);
         }
         if (workStatusDot != null) {
@@ -304,14 +340,21 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (workBadge != null) {
-            workBadge.setText(work <= LoadZones.WORK_CAP_HOURS
-                    ? getString(R.string.work_badge_prefix) + work + "h"
-                    : (band == LoadZones.WorkBand.CAUTION ? "Caution: " : "High Risk: ") + work + "h");
+            // One whole string per band, so the hours and the "h" unit sit inside the
+            // resource and a translator can move them.
+            workBadge.setText(getString(work <= LoadZones.WORK_CAP_HOURS
+                            ? R.string.work_badge_protected
+                            : (band == LoadZones.WorkBand.CAUTION
+                                    ? R.string.work_badge_caution
+                                    : R.string.work_badge_risk),
+                    work));
             workBadge.setTextColor(accent);
         }
 
         if (workWarningText != null) {
-            workWarningText.setText(band.warningTextRes);
+            // The warning is a fixed sentence per band and is deliberately not given the
+            // hours - only the Dino's line below takes a value.
+            workWarningText.setText(band.warningText.pick(tone));
         }
         if (workWarningIcon != null && tintList != null) {
             workWarningIcon.setImageTintList(tintList);
@@ -324,9 +367,11 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (dinoGuardSpeech != null) {
+            // Only the safe band's copy names the number, so only that one takes the hours.
+            int line = band.dinoQuote.pick(tone);
             dinoGuardSpeech.setText(band == LoadZones.WorkBand.SAFE
-                    ? getString(band.dinoSpeechRes, work)
-                    : getString(band.dinoSpeechRes));
+                    ? getString(line, work)
+                    : getString(line));
         }
         if (dinoGuardAvatar != null) {
             loadDinoSprite(dinoGuardAvatar, avatarFor(band));
@@ -345,7 +390,7 @@ public class HardLimitsFragment extends Fragment {
             totalHoursValue.setTextColor(accent);
         }
         if (zoneLabel != null) {
-            zoneLabel.setText(result.zone.labelRes);
+            zoneLabel.setText(result.zone.label.pick(OnboardingPrefs.getTone(requireContext())));
             zoneLabel.setTextColor(accent);
         }
         if (zoneDot != null) {

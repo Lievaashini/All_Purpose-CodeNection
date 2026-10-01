@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   SCREEN 7 - WEEKLY FEAST  (port of Prototype/feast.html)
 
@@ -100,13 +100,16 @@
                     app:tint="@color/text_muted_dark" />
             </LinearLayout>
 
+            <!-- Hype wording: the design-time default, rewritten for the user's tone in
+                 FeastFragment. -->
             <TextView
+                android:id="@+id/feastTitle"
                 style="@style/Text.Heading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_md"
                 android:gravity="center"
-                android:text="@string/feast_title"
+                android:text="@string/feast_title_hype"
                 android:textColor="@color/text_primary_dark" />
 
             <TextView
@@ -132,14 +135,16 @@
                     android:paddingHorizontal="@dimen/space_md"
                     android:paddingVertical="@dimen/space_xxs">
 
+                    <!-- Design-time text only. The real opening line depends on the coaching
+                         tone, so FeastFragment sets it from DinoVoice. -->
                     <TextView
                         android:id="@+id/dinoBubble"
                         style="@style/Text.MicroLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feast_bubble_hungry"
                         android:textColor="@color/brand_mint"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        tools:text="&quot;Om nom! I'm starving! Feed me!&quot;" />
                 </LinearLayout>
 
                 <FrameLayout
@@ -360,11 +365,12 @@
                         android:background="@drawable/dot_mint" />
 
                     <TextView
+                        android:id="@+id/feastTrayTitle"
                         style="@style/Text.MicroLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/space_xs"
-                        android:text="@string/feast_tray_title"
+                        android:text="@string/feast_tray_title_hype"
                         android:textColor="@color/text_primary_dark" />
 
                     <View

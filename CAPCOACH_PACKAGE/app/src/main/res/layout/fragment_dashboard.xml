@@ -97,13 +97,14 @@
                                     android:layout_height="6dp"
                                     android:background="@drawable/dot_mint" />
 
+                                <!-- Text written by renderCapacityCard(), because the
+                                     wording depends on the coaching tone. -->
                                 <TextView
                                     android:id="@+id/stateLabel"
                                     style="@style/Text.MicroLabel"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="@dimen/space_xxs"
-                                    android:text="@string/dash_state_optimal"
                                     android:textColor="@color/brand_mint"
                                     android:textStyle="bold"
                                     tools:text="OPTIMAL" />
@@ -122,6 +123,7 @@
                                 tools:text="40% LOAD" />
                         </LinearLayout>
 
+                        <!-- Text written by renderCapacityCard() - see stateLabel above. -->
                         <TextView
                             android:id="@+id/headline"
                             style="@style/Text.Body"
@@ -130,9 +132,9 @@
                             android:layout_marginTop="2dp"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="@string/dash_headline_balanced"
                             android:textColor="@color/text_primary_dark"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:text="All balanced today." />
 
                         <TextView
                             android:id="@+id/telemetry"
@@ -405,8 +407,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_md"
                 android:gravity="center"
-                android:text="@string/dash_no_tasks"
                 android:visibility="gone"
+                tools:text="No tasks yet. Tap Add Task to create one."
                 tools:visibility="visible" />
 
             <!-- ============ Calendar sync strip ============ -->
@@ -494,20 +496,24 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <!-- Design-time text only: both lines are written by showRebalanceToast(),
+                 because the wording depends on the coaching tone. -->
             <TextView
+                android:id="@+id/toastTitle"
                 style="@style/Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/toast_rebalanced_title"
                 android:textColor="@color/text_primary_dark"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:text="Schedule Rebalanced &amp; Rest Protected" />
 
             <TextView
+                android:id="@+id/toastSub"
                 style="@style/Text.MicroLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/toast_rebalanced_sub"
-                android:textColor="@color/brand_mint" />
+                android:textColor="@color/brand_mint"
+                tools:text="-55% cognitive load | +3.5h rest locked" />
         </LinearLayout>
 
         <ImageView
