@@ -120,6 +120,8 @@
     <string name="cd_back">Back</string>
     <string name="cd_brand_home">CapCoach home</string>
     <string name="cd_close_modal">Close</string>
+    <!-- Destructive action in the Edit Task sheet. GONE in the Add Task flow. -->
+    <string name="cd_delete_task">Delete this task</string>
 
     <!-- ==================================================================
          SCREEN 3 - DASHBOARD  (port of Prototype/dashboard.html)
