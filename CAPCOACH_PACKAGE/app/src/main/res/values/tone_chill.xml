@@ -108,7 +108,6 @@
          ================================================================== -->
 
     <string name="addtask_subtitle_work_chill">Fixed Work Hours</string>
-    <string name="addtask_subtitle_academic_chill">Academic Time Stays Flexible</string>
     <string name="addtask_subtitle_flexible_category_chill">%1$s Stays Flexible</string>
     <string name="addtask_mode_work_desc_chill">Fixed hours. We won\'t push these.</string>
     <string name="addtask_mode_work_badge_chill">Held under the 20h cap</string>
@@ -138,7 +137,6 @@
     <string name="bio_trend_state_chill">A Real Dip</string>
     <string name="bio_penalty_sub_chill">Easing today\'s capacity to match your sleep...</string>
     <string name="bio_penalty_footnote_chill">Working out what to shed, on-device...</string>
-    <string name="bio_no_data_chill">Nothing stored from your health data yet.</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST
@@ -157,7 +155,7 @@
          ================================================================== -->
 
     <string name="feast_title_chill">Feed Coach Dino</string>
-    <string name="feast_subtitle_chill">You gathered %1$d apples from %1$d study &amp; shift blocks this week.</string>
+    <string name="feast_subtitle_chill">You gathered %1$d apples, one for every study &amp; shift block this week.</string>
     <string name="feast_tray_title_chill">Tap an apple to feed one at a time:</string>
     <string name="feast_full_toast_chill">Dino\'s full. That was a good week.</string>
     <string name="feast_complete_toast_chill">Feast done. Dino is fully rested (+400 XP)</string>

@@ -108,7 +108,6 @@
          ================================================================== -->
 
     <string name="addtask_subtitle_work_plain">Work Mode: Fixed</string>
-    <string name="addtask_subtitle_academic_plain">Academic Mode: Flexible</string>
     <string name="addtask_subtitle_flexible_category_plain">%1$s Mode: Flexible</string>
 
     <string name="addtask_mode_work_desc_plain">Fixed work hours. Not deferred.</string>
@@ -141,7 +140,6 @@
     <string name="bio_trend_state_plain">Critical dip</string>
     <string name="bio_penalty_sub_plain">Applying biometric penalty to today\'s capacity...</string>
     <string name="bio_penalty_footnote_plain">Computing load-shedding recommendations on-device (TFLite)...</string>
-    <string name="bio_no_data_plain">No biometric records.</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST
@@ -160,7 +158,7 @@
          ================================================================== -->
 
     <string name="feast_title_plain">Weekly Feast</string>
-    <string name="feast_subtitle_plain">%1$d apples harvested from %1$d study &amp; shift blocks this week.</string>
+    <string name="feast_subtitle_plain">%1$d apples harvested, one for every study &amp; shift block this week.</string>
     <string name="feast_tray_title_plain">Select apples to feed one-by-one:</string>
     <string name="feast_full_toast_plain">Capacity reached. Stamina at maximum.</string>
     <string name="feast_complete_toast_plain">Weekly Feast complete. Max stamina (+400 XP)</string>

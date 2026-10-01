@@ -193,9 +193,6 @@ public final class CoachVoice {
         ADDTASK_SUBTITLE_WORK(R.string.addtask_subtitle_work_hype,
                 R.string.addtask_subtitle_work_chill,
                 R.string.addtask_subtitle_work_plain),
-        ADDTASK_SUBTITLE_ACADEMIC(R.string.addtask_subtitle_academic_hype,
-                R.string.addtask_subtitle_academic_chill,
-                R.string.addtask_subtitle_academic_plain),
         ADDTASK_SUBTITLE_FLEXIBLE_CATEGORY(R.string.addtask_subtitle_flexible_category_hype,
                 R.string.addtask_subtitle_flexible_category_chill,
                 R.string.addtask_subtitle_flexible_category_plain),
@@ -271,9 +268,6 @@ public final class CoachVoice {
         BIO_PENALTY_FOOTNOTE(R.string.bio_penalty_footnote_hype,
                 R.string.bio_penalty_footnote_chill,
                 R.string.bio_penalty_footnote_plain),
-        BIO_NO_DATA(R.string.bio_no_data_hype,
-                R.string.bio_no_data_chill,
-                R.string.bio_no_data_plain),
 
         // ==================== SCREEN 6 - DAILY HARVEST ====================
 

@@ -120,7 +120,6 @@
          ================================================================== -->
 
     <string name="addtask_subtitle_work_hype">Inflexible Work Mode Active</string>
-    <string name="addtask_subtitle_academic_hype">Flexible Academic Mode Active</string>
     <string name="addtask_subtitle_flexible_category_hype">Flexible %1$s Mode Active</string>
     <string name="addtask_mode_work_desc_hype">Fixed work hours. Never deferred.</string>
     <string name="addtask_mode_work_badge_hype">Protected under 20h cap</string>
@@ -150,7 +149,6 @@
     <string name="bio_trend_state_hype">Critical Dip</string>
     <string name="bio_penalty_sub_hype">Applying Biometric Penalty to Today\'s Cognitive Capacity...</string>
     <string name="bio_penalty_footnote_hype">Calculating Cognitive Load Shedding recommendations via on-device TFLite...</string>
-    <string name="bio_no_data_hype">No biometric records stored yet.</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST
@@ -169,7 +167,7 @@
          ================================================================== -->
 
     <string name="feast_title_hype">Feed Coach Dino!</string>
-    <string name="feast_subtitle_hype">You harvested %1$d apples from completing %1$d study &amp; shift blocks this week!</string>
+    <string name="feast_subtitle_hype">You harvested %1$d apples, one for every study &amp; shift block this week!</string>
     <string name="feast_tray_title_hype">Tap apples to feed one-by-one:</string>
     <string name="feast_full_toast_hype">Dino\'s belly is completely full! Great work this week!</string>
     <string name="feast_complete_toast_hype">Weekly Feast Complete! Dino at Max Stamina (+400 XP)</string>
