@@ -19,22 +19,29 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.health.connect.client.HealthConnectClient;
 import androidx.health.connect.client.records.SleepSessionRecord;
 
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.api.HealthConnectHelper;
 import com.example.codenection2026_package.api.HealthConnectManager;
 import com.example.codenection2026_package.api.HealthConnectReader;
-import com.example.codenection2026_package.model.Biometrics;
 import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.shell.ToneCopy;
+import com.example.codenection2026_package.ui.widget.TrendChartView;
 
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,65 +51,48 @@ import java.util.Locale;
  * <p>Shows the overnight sleep anomaly, the sleep debt and HRV metrics, and the cognitive
  * penalty the app applies to today's capacity.
  *
- * <p>Data flows through {@link BiometricsSource}. There is no shared Room database class in
- * the project yet, so the default source returns an empty list; the screen then renders the
- * prototype's own numbers. That is a supported state, not a failure: nothing here assumes a
- * record exists.
+ * <p><b>Every figure on this screen is a Health Connect reading.</b> The screen used to
+ * paint the prototype's own numbers whenever a reading was missing - a 7.2 hr baseline, a
+ * 4.3 hr night, a 28 ms HRV - and its penalty bar animated from 40% to 95% without looking
+ * at any data at all. Those are gone. A figure is now either the real reading or an
+ * explicit "Not recorded", and the alert card only appears when the alert is real.
+ *
+ * <p>The arithmetic is not reimplemented here. It all comes from {@link HealthConnectReader},
+ * used exactly as written: the rolling 24-hour sleep read, the seven-day history, the sleep
+ * debt, the 0-100 recovery-debt score and the HRV mean. That class's debt, debt-score and
+ * HRV helpers were written but never called from anywhere until this screen called them -
+ * which is precisely why this screen was showing invented numbers while the code to compute
+ * the real ones already existed.
+ *
+ * <p>The load-shedding rate is worth calling out: it is
+ * {@link HealthConnectReader#calculateRecoveryDebtScore}, the same 0-100 score
+ * {@code engine.LoadShedder} takes as its {@code recoveryDebtScore} input. The number on
+ * screen is therefore the number the triage model will actually use, not a lookalike
+ * computed for display.
  */
 public class BiometricsFragment extends Fragment {
 
     /**
-     * Swap-in point for AppDatabase once it lands.
+     * The guideline the debt and the deficit are judged against. The screen's own anomaly
+     * copy names it ("Target: 8h 00m"), and it is the scale both sleep bars are drawn on.
      */
-    private interface BiometricsSource {
-        List<Biometrics> loadAll(Context context);
-    }
+    private static final double TARGET_SLEEP_HOURS = 8.0;
+
+    /** A full sleep bar is the target: 480 minutes. */
+    private static final int SCALE_MINUTES = (int) (TARGET_SLEEP_HOURS * 60);
+
+    /** How many days of history the "Baseline Average" row averages over. */
+    private static final int BASELINE_DAYS = 7;
 
     /**
-     * API DIRECT SOURCE (Replaces EmptyBiometricsSource)
+     * Below this, last night is an anomaly worth alerting on.
      *
-     * <p>Bypasses the unmerged Room database and feeds data directly from the
-     * Health Connect API into the UI.
+     * <p>Deliberately the threshold the alert's own headline states ("&lt; 5 Hours Sleep
+     * Detected"), so the card and its copy cannot end up disagreeing.
      */
-    private static final class ApiBiometricsSource implements BiometricsSource {
-        @NonNull
-        @Override
-        public List<Biometrics> loadAll(Context context) {
-            // 1. Fetch real rolling 24-hour sleep sessions from your API
-            List<SleepSessionRecord> sessions = HealthConnectReader.getSleepSessionsLast24Hours(context);
+    private static final double ANOMALY_SLEEP_HOURS = 5.0;
 
-            // 2. Calculate the total sleep time in hours, then convert to minutes for the UI model
-            double totalHours = HealthConnectReader.calculateTotalSleepHours(sessions);
-            int sleepMinutes = (int) (totalHours * 60);
-
-            // 3. Fetch the real rolling 24-hour HRV
-            double hrv = HealthConnectReader.getAverageHrvLast24Hours(context);
-
-            // If the API returns 0 (meaning no permissions or no data), fall back to empty list so UI uses prototype defaults
-            if (sleepMinutes <= 0) {
-                return Collections.emptyList();
-            }
-
-            // Map the API results to the UI's expected format
-            String todayIso = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
-            Biometrics liveData = new Biometrics(todayIso, sleepMinutes, hrv);
-
-            return Collections.singletonList(liveData);
-        }
-    }
-
-    /** Prototype values, used while no record has been stored. */
-    private static final int FALLBACK_BASELINE_MINUTES = 432;      // 7.2 hrs
-    private static final int FALLBACK_LAST_NIGHT_MINUTES = 258;    // 4.3 hrs
-    private static final double FALLBACK_HRV_MS = 28d;
-
-    /** Fill fractions from the prototype's inline widths (90% and 53.75%). */
-    private static final float BASELINE_FRACTION = 0.90f;
-    private static final float LAST_NIGHT_FRACTION = 0.5375f;
-
-    /** The prototype walks the penalty bar from 40% to 95% one point every 45ms. */
-    private static final float PENALTY_FROM = 0.40f;
-    private static final float PENALTY_TO = 0.95f;
+    /** The prototype walks the penalty bar up; it now climbs to the real score. */
     private static final long PENALTY_DURATION_MS = 2500L;
 
     /** Prototype animate-ping / animate-pulse are both a slow opacity breathing loop. */
@@ -121,6 +111,9 @@ public class BiometricsFragment extends Fragment {
 
     @DrawableRes
     private int penaltyFillRes;
+
+    /** Where the penalty bar has to settle, as a 0-1 fraction of its track. */
+    private float penaltyFraction;
 
     @Nullable
     @Override
@@ -143,30 +136,14 @@ public class BiometricsFragment extends Fragment {
         eventDot = view.findViewById(R.id.eventDot);
         penaltyDot = view.findViewById(R.id.penaltyDot);
 
+        Snapshot snapshot = read(requireContext());
+
         bindToneCopy(view);
-
-        // Fetch data from Health Connect directly
-        List<Biometrics> records = createSource().loadAll(requireContext());
-        Biometrics newest = newestRecord(records);
-
-        LinearLayout metricBars = view.findViewById(R.id.metricBarsContainer);
-        addMetricBar(metricBars,
-                R.string.bio_baseline_label,
-                formatHours(FALLBACK_BASELINE_MINUTES), // Baseline remains prototype data until we pull 7-day history
-                R.drawable.dot_mint,
-                R.color.brand_mint,
-                BASELINE_FRACTION);
-        addMetricBar(metricBars,
-                R.string.bio_lastnight_label,
-                formatHours(newest == null
-                        ? FALLBACK_LAST_NIGHT_MINUTES
-                        : newest.getSleepDurationMinutes()),
-                R.drawable.dot_red,
-                R.color.status_red,
-                newest == null ? LAST_NIGHT_FRACTION : calculateFillFraction(newest.getSleepDurationMinutes()));
-
-        TextView hrvValue = view.findViewById(R.id.hrvValue);
-        hrvValue.setText(formatHrv(newest));
+        bindAnomaly(view, snapshot);
+        bindSleepMetrics(view, snapshot);
+        bindTrend(view, snapshot);
+        bindHrv(view, snapshot);
+        bindDeficitAndPenalty(view, snapshot);
 
         reportHealthConnectCapability();
 
@@ -180,6 +157,360 @@ public class BiometricsFragment extends Fragment {
         penaltyDotPulse = startDotPulse(penaltyDot);
     }
 
+    // ==================================================================
+    // Reading Health Connect
+    // ==================================================================
+
+    /** Every figure the screen shows, read once per bind. */
+    private static final class Snapshot {
+
+        /** Seven-day mean, in minutes. 0 when Health Connect holds no history. */
+        final int baselineMinutes;
+
+        /** Last night's total, in minutes. 0 when nothing was recorded. */
+        final int lastNightMinutes;
+
+        /** Mean HRV over the last 24 hours, in milliseconds. 0 when not recorded. */
+        final double hrvMs;
+
+        /** How far under the target last night fell, in whole percent. 0 when it did not. */
+        final int deficitPercent;
+
+        /** The 0-100 recovery-debt score, which is what the load shedder consumes. */
+        final int recoveryDebtScore;
+
+        /** True when last night is short enough to alert on. */
+        final boolean anomaly;
+
+        /** Local time the last sleep session ended. Null unless there is an anomaly. */
+        @Nullable
+        final String anomalyTime;
+
+        /**
+         * One sleep total per night over the last week, oldest first, with
+         * {@link TrendChartView#NO_READING} for a night nothing was recorded. The trend
+         * sparkline draws this, and the Baseline row is its mean.
+         */
+        @NonNull
+        final float[] nightlyMinutes;
+
+        Snapshot(int baselineMinutes,
+                 int lastNightMinutes,
+                 double hrvMs,
+                 int deficitPercent,
+                 int recoveryDebtScore,
+                 boolean anomaly,
+                 @Nullable String anomalyTime,
+                 @NonNull float[] nightlyMinutes) {
+            this.baselineMinutes = baselineMinutes;
+            this.lastNightMinutes = lastNightMinutes;
+            this.hrvMs = hrvMs;
+            this.deficitPercent = deficitPercent;
+            this.recoveryDebtScore = recoveryDebtScore;
+            this.anomaly = anomaly;
+            this.anomalyTime = anomalyTime;
+            this.nightlyMinutes = nightlyMinutes;
+        }
+    }
+
+    /**
+     * Reads the screen's figures from Health Connect.
+     *
+     * <p>Only {@link HealthConnectReader} and {@link HealthConnectHelper} are used, both
+     * exactly as they were written. Nothing here re-derives sleep debt or the debt score,
+     * because both already exist and are the values the triage model will consume.
+     */
+    @NonNull
+    private static Snapshot read(@NonNull Context context) {
+        List<SleepSessionRecord> lastNight = HealthConnectReader.getSleepSessionsLast24Hours(context);
+        double lastNightHours = HealthConnectReader.calculateTotalSleepHours(lastNight);
+        boolean hasSleep = lastNightHours > 0;
+
+        // One seven-day read serves both the Baseline row and the trend sparkline, so the two
+        // can never disagree about how the week went.
+        float[] nightly = nightlyMinutes(readSleepSessions(context, BASELINE_DAYS), BASELINE_DAYS);
+        int baselineMinutes = meanOfRecordedNights(nightly);
+
+        double hrvMs = HealthConnectReader.getAverageHrvLast24Hours(context);
+
+        // The existing helpers own both of these. Debt is measured against the target, and
+        // the resulting 0-100 score is exactly the recoveryDebtScore LoadShedder expects.
+        double debtHours = HealthConnectReader.getSleepDebtHours(lastNight, TARGET_SLEEP_HOURS);
+        int debtScore = HealthConnectReader.calculateRecoveryDebtScore(debtHours, hasSleep);
+
+        int deficitPercent = hasSleep && debtHours > 0
+                ? (int) Math.round(debtHours / TARGET_SLEEP_HOURS * 100.0)
+                : 0;
+
+        boolean anomaly = hasSleep && lastNightHours < ANOMALY_SLEEP_HOURS;
+
+        return new Snapshot(
+                baselineMinutes,
+                hasSleep ? (int) Math.round(lastNightHours * 60.0) : 0,
+                hrvMs,
+                deficitPercent,
+                debtScore,
+                anomaly,
+                anomaly ? latestEndTime(lastNight) : null,
+                nightly);
+    }
+
+    /**
+     * Sleep sessions over the last {@code days} days, through the same helper the rolling
+     * 24-hour read uses. That helper takes an arbitrary window, so a seven-day history needs
+     * no new query code - only a wider range.
+     *
+     * @return an empty list when Health Connect is unreachable or was never granted the
+     *         read permission
+     */
+    @NonNull
+    private static List<SleepSessionRecord> readSleepSessions(@NonNull Context context, int days) {
+        try {
+            HealthConnectClient client = HealthConnectClient.getOrCreate(context);
+            Instant end = Instant.now();
+            Instant start = end.minus(days, ChronoUnit.DAYS);
+            return HealthConnectHelper.readSleepDataSync(client, start, end);
+        } catch (Exception e) {
+            // Every device without Health Connect, and every install where the user never
+            // granted the read permission, lands here.
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Totals one night at a time, oldest first, keyed by the local date a session ended on -
+     * the morning the user woke, which is how sleep is normally attributed to a night.
+     *
+     * <p>Each night is summed through {@link HealthConnectReader#calculateTotalSleepHours},
+     * so the sparkline and the metrics card divide the same way rather than each doing their
+     * own arithmetic.
+     *
+     * @return one entry per night, oldest first, with {@link TrendChartView#NO_READING}
+     *         where Health Connect holds nothing
+     */
+    @NonNull
+    private static float[] nightlyMinutes(@NonNull List<SleepSessionRecord> sessions, int days) {
+        List<List<SleepSessionRecord>> byNight = new ArrayList<>(days);
+        for (int i = 0; i < days; i++) {
+            byNight.add(new ArrayList<>());
+        }
+
+        ZoneId deviceZone = ZoneId.systemDefault();
+        LocalDate today = LocalDate.now(deviceZone);
+
+        for (SleepSessionRecord session : sessions) {
+            // The session records the offset it happened in, so the night it belongs to is
+            // the date it ended on where it was slept, not where the phone is now.
+            ZoneOffset offset = session.getEndZoneOffset();
+            ZoneId zone = offset != null ? offset : deviceZone;
+            long nightsAgo = ChronoUnit.DAYS.between(
+                    session.getEndTime().atZone(zone).toLocalDate(), today);
+            if (nightsAgo < 0 || nightsAgo >= days) {
+                continue;
+            }
+            byNight.get(days - 1 - (int) nightsAgo).add(session);
+        }
+
+        float[] totals = new float[days];
+        for (int i = 0; i < days; i++) {
+            List<SleepSessionRecord> night = byNight.get(i);
+            totals[i] = night.isEmpty()
+                    ? TrendChartView.NO_READING
+                    : (float) (HealthConnectReader.calculateTotalSleepHours(night) * 60.0);
+        }
+        return totals;
+    }
+
+    /**
+     * The Baseline row: the mean of the nights that were actually recorded.
+     *
+     * <p>Dividing by seven instead would treat every unrecorded night as a night of no sleep
+     * and drag the baseline down, which is a claim the data does not support.
+     */
+    private static int meanOfRecordedNights(@NonNull float[] nightly) {
+        float sum = 0f;
+        int recorded = 0;
+        for (float minutes : nightly) {
+            if (minutes > 0f) {
+                sum += minutes;
+                recorded++;
+            }
+        }
+        return recorded == 0 ? 0 : Math.round(sum / recorded);
+    }
+
+    /** The newest night carrying a reading, or -1 when the week is empty. */
+    private static int latestRecordedIndex(@NonNull float[] nightly) {
+        for (int i = nightly.length - 1; i >= 0; i--) {
+            if (nightly[i] >= 0f) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * The most recent night that fell short of the target, skipping the newest night.
+     *
+     * <p>The amber marker answers "where did the week start going wrong", so it must not sit
+     * on the same point as the pulsing alarm, which already owns the newest night.
+     */
+    private static int warnIndex(@NonNull float[] nightly, int latestIndex) {
+        for (int i = latestIndex - 1; i >= 0; i--) {
+            if (nightly[i] >= 0f && nightly[i] < SCALE_MINUTES) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /** Local time the latest session in the list ended, or null when the list is empty. */
+    @Nullable
+    private static String latestEndTime(@NonNull List<SleepSessionRecord> sessions) {
+        SleepSessionRecord latest = null;
+        for (SleepSessionRecord session : sessions) {
+            if (latest == null || session.getEndTime().isAfter(latest.getEndTime())) {
+                latest = session;
+            }
+        }
+        if (latest == null) {
+            return null;
+        }
+        // The session records the offset it happened in, and that is the wall-clock time the
+        // user woke at. Formatting in the device's zone instead would print a different hour
+        // for anyone who slept somewhere else, so the device zone is only the fallback for a
+        // record that carries no offset at all.
+        ZoneOffset recordedOffset = latest.getEndZoneOffset();
+        ZoneId zone = recordedOffset != null ? recordedOffset : ZoneId.systemDefault();
+        return DateTimeFormatter.ofPattern("hh:mm a", Locale.US)
+                .withZone(zone)
+                .format(latest.getEndTime());
+    }
+
+    // ==================================================================
+    // Binding
+    // ==================================================================
+
+    /**
+     * The anomaly card and its status pill.
+     *
+     * <p>Both are hidden unless last night really is short. That is what keeps the
+     * headline honest: its claim is "&lt; 5 Hours Sleep Detected", so the card may only be
+     * on screen when a reading is under {@link #ANOMALY_SLEEP_HOURS}. Both numbers in the
+     * body come from the reading rather than from the prototype's copy.
+     */
+    private void bindAnomaly(@NonNull View view, @NonNull Snapshot snapshot) {
+        setVisible(view.findViewById(R.id.anomalyCard), snapshot.anomaly);
+        setVisible(view.findViewById(R.id.eventPillRow), snapshot.anomaly);
+        if (!snapshot.anomaly) {
+            return;
+        }
+
+        ToneType tone = tone();
+        TextView title = view.findViewById(R.id.bioAnomalyTitle);
+        if (title != null) {
+            title.setText(CoachVoice.Line.BIO_ANOMALY_TITLE.pick(tone));
+        }
+
+        TextView body = view.findViewById(R.id.bioAnomalyBody);
+        if (body != null) {
+            // The body names two durations, so it takes arguments rather than going
+            // through ToneCopy, which only sets a whole string.
+            body.setText(getString(CoachVoice.Line.BIO_ANOMALY_BODY.pick(tone),
+                    formatDuration(snapshot.lastNightMinutes),
+                    formatDuration(SCALE_MINUTES)));
+        }
+
+        TextView time = view.findViewById(R.id.anomalyTime);
+        if (time != null && snapshot.anomalyTime != null) {
+            time.setText(getString(R.string.bio_anomaly_time, snapshot.anomalyTime));
+        }
+    }
+
+    /**
+     * The two sleep rows.
+     *
+     * <p>A row with no reading says so rather than falling back to the prototype's numbers,
+     * which is what used to make this card look like it held data it did not.
+     */
+    private void bindSleepMetrics(@NonNull View view, @NonNull Snapshot snapshot) {
+        LinearLayout metricBars = view.findViewById(R.id.metricBarsContainer);
+        if (metricBars == null) {
+            return;
+        }
+        metricBars.removeAllViews();
+
+        addMetricBar(metricBars,
+                R.string.bio_baseline_label,
+                sleepValue(snapshot.baselineMinutes),
+                R.drawable.dot_mint,
+                R.color.brand_mint,
+                fillFraction(snapshot.baselineMinutes));
+        addMetricBar(metricBars,
+                R.string.bio_lastnight_label,
+                sleepValue(snapshot.lastNightMinutes),
+                R.drawable.dot_red,
+                R.color.status_red,
+                fillFraction(snapshot.lastNightMinutes));
+    }
+
+    /**
+     * Hands the week to the trend sparkline.
+     *
+     * <p>Both markers are chosen here rather than inside the widget: "newest night" and "the
+     * night the week started going short" are facts about the readings, not about how the
+     * chart happens to be drawn.
+     */
+    private void bindTrend(@NonNull View view, @NonNull Snapshot snapshot) {
+        TrendChartView chart = view.findViewById(R.id.sleepTrendChart);
+        if (chart == null) {
+            return;
+        }
+        int latest = latestRecordedIndex(snapshot.nightlyMinutes);
+        chart.setNights(snapshot.nightlyMinutes,
+                SCALE_MINUTES,
+                latest,
+                warnIndex(snapshot.nightlyMinutes, latest));
+    }
+
+    /** The real rolling 24-hour HRV mean, or the honest empty state. */
+    private void bindHrv(@NonNull View view, @NonNull Snapshot snapshot) {
+        TextView hrvValue = view.findViewById(R.id.hrvValue);
+        if (hrvValue == null) {
+            return;
+        }
+        hrvValue.setText(snapshot.hrvMs > 0
+                ? getString(R.string.bio_hrv_value, formatHrv(snapshot.hrvMs))
+                : getString(R.string.bio_not_recorded));
+    }
+
+    /**
+     * The deficit badge, and the fraction the load-shedding bar has to settle on.
+     *
+     * <p>The rate is the recovery-debt score straight from
+     * {@link HealthConnectReader#calculateRecoveryDebtScore} - the same number
+     * {@code engine.LoadShedder} receives as {@code recoveryDebtScore}, so the screen and
+     * the triage model cannot disagree about how depleted today is.
+     */
+    private void bindDeficitAndPenalty(@NonNull View view, @NonNull Snapshot snapshot) {
+        TextView badge = view.findViewById(R.id.deficitBadge);
+        if (badge != null) {
+            if (snapshot.deficitPercent > 0) {
+                badge.setVisibility(View.VISIBLE);
+                badge.setText(getString(R.string.bio_deficit_badge, snapshot.deficitPercent));
+            } else if (snapshot.lastNightMinutes > 0) {
+                // Slept at or past the target, so the shortfall is a real, reportable zero.
+                badge.setVisibility(View.VISIBLE);
+                badge.setText(R.string.bio_deficit_none);
+            } else {
+                // No reading, so there is no shortfall to claim in either direction.
+                badge.setVisibility(View.GONE);
+            }
+        }
+
+        penaltyFraction = snapshot.recoveryDebtScore / 100f;
+    }
+
     /**
      * Rewrites the screen's prose in the user's coaching tone.
      *
@@ -188,6 +519,10 @@ public class BiometricsFragment extends Fragment {
      * The layout keeps the Hype variant, which gives a sensible design-time preview and a
      * graceful fallback if this pass ever runs without a tone.
      *
+     * <p>The anomaly title and body are not here: both live in {@link #bindAnomaly}, which
+     * only runs when there is an anomaly to report and which has the reading the body's
+     * two durations need.
+     *
      * <p>Null-tolerant per view, like the rest of the shell's view binding: a missing id
      * costs one line of copy rather than crashing the screen.
      */
@@ -195,12 +530,8 @@ public class BiometricsFragment extends Fragment {
         if (getContext() == null) {
             return;
         }
-        ToneType tone = OnboardingPrefs.getTone(requireContext());
-
-        ToneCopy.on(view, tone)
+        ToneCopy.on(view, tone())
                 .set(R.id.bioEventPill, CoachVoice.Line.BIO_EVENT_PILL)
-                .set(R.id.bioAnomalyTitle, CoachVoice.Line.BIO_ANOMALY_TITLE)
-                .set(R.id.bioAnomalyBody, CoachVoice.Line.BIO_ANOMALY_BODY)
                 .set(R.id.bioHrvState, CoachVoice.Line.BIO_HRV_STATE)
                 .set(R.id.bioHrvStateSub, CoachVoice.Line.BIO_HRV_STATE_SUB)
                 .set(R.id.bioTrendState, CoachVoice.Line.BIO_TREND_STATE)
@@ -208,65 +539,54 @@ public class BiometricsFragment extends Fragment {
                 .set(R.id.bioPenaltyFootnote, CoachVoice.Line.BIO_PENALTY_FOOTNOTE);
     }
 
-    /**
-     * Replaces the static fractions with dynamic math when real API data arrives.
-     * Target is 8 hours (480 minutes).
-     */
-    private float calculateFillFraction(int minutes) {
-        float fraction = (float) minutes / 480f;
-        if (fraction > 1.0f) return 1.0f;
-        if (fraction < 0.1f) return 0.1f;
-        return fraction;
-    }
-
-    /**
-     * The one place that knows how to read biometric records. Swap the returned
-     * implementation for the Room backed one when the shared database lands.
-     */
+    /** The coaching tone chosen in onboarding or Settings. */
     @NonNull
-    private BiometricsSource createSource() {
-        return new ApiBiometricsSource();
+    private ToneType tone() {
+        return OnboardingPrefs.getTone(requireContext());
     }
 
     // ==================================================================
-    // Derivation from the stored records (with prototype fallbacks)
+    // Formatting
     // ==================================================================
 
-    /** Newest record by its yyyy-MM-dd date, or null when nothing is stored. */
-    @Nullable
-    private static Biometrics newestRecord(@NonNull List<Biometrics> records) {
-        Biometrics newest = null;
-        for (Biometrics record : records) {
-            if (newest == null) {
-                newest = record;
-                continue;
-            }
-            String candidate = record.getDate();
-            String current = newest.getDate();
-            if (candidate != null && current != null && candidate.compareTo(current) > 0) {
-                newest = record;
-            }
-        }
-        return newest;
+    /** "7.2", or "Not recorded" when there is no reading. The unit comes from resources. */
+    @NonNull
+    private String sleepValue(int minutes) {
+        return minutes > 0
+                ? getString(R.string.bio_sleep_hours, formatHours(minutes))
+                : getString(R.string.bio_not_recorded);
     }
 
-    /** sleepDurationMinutes is an int of minutes, so it is shown as hours with one decimal. */
+    /** Sleep minutes as hours to one decimal: {@code bio_sleep_hours} adds the unit. */
     @NonNull
     private static String formatHours(int minutes) {
-        return String.format(Locale.US, "%.1f hrs", minutes / 60f);
+        return String.format(Locale.US, "%.1f", minutes / 60f);
     }
 
+    /** Minutes as the alert copy writes them: 258 becomes "4h 18m", 480 becomes "8h 00m". */
     @NonNull
-    private String formatHrv(@Nullable Biometrics newest) {
-        Double hrv = newest == null ? null : newest.getHrv();
-        if (hrv == null || hrv <= 0) {
-            // No record at all still shows the prototype figure; a record with a null HRV
-            // is reported honestly as not recorded.
-            return newest == null
-                    ? String.format(Locale.US, "%.0f ms", FALLBACK_HRV_MS)
-                    : getString(R.string.bio_hrv_unavailable);
+    private String formatDuration(int minutes) {
+        return getString(R.string.bio_duration_hm, minutes / 60, minutes % 60);
+    }
+
+    /** HRV as whole milliseconds: {@code bio_hrv_value} adds the unit. */
+    @NonNull
+    private static String formatHrv(double millis) {
+        return String.format(Locale.US, "%.0f", millis);
+    }
+
+    /**
+     * How full a sleep bar is, against the target.
+     *
+     * <p>A row with no reading stays empty rather than showing a stub: a 10% sliver next to
+     * "Not recorded" reads as a small amount of sleep, which is exactly the confusion the
+     * prototype numbers caused.
+     */
+    private static float fillFraction(int minutes) {
+        if (minutes <= 0) {
+            return 0f;
         }
-        return String.format(Locale.US, "%.0f ms", hrv);
+        return Math.min(1f, minutes / (float) SCALE_MINUTES);
     }
 
     // ==================================================================
@@ -277,7 +597,7 @@ public class BiometricsFragment extends Fragment {
      * Inflates one {@code item_metric_bar} row into the metrics card.
      *
      * <p>The value parameter is a pre-formatted string rather than a string resource: both
-     * rows show numbers derived from stored records, so they cannot be static resources.
+     * rows show numbers derived from the reading, so they cannot be static resources.
      *
      * <p>The fill width is applied after the first layout pass. During onViewCreated the
      * track is still 0px wide, so a width computed there would collapse to nothing.
@@ -379,7 +699,9 @@ public class BiometricsFragment extends Fragment {
         if (penaltyAnimator != null || trackWidth <= 0) {
             return;
         }
-        ValueAnimator animator = ValueAnimator.ofFloat(PENALTY_FROM, PENALTY_TO);
+        // Climbs from empty to the real score. The prototype's 40% floor was an invented
+        // starting point, and keeping it would show a penalty no reading supports.
+        ValueAnimator animator = ValueAnimator.ofFloat(0f, penaltyFraction);
         animator.setDuration(PENALTY_DURATION_MS);
         animator.setInterpolator(new LinearInterpolator());
         animator.addUpdateListener(animation ->
@@ -457,11 +779,17 @@ public class BiometricsFragment extends Fragment {
             }
         } catch (RuntimeException e) {
             // Health Connect is not installable on every device; the screen still works
-            // from stored records, so a missing provider is not fatal.
+            // from the reading, so a missing provider is not fatal.
             Toast.makeText(requireContext(),
                     getString(R.string.bio_health_connect_unavailable,
                             getString(R.string.bio_health_connect)),
                     Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private static void setVisible(@Nullable View view, boolean visible) {
+        if (view != null) {
+            view.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -480,6 +808,7 @@ public class BiometricsFragment extends Fragment {
         eventDot = null;
         penaltyDot = null;
         penaltyFillRes = 0;
+        penaltyFraction = 0f;
 
         super.onDestroyView();
     }

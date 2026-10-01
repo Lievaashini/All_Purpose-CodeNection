@@ -131,7 +131,7 @@
 
     <string name="bio_event_pill_chill">Something in Your Biometrics</string>
     <string name="bio_anomaly_title_chill">Health Connect: &lt; 5 Hours Sleep Noted</string>
-    <string name="bio_anomaly_body_chill">Last night\'s sleep: 4h 18m, against a target of 8h 00m. Recovery came up short.</string>
+    <string name="bio_anomaly_body_chill">Last night\'s sleep: %1$s, against a target of %2$s. Recovery came up short.</string>
     <string name="bio_hrv_state_chill">Running Tense</string>
     <string name="bio_hrv_state_sub_chill">Nervous system is working hard</string>
     <string name="bio_trend_state_chill">A Real Dip</string>
