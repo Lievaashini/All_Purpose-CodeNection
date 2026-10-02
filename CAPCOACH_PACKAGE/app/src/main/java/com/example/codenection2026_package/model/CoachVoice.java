@@ -1,0 +1,450 @@
+package com.example.codenection2026_package.model;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.PluralsRes;
+import androidx.annotation.StringRes;
+
+import com.example.codenection2026_package.R;
+
+/**
+ * Everything the app says to the user, resolved for their coaching tone.
+ *
+ * <p>The tone is a single preference that changes the app's <i>voice</i>: the Dino's
+ * dialogue, plus the copy that reads as the app talking - state pills, headlines, empty
+ * states, warnings, confirmations, prompts and toasts. It deliberately does not reach
+ * functional chrome (nav names, field labels, units, category and priority names, button
+ * verbs, content descriptions), which stays tone-neutral in {@code strings.xml}.
+ *
+ * <p>This class is the single place that maps (slot, tone) to a string, so no screen has to
+ * know how the tone is stored or spell out a three-way switch of its own. The copy lives in
+ * the three per-tone files {@code tone_hype.xml}, {@code tone_chill.xml} and
+ * {@code tone_plain.xml}.
+ *
+ * <p><b>Naming is mechanical:</b> every constant is its resource base name upper-cased, so
+ * {@code WORK_STATUS_SAFE} resolves {@code work_status_safe_hype} / {@code _chill} /
+ * {@code _plain}. The constants were generated from the hype file and mirror its order, which
+ * means a slot present in one tone and missing from another is a compile error rather than a
+ * silently missing string.
+ *
+ * <p><b>Adding a slot:</b> add the string to all three tone files and regenerate. Do not
+ * hand-edit the constants.
+ *
+ * <p>Tone is a presentation preference only - see {@link ToneType} - so nothing here touches
+ * scheduling, the capacity model or anything the ML layer reads.
+ */
+public final class CoachVoice {
+
+    /** One dialogue slot, with its wording in each of the three coaching tones. */
+    public enum Line {
+
+        // ==================== DINO DIALOGUE ====================
+
+        DINO_ONBOARDING(R.string.dino_onboarding_hype,
+                R.string.dino_onboarding_chill,
+                R.string.dino_onboarding_plain),
+        DINO_WORK_SAFE(R.string.dino_work_safe_hype,
+                R.string.dino_work_safe_chill,
+                R.string.dino_work_safe_plain),
+        DINO_WORK_CAUTION(R.string.dino_work_caution_hype,
+                R.string.dino_work_caution_chill,
+                R.string.dino_work_caution_plain),
+        DINO_WORK_RISK(R.string.dino_work_risk_hype,
+                R.string.dino_work_risk_chill,
+                R.string.dino_work_risk_plain),
+        DINO_FEAST_HUNGRY(R.string.dino_feast_hungry_hype,
+                R.string.dino_feast_hungry_chill,
+                R.string.dino_feast_hungry_plain),
+        DINO_FEAST_ALL(R.string.dino_feast_all_hype,
+                R.string.dino_feast_all_chill,
+                R.string.dino_feast_all_plain),
+        DINO_FEAST_HUG(R.string.dino_feast_hug_hype,
+                R.string.dino_feast_hug_chill,
+                R.string.dino_feast_hug_plain),
+        DINO_FEAST_DONE(R.string.dino_feast_done_hype,
+                R.string.dino_feast_done_chill,
+                R.string.dino_feast_done_plain),
+        DINO_ADDTASK_GUARD(R.string.dino_addtask_guard_hype,
+                R.string.dino_addtask_guard_chill,
+                R.string.dino_addtask_guard_plain),
+        DINO_ADDTASK_SCHED(R.string.dino_addtask_sched_hype,
+                R.string.dino_addtask_sched_chill,
+                R.string.dino_addtask_sched_plain),
+
+        // ==================== SCREEN 1 - ONBOARDING ====================
+
+        ONBOARD_SUBTITLE(R.string.onboard_subtitle_hype,
+                R.string.onboard_subtitle_chill,
+                R.string.onboard_subtitle_plain),
+        ONBOARD_FOOTNOTE(R.string.onboard_footnote_hype,
+                R.string.onboard_footnote_chill,
+                R.string.onboard_footnote_plain),
+        TONE_SECTION_LABEL(R.string.tone_section_label_hype,
+                R.string.tone_section_label_chill,
+                R.string.tone_section_label_plain),
+
+        // ==================== SCREEN 2 - SET LIMITS ====================
+
+        LIMITS_SUBTITLE(R.string.limits_subtitle_hype,
+                R.string.limits_subtitle_chill,
+                R.string.limits_subtitle_plain),
+        LIMITS_FOOTNOTE(R.string.limits_footnote_hype,
+                R.string.limits_footnote_chill,
+                R.string.limits_footnote_plain),
+        LIMITS_NAME_LABEL(R.string.limits_name_label_hype,
+                R.string.limits_name_label_chill,
+                R.string.limits_name_label_plain),
+        WORK_STATUS_SAFE(R.string.work_status_safe_hype,
+                R.string.work_status_safe_chill,
+                R.string.work_status_safe_plain),
+        WORK_STATUS_CAUTION(R.string.work_status_caution_hype,
+                R.string.work_status_caution_chill,
+                R.string.work_status_caution_plain),
+        WORK_STATUS_RISK(R.string.work_status_risk_hype,
+                R.string.work_status_risk_chill,
+                R.string.work_status_risk_plain),
+        WORK_WARNING_SAFE(R.string.work_warning_safe_hype,
+                R.string.work_warning_safe_chill,
+                R.string.work_warning_safe_plain),
+        WORK_WARNING_CAUTION(R.string.work_warning_caution_hype,
+                R.string.work_warning_caution_chill,
+                R.string.work_warning_caution_plain),
+        WORK_WARNING_RISK(R.string.work_warning_risk_hype,
+                R.string.work_warning_risk_chill,
+                R.string.work_warning_risk_plain),
+        ZONE_SAFE(R.string.zone_safe_hype,
+                R.string.zone_safe_chill,
+                R.string.zone_safe_plain),
+        ZONE_ELEVATED(R.string.zone_elevated_hype,
+                R.string.zone_elevated_chill,
+                R.string.zone_elevated_plain),
+        ZONE_OVERLOAD(R.string.zone_overload_hype,
+                R.string.zone_overload_chill,
+                R.string.zone_overload_plain),
+
+        // ==================== SCREEN 3 - DASHBOARD ====================
+
+        DASH_STATE_OPTIMAL(R.string.dash_state_optimal_hype,
+                R.string.dash_state_optimal_chill,
+                R.string.dash_state_optimal_plain),
+        DASH_STATE_ELEVATED(R.string.dash_state_elevated_hype,
+                R.string.dash_state_elevated_chill,
+                R.string.dash_state_elevated_plain),
+        DASH_STATE_OVERLOAD(R.string.dash_state_overload_hype,
+                R.string.dash_state_overload_chill,
+                R.string.dash_state_overload_plain),
+        DASH_HEADLINE_BALANCED(R.string.dash_headline_balanced_hype,
+                R.string.dash_headline_balanced_chill,
+                R.string.dash_headline_balanced_plain),
+        DASH_HEADLINE_ELEVATED(R.string.dash_headline_elevated_hype,
+                R.string.dash_headline_elevated_chill,
+                R.string.dash_headline_elevated_plain),
+        DASH_HEADLINE_OVERLOAD(R.string.dash_headline_overload_hype,
+                R.string.dash_headline_overload_chill,
+                R.string.dash_headline_overload_plain),
+        DASH_NO_TASKS(R.string.dash_no_tasks_hype,
+                R.string.dash_no_tasks_chill,
+                R.string.dash_no_tasks_plain),
+        DASH_SAVED_OTHER_WEEK(R.string.dash_saved_other_week_hype,
+                R.string.dash_saved_other_week_chill,
+                R.string.dash_saved_other_week_plain),
+        TRIAGE_TITLE(R.string.triage_title_hype,
+                R.string.triage_title_chill,
+                R.string.triage_title_plain),
+        TRIAGE_LOAD_SUB(R.string.triage_load_sub_hype,
+                R.string.triage_load_sub_chill,
+                R.string.triage_load_sub_plain),
+        TRIAGE_SLEEP_SUB(R.string.triage_sleep_sub_hype,
+                R.string.triage_sleep_sub_chill,
+                R.string.triage_sleep_sub_plain),
+        TRIAGE_KEPT_SUB(R.string.triage_kept_sub_hype,
+                R.string.triage_kept_sub_chill,
+                R.string.triage_kept_sub_plain),
+        TRIAGE_POSTPONED_SUB(R.string.triage_postponed_sub_hype,
+                R.string.triage_postponed_sub_chill,
+                R.string.triage_postponed_sub_plain),
+        TRIAGE_DEFERRED_SUB(R.string.triage_deferred_sub_hype,
+                R.string.triage_deferred_sub_chill,
+                R.string.triage_deferred_sub_plain),
+        TRIAGE_ACCEPT(R.string.triage_accept_hype,
+                R.string.triage_accept_chill,
+                R.string.triage_accept_plain),
+        TRIAGE_DISMISS(R.string.triage_dismiss_hype,
+                R.string.triage_dismiss_chill,
+                R.string.triage_dismiss_plain),
+        TOAST_REBALANCED_TITLE(R.string.toast_rebalanced_title_hype,
+                R.string.toast_rebalanced_title_chill,
+                R.string.toast_rebalanced_title_plain),
+        TOAST_REBALANCED_SUB(R.string.toast_rebalanced_sub_hype,
+                R.string.toast_rebalanced_sub_chill,
+                R.string.toast_rebalanced_sub_plain),
+        DASH_SYNC_STARTING(R.string.dash_sync_starting_hype,
+                R.string.dash_sync_starting_chill,
+                R.string.dash_sync_starting_plain),
+        DASH_SYNC_NONE(R.string.dash_sync_none_hype,
+                R.string.dash_sync_none_chill,
+                R.string.dash_sync_none_plain),
+        DASH_SYNC_DONE(R.string.dash_sync_done_hype,
+                R.string.dash_sync_done_chill,
+                R.string.dash_sync_done_plain),
+
+        // ==================== SCREEN 4 - ADD ACTIVITY ====================
+
+        ADDTASK_SUBTITLE_WORK(R.string.addtask_subtitle_work_hype,
+                R.string.addtask_subtitle_work_chill,
+                R.string.addtask_subtitle_work_plain),
+        ADDTASK_SUBTITLE_FLEXIBLE_CATEGORY(R.string.addtask_subtitle_flexible_category_hype,
+                R.string.addtask_subtitle_flexible_category_chill,
+                R.string.addtask_subtitle_flexible_category_plain),
+        ADDTASK_MODE_WORK_DESC(R.string.addtask_mode_work_desc_hype,
+                R.string.addtask_mode_work_desc_chill,
+                R.string.addtask_mode_work_desc_plain),
+        ADDTASK_MODE_WORK_BADGE(R.string.addtask_mode_work_badge_hype,
+                R.string.addtask_mode_work_badge_chill,
+                R.string.addtask_mode_work_badge_plain),
+        ADDTASK_MODE_ACADEMIC_DESC(R.string.addtask_mode_academic_desc_hype,
+                R.string.addtask_mode_academic_desc_chill,
+                R.string.addtask_mode_academic_desc_plain),
+        ADDTASK_MODE_ACADEMIC_BADGE(R.string.addtask_mode_academic_badge_hype,
+                R.string.addtask_mode_academic_badge_chill,
+                R.string.addtask_mode_academic_badge_plain),
+        ADDTASK_HINT_SHEDDABLE(R.string.addtask_hint_sheddable_hype,
+                R.string.addtask_hint_sheddable_chill,
+                R.string.addtask_hint_sheddable_plain),
+        ADDTASK_HINT_LOCKED(R.string.addtask_hint_locked_hype,
+                R.string.addtask_hint_locked_chill,
+                R.string.addtask_hint_locked_plain),
+        ADDTASK_CAP_FOOTNOTE(R.string.addtask_cap_footnote_hype,
+                R.string.addtask_cap_footnote_chill,
+                R.string.addtask_cap_footnote_plain),
+        ADDTASK_BUFFER_ELIGIBLE(R.string.addtask_buffer_eligible_hype,
+                R.string.addtask_buffer_eligible_chill,
+                R.string.addtask_buffer_eligible_plain),
+        ADDTASK_PRIORITY_HINT(R.string.addtask_priority_hint_hype,
+                R.string.addtask_priority_hint_chill,
+                R.string.addtask_priority_hint_plain),
+        ADDTASK_DEFERRAL_HINT(R.string.addtask_deferral_hint_hype,
+                R.string.addtask_deferral_hint_chill,
+                R.string.addtask_deferral_hint_plain),
+        ADDTASK_SAVED_WORK(R.string.addtask_saved_work_hype,
+                R.string.addtask_saved_work_chill,
+                R.string.addtask_saved_work_plain),
+        ADDTASK_SAVED_ACADEMIC(R.string.addtask_saved_academic_hype,
+                R.string.addtask_saved_academic_chill,
+                R.string.addtask_saved_academic_plain),
+        ADDTASK_SAVED_CATEGORY(R.string.addtask_saved_category_hype,
+                R.string.addtask_saved_category_chill,
+                R.string.addtask_saved_category_plain),
+        ADDTASK_SAVE_FAILED(R.string.addtask_save_failed_hype,
+                R.string.addtask_save_failed_chill,
+                R.string.addtask_save_failed_plain),
+        ADDTASK_NAME_REQUIRED(R.string.addtask_name_required_hype,
+                R.string.addtask_name_required_chill,
+                R.string.addtask_name_required_plain),
+
+        // ==================== SCREEN 5 - BIOMETRICS ====================
+
+        BIO_EVENT_PILL(R.string.bio_event_pill_hype,
+                R.string.bio_event_pill_chill,
+                R.string.bio_event_pill_plain),
+        BIO_ANOMALY_TITLE(R.string.bio_anomaly_title_hype,
+                R.string.bio_anomaly_title_chill,
+                R.string.bio_anomaly_title_plain),
+        BIO_ANOMALY_BODY(R.string.bio_anomaly_body_hype,
+                R.string.bio_anomaly_body_chill,
+                R.string.bio_anomaly_body_plain),
+        BIO_HRV_STATE(R.string.bio_hrv_state_hype,
+                R.string.bio_hrv_state_chill,
+                R.string.bio_hrv_state_plain),
+        BIO_HRV_STATE_SUB(R.string.bio_hrv_state_sub_hype,
+                R.string.bio_hrv_state_sub_chill,
+                R.string.bio_hrv_state_sub_plain),
+        BIO_TREND_STATE(R.string.bio_trend_state_hype,
+                R.string.bio_trend_state_chill,
+                R.string.bio_trend_state_plain),
+        BIO_PENALTY_SUB(R.string.bio_penalty_sub_hype,
+                R.string.bio_penalty_sub_chill,
+                R.string.bio_penalty_sub_plain),
+        BIO_PENALTY_FOOTNOTE(R.string.bio_penalty_footnote_hype,
+                R.string.bio_penalty_footnote_chill,
+                R.string.bio_penalty_footnote_plain),
+
+        // ==================== SCREEN 6 - DAILY HARVEST ====================
+
+        HARVEST_GREETING(R.string.harvest_greeting_hype,
+                R.string.harvest_greeting_chill,
+                R.string.harvest_greeting_plain),
+        HARVEST_SUBTITLE(R.string.harvest_subtitle_hype,
+                R.string.harvest_subtitle_chill,
+                R.string.harvest_subtitle_plain),
+        HARVEST_TOOLTIP(R.string.harvest_tooltip_hype,
+                R.string.harvest_tooltip_chill,
+                R.string.harvest_tooltip_plain),
+        HARVEST_STASH_LABEL(R.string.harvest_stash_label_hype,
+                R.string.harvest_stash_label_chill,
+                R.string.harvest_stash_label_plain),
+        HARVEST_SKIP_CONFIRM(R.string.harvest_skip_confirm_hype,
+                R.string.harvest_skip_confirm_chill,
+                R.string.harvest_skip_confirm_plain),
+        HARVEST_TOAST_TITLE(R.string.harvest_toast_title_hype,
+                R.string.harvest_toast_title_chill,
+                R.string.harvest_toast_title_plain),
+        HARVEST_TOAST_SUB(R.string.harvest_toast_sub_hype,
+                R.string.harvest_toast_sub_chill,
+                R.string.harvest_toast_sub_plain),
+
+        // ==================== SCREEN 7 - WEEKLY FEAST ====================
+
+        FEAST_TITLE(R.string.feast_title_hype,
+                R.string.feast_title_chill,
+                R.string.feast_title_plain),
+        FEAST_SUBTITLE(R.string.feast_subtitle_hype,
+                R.string.feast_subtitle_chill,
+                R.string.feast_subtitle_plain),
+        FEAST_TRAY_TITLE(R.string.feast_tray_title_hype,
+                R.string.feast_tray_title_chill,
+                R.string.feast_tray_title_plain),
+        FEAST_FULL_TOAST(R.string.feast_full_toast_hype,
+                R.string.feast_full_toast_chill,
+                R.string.feast_full_toast_plain),
+        FEAST_COMPLETE_TOAST(R.string.feast_complete_toast_hype,
+                R.string.feast_complete_toast_chill,
+                R.string.feast_complete_toast_plain),
+        FEAST_COMPLETE(R.string.feast_complete_hype,
+                R.string.feast_complete_chill,
+                R.string.feast_complete_plain),
+
+        // ==================== SCREEN 8 - SETTINGS ====================
+
+        SETTINGS_THEME_SUB(R.string.settings_theme_sub_hype,
+                R.string.settings_theme_sub_chill,
+                R.string.settings_theme_sub_plain),
+        SETTINGS_SHARE_TITLE(R.string.settings_share_title_hype,
+                R.string.settings_share_title_chill,
+                R.string.settings_share_title_plain),
+        SETTINGS_LINK_DISCONNECTED(R.string.settings_link_disconnected_hype,
+                R.string.settings_link_disconnected_chill,
+                R.string.settings_link_disconnected_plain),
+        SETTINGS_LINK_ACTIVE(R.string.settings_link_active_hype,
+                R.string.settings_link_active_chill,
+                R.string.settings_link_active_plain),
+        SETTINGS_LINK_INFO(R.string.settings_link_info_hype,
+                R.string.settings_link_info_chill,
+                R.string.settings_link_info_plain),
+
+        // ==================== SCREEN 9 - COMPANION / VOICE ====================
+
+        VOICE_INSTRUCTION(R.string.voice_instruction_hype,
+                R.string.voice_instruction_chill,
+                R.string.voice_instruction_plain),
+        VOICE_CTA(R.string.voice_cta_hype,
+                R.string.voice_cta_chill,
+                R.string.voice_cta_plain),
+        VOICE_UNAVAILABLE(R.string.voice_unavailable_hype,
+                R.string.voice_unavailable_chill,
+                R.string.voice_unavailable_plain),
+        VOICE_RETRY(R.string.voice_retry_hype,
+                R.string.voice_retry_chill,
+                R.string.voice_retry_plain);
+
+
+        @StringRes
+        private final int hype;
+        @StringRes
+        private final int chill;
+        @StringRes
+        private final int plain;
+
+        Line(@StringRes int hype, @StringRes int chill, @StringRes int plain) {
+            this.hype = hype;
+            this.chill = chill;
+            this.plain = plain;
+        }
+
+        /** The wording for {@code tone}; Hype for a null or unknown tone. */
+        @StringRes
+        public int pick(@Nullable ToneType tone) {
+            if (tone == null) {
+                return hype;
+            }
+            switch (tone) {
+                case CHILL:
+                    return chill;
+                case PLAIN:
+                    return plain;
+                case HYPE:
+                default:
+                    return hype;
+            }
+        }
+    }
+
+    private static final int[] FEAST_QUOTES_HYPE = {
+            R.string.dino_feast_quote_1_hype,
+            R.string.dino_feast_quote_2_hype,
+            R.string.dino_feast_quote_3_hype,
+            R.string.dino_feast_quote_4_hype,
+            R.string.dino_feast_quote_5_hype
+    };
+
+    private static final int[] FEAST_QUOTES_CHILL = {
+            R.string.dino_feast_quote_1_chill,
+            R.string.dino_feast_quote_2_chill,
+            R.string.dino_feast_quote_3_chill,
+            R.string.dino_feast_quote_4_chill,
+            R.string.dino_feast_quote_5_chill
+    };
+
+    private static final int[] FEAST_QUOTES_PLAIN = {
+            R.string.dino_feast_quote_1_plain,
+            R.string.dino_feast_quote_2_plain,
+            R.string.dino_feast_quote_3_plain,
+            R.string.dino_feast_quote_4_plain,
+            R.string.dino_feast_quote_5_plain
+    };
+
+    private CoachVoice() {
+    }
+
+    /**
+     * The Daily Harvest bubble, which is a plural because a one-apple day must not read
+     * "1 apples". Resolved separately from {@link Line} because a plurals resource is a
+     * different type from a string resource and cannot share the same constant.
+     */
+    @PluralsRes
+    public static int harvestApples(@Nullable ToneType tone) {
+        if (tone == null) {
+            return R.plurals.dino_harvest_apples_hype;
+        }
+        switch (tone) {
+            case CHILL:
+                return R.plurals.dino_harvest_apples_chill;
+            case PLAIN:
+                return R.plurals.dino_harvest_apples_plain;
+            case HYPE:
+            default:
+                return R.plurals.dino_harvest_apples_hype;
+        }
+    }
+
+    /**
+     * The five idle Feast lines for {@code tone}, for the caller to pick from at random.
+     *
+     * <p>Returns the shared array rather than a copy: callers only read it.
+     */
+    @NonNull
+    public static int[] feastQuotes(@Nullable ToneType tone) {
+        if (tone == null) {
+            return FEAST_QUOTES_HYPE;
+        }
+        switch (tone) {
+            case CHILL:
+                return FEAST_QUOTES_CHILL;
+            case PLAIN:
+                return FEAST_QUOTES_PLAIN;
+            case HYPE:
+            default:
+                return FEAST_QUOTES_HYPE;
+        }
+    }
+}

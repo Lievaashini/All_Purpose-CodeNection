@@ -5,29 +5,29 @@
     <!-- ==================== Onboarding (Screen 1) ==================== -->
     <string name="onboarding_phase_badge">PHASE 01 / SETUP</string>
     <string name="onboarding_title">Meet CapCoach</string>
-    <string name="onboarding_subtitle">Choose your companion tone.</string>
-    <string name="onboarding_talk_to_me">TALK TO ME</string>
+        <string name="onboarding_talk_to_me">TALK TO ME</string>
     <string name="onboarding_synced">SYNCED</string>
     <string name="dino_description">CapCoach pixel dinosaur mascot</string>
     <string name="dino_dialogue_default">"Ready to protect your schedule!"</string>
+    <!-- What the Dino says when the voice button echoes the user's own words back. Tone
+         neutral on purpose: this is the app repeating input, not the Dino coaching. -->
+    <string name="dino_you_said">You said: %1$s</string>
 
-    <string name="tone_section_label">Choose Dino Coaching Tone</string>
-    <string name="tone_section_hint">SELECT 1</string>
+    <!-- The tone cards. Their copy names the tone, so it does not change with it; the Dino's
+         actual dialogue lives in dino_hype.xml / dino_chill.xml / dino_plain.xml. -->
+        <string name="tone_section_hint">SELECT 1</string>
 
     <string name="tone_hype_title">Hype</string>
     <string name="tone_hype_tag">Energetic</string>
     <string name="tone_hype_desc">Energetic sleep protector</string>
-    <string name="tone_hype_speech">"Energetic sleep protector ready!"</string>
 
     <string name="tone_chill_title">Chill</string>
     <string name="tone_chill_tag">Gentle</string>
     <string name="tone_chill_desc">Gentle mindful pacing</string>
-    <string name="tone_chill_speech">"Smooth pacing, calm focus."</string>
 
     <string name="tone_plain_title">Plain</string>
     <string name="tone_plain_tag">Facts Only</string>
     <string name="tone_plain_desc">Direct data analytics</string>
-    <string name="tone_plain_speech">"Telemetry active. Zero fluff."</string>
 
     <string name="health_connect_title">Connect Android Health</string>
     <string name="health_connect_subtitle">Sync Sleep &amp; HRV</string>
@@ -35,31 +35,21 @@
     <string name="health_connect_status_ready">READY</string>
 
     <string name="onboarding_cta">Continue to Hard Limits</string>
-    <string name="onboarding_footnote">Offline &amp; encrypted</string>
-
-    <!-- ==================== Hard limits (Screen 2) ==================== -->
+        <!-- ==================== Hard limits (Screen 2) ==================== -->
     <string name="limits_phase_badge">PHASE 02: BOUNDARIES</string>
     <string name="limits_title">Set Limits</string>
-    <string name="limits_subtitle">Protect your non-negotiable time.</string>
-    <string name="dino_guard_label">DEMCHING DINO</string>
+        <string name="dino_guard_label">DEMCHING DINO</string>
     <string name="dino_guard_suffix">- GUARDIAN AI</string>
     <string name="dino_guard_speech_default">"20h cap locked."</string>
-    <!-- Dino dialogue on the limits screen, by work-hour band.
-         The "safe" variant is formatted with the slider value. -->
-    <string name="dino_work_safe_speech">"%1$dh cap locked. I\'ll auto-deflect exam week overruns!"</string>
-    <string name="dino_work_caution_speech">"Careful! We are eating into deep recovery windows."</string>
-    <string name="dino_work_risk_speech">"Red Alert! Demching Dino initiating emergency offloading!"</string>
+    <!-- The limits-screen guard dialogue is per coaching tone, in the dino_*.xml files.
+         LoadZones.WorkBand carries the slot and HardLimitsFragment resolves it. -->
 
     <string name="profile_label">STUDENT PROFILE</string>
     <string name="profile_value">Full-Time Undergrad</string>
 
     <string name="total_load_label">Total Committed Load</string>
     <string name="total_load_unit">HRS / WEEK</string>
-    <string name="zone_safe">SAFE ZONE / BALANCED</string>
-    <string name="zone_elevated">ELEVATED CAPACITY</string>
-    <string name="zone_overload">OVERLOAD WARNING</string>
-
-    <!-- Study slider -->
+                <!-- Study slider -->
     <string name="study_title">Study &amp; Classes</string>
     <string name="study_subtitle">Academics</string>
     <string name="study_min_label">10 hrs</string>
@@ -71,7 +61,12 @@
     <string name="work_title">Weekly Shift Ceiling</string>
     <string name="work_subtitle">Work &amp; gigs</string>
     <string name="work_locked_cap">LOCKED CAP</string>
-    <string name="work_badge_prefix">Protected:\n</string>
+    <!-- The work-hours badge, one whole string per band. It used to be a
+         "Protected:\n" prefix with the hours and the "h" unit glued on in Java,
+         which left the hours' position untranslatable. -->
+    <string name="work_badge_protected">Protected:\n%1$dh</string>
+    <string name="work_badge_caution">Caution: %1$dh</string>
+    <string name="work_badge_risk">High Risk: %1$dh</string>
     <string name="work_min_label">0 hrs</string>
     <string name="work_limit_label">20h Limit</string>
     <string name="work_max_label">40 hrs</string>
@@ -85,20 +80,15 @@
     <string name="cocurricular_max_label">20 hrs</string>
 
     <!-- Work status messages -->
-    <string name="work_status_safe">Safe Labor Cap</string>
-    <string name="work_status_caution">Fatigue Warning</string>
-    <string name="work_status_risk">Burnout Risk &gt; 20h</string>
-    <string name="work_warning_safe">Shielded up to 20h. Overages trigger alert.</string>
-    <string name="work_warning_caution">Caution: Beyond 20 weekly hours, sleep buffers and academic grades face risk.</string>
-    <string name="work_warning_risk">Severe risk of academic collision. Shift shedding will trigger on deadlines.</string>
-
-    <!-- Integration toggles -->
+                            <!-- Integration toggles -->
     <string name="calendar_section_label">CALENDAR INTEGRATION</string>
     <string name="sync_calendar_title">Sync Calendar</string>
     <string name="sync_calendar_badge">ACTIVE</string>
 
     <string name="limits_cta">Save &amp; Launch</string>
-    <string name="limits_footnote">Editable anytime from triage.</string>
+        <!-- Display name. Screen 2 pre-fills the field with "Maya" so this question can be
+         answered by simply not answering it. -->
+        <string name="limits_name_default">Maya</string>
 
     <!-- Accessibility -->
     <string name="cd_theme_toggle">Toggle night and bright theme</string>
@@ -109,6 +99,9 @@
     <string name="cd_study_slider">Study and classes hours per week</string>
     <string name="cd_cocurricular_slider">Co-curricular hours per week</string>
     <string name="cd_sync_calendar_switch">Enable calendar sync</string>
+    <string name="cd_display_name_input">Your name, used in your morning greeting</string>
+    <string name="cd_profile_photo">Your profile picture</string>
+    <string name="cd_avatar_preview">Profile picture preview</string>
 
     <!-- ==================================================================
          SHARED SHELL - added with Screens 3-9. Nothing above changed.
@@ -130,14 +123,14 @@
 
     <!-- ==================================================================
          SCREEN 3 - DASHBOARD  (port of Prototype/dashboard.html)
+
+         Anything here that reads as the app TALKING (state pills, headlines,
+         empty state, triage prose, toasts) lives in the tone files instead:
+         tone_hype.xml / tone_chill.xml / tone_plain.xml, resolved through
+         model/CoachVoice. What stays below is chrome and data - labels, units,
+         format strings, sample task names and content descriptions.
          ================================================================== -->
-    <string name="dash_state_optimal">OPTIMAL</string>
-    <string name="dash_state_elevated">ELEVATED</string>
-    <string name="dash_state_overload">OVERLOAD</string>
     <string name="dash_load_percent">%1$d%% LOAD</string>
-    <string name="dash_headline_balanced">"All balanced today."</string>
-    <string name="dash_headline_elevated">"Running warm - watch tonight."</string>
-    <string name="dash_headline_overload">"Overload risk. Let me shed something."</string>
     <string name="dash_telemetry">Sleep %1$s | Work %2$s</string>
     <string name="dash_month">October 2025</string>
     <string name="dash_week_number">Week %1$d</string>
@@ -160,57 +153,39 @@
     <string name="dash_add_task">Add Task</string>
     <string name="cd_add_task">Add a new task or shift</string>
     <string name="cd_mark_task_done">Mark task done</string>
-    <string name="dash_no_tasks">No tasks yet. Tap Add Task to create one.</string>
-    <string name="dash_saved_other_week">Saved for %1$s, which is outside this week.</string>
 
-    <!-- Triage sheet (opened by the dashboard's Rebalance button) -->
+    <!-- Triage sheet (opened by the dashboard's Rebalance button).
+         Its prose is tone-dependent; what remains here is the eyebrow, the metric
+         names and figures, the sample task names and the machine tags. -->
     <string name="triage_eyebrow">AUTONOMOUS ML TRIAGE</string>
-    <string name="triage_title">Overload Prevention Action</string>
     <string name="triage_metric_load">Cognitive Load</string>
     <string name="triage_metric_load_value">-55%</string>
-    <string name="triage_metric_load_sub">Crash risk drops to 0%</string>
     <string name="triage_metric_sleep">Sleep Secured</string>
     <string name="triage_metric_sleep_value">+3.5h</string>
-    <string name="triage_metric_sleep_sub">Recovery window locked</string>
     <string name="triage_plan_label">PROPOSED SCHEDULE MODIFICATIONS</string>
     <string name="triage_item_protected_title">Cafe Shift (Barista Lead)</string>
     <string name="triage_item_protected_sub">6:00 PM - 10:00 PM | Unchanged</string>
     <string name="triage_tag_protected">PROTECTED</string>
     <string name="triage_item_kept_title">Math Quiz Prep (Sets 1-4)</string>
-    <string name="triage_item_kept_sub">Condensed to 45m focused sprint</string>
     <string name="triage_tag_kept">KEPT</string>
     <string name="triage_item_postponed_title">Read Chapter 4 (Graphs)</string>
-    <string name="triage_item_postponed_sub">Moved to Thu 10:00 AM low-fatigue block</string>
     <string name="triage_tag_postponed">POSTPONED</string>
     <string name="triage_item_deferred_title">Dorm Laundry &amp; Ironing</string>
-    <string name="triage_item_deferred_sub">Auto-deferred to Saturday afternoon</string>
     <string name="triage_tag_deferred">DEFERRED</string>
-    <string name="triage_accept">Accept Rebalance &amp; Rest</string>
-    <string name="triage_dismiss">Dismiss for Now</string>
-    <string name="toast_rebalanced_title">Schedule Rebalanced &amp; Rest Protected</string>
-    <string name="toast_rebalanced_sub">-55% cognitive load | +3.5h rest locked</string>
 
     <!-- ==================================================================
          SCREEN 4 - ADD TASK  (port of Prototype/add-task.html)
          The two mode names map onto Task.classification FLEXIBLE / INFLEXIBLE.
          ================================================================== -->
     <string name="addtask_title">Add Activity</string>
-    <string name="addtask_subtitle_work">Inflexible Work Mode Active</string>
-    <string name="addtask_subtitle_academic">Flexible Academic Mode Active</string>
-    <string name="addtask_classification_label">CLASSIFICATION ARCHITECTURE</string>
+            <string name="addtask_classification_label">CLASSIFICATION ARCHITECTURE</string>
     <string name="addtask_mode_hint">Selectable Mode</string>
     <string name="addtask_mode_work_title">Inflexible Shift</string>
     <string name="addtask_mode_work_tag">Work</string>
-    <string name="addtask_mode_work_desc">Fixed work hours. Never deferred.</string>
-    <string name="addtask_mode_work_badge">Protected under 20h cap</string>
-    <string name="addtask_mode_academic_title">Flexible Deadline</string>
+            <string name="addtask_mode_academic_title">Flexible Deadline</string>
     <string name="addtask_mode_academic_tag">Academic</string>
-    <string name="addtask_mode_academic_desc">Eligible for auto-deferral during crunch.</string>
-    <string name="addtask_mode_academic_badge">Auto-deferral active</string>
-    <string name="addtask_name_label">TASK NAME</string>
-    <string name="addtask_hint_sheddable">Auto-Sheddable</string>
-    <string name="addtask_hint_locked">Work Shift Auto-Locked</string>
-    <string name="addtask_name_hint_work">e.g., Read Chapter 4 or Cafe Barista Shift</string>
+            <string name="addtask_name_label">TASK NAME</string>
+            <string name="addtask_name_hint_work">e.g., Read Chapter 4 or Cafe Barista Shift</string>
     <string name="addtask_name_hint_academic">e.g. Read Ch. 4 Neurobiology or ECON 102 Problem Set</string>
     <string name="addtask_work_default">Warehouse Evening Shift</string>
     <string name="addtask_academic_default">Read Ch. 4 Neurobiology</string>
@@ -228,8 +203,7 @@
     <string name="cat_cocurricular">Co-curricular</string>
     <!-- Priority is chosen by the user, not inferred: the scheduler protects a HIGH task. -->
     <string name="addtask_priority_label">PRIORITY</string>
-    <string name="addtask_priority_hint">Protects urgent work</string>
-    <string name="addtask_priority_high">High</string>
+        <string name="addtask_priority_high">High</string>
     <string name="addtask_priority_med">Med</string>
     <string name="addtask_priority_low">Low</string>
     <string name="cd_priority_group">Task priority</string>
@@ -239,13 +213,10 @@
     <string name="addtask_duration_hours">%1$s hrs</string>
     <string name="addtask_cap_label">Weekly Cap:</string>
     <string name="addtask_cap_value">16h / 20h</string>
-    <string name="addtask_cap_footnote">Protected Shift - Never deferred by algorithm.</string>
-    <string name="addtask_buffer_label">COGNITIVE LOAD &amp; BUFFER</string>
-    <string name="addtask_buffer_eligible">Eligible for Auto-Shed</string>
-    <!-- Deferral is a choice, not a constant: the user decides how late it may slip. -->
+        <string name="addtask_buffer_label">COGNITIVE LOAD &amp; BUFFER</string>
+        <!-- Deferral is a choice, not a constant: the user decides how late it may slip. -->
     <string name="addtask_buffer_deferral">DEFERRAL WINDOW</string>
-    <string name="addtask_deferral_hint">How late the scheduler may push this activity.</string>
-    <string name="addtask_deferral_none">Locked - never deferred</string>
+        <string name="addtask_deferral_none">Locked - never deferred</string>
     <string name="addtask_deferral_12">Up to 12h late</string>
     <string name="addtask_deferral_24">Up to 24h late</string>
     <string name="addtask_deferral_48">Up to 48h late</string>
@@ -256,70 +227,46 @@
     <string name="addtask_buffer_effort">Effort</string>
     <string name="addtask_buffer_effort_value">45m</string>
     <string name="addtask_dino_guard_label">CapCoach Dino Guard</string>
-    <string name="addtask_dino_guard_speech">"Locking shift. 0% chance of study-hall collisions."</string>
     <string name="addtask_dino_scheduler_label">CapCoach ML Scheduler</string>
-    <string name="addtask_dino_scheduler_speech">"Shedding buffer allocated: 48h elasticity active for neuro exam prep."</string>
-    <!-- Echoes the two values the user just picked, so the sheet proves it read them. -->
-    <string name="addtask_dino_scheduler_speech_fmt">Shedding buffer: %1$s. Priority %2$s is held back from the shed list.</string>
+    <!-- The two Dino lines under the sheet are per coaching tone, in the dino_*.xml files.
+         The scheduler variant echoes the deferral window and priority, so it stays a
+         format string: %1$s window, %2$s priority label. -->
     <string name="addtask_save_work">Save &amp; Shield Shift</string>
     <string name="addtask_save_academic">Save Academic Task</string>
     <string name="addtask_save_category">Save %1$s Task</string>
     <string name="addtask_cancel">Cancel</string>
-    <string name="addtask_saved_work">Work shift saved and locked against auto-cancellation!</string>
-    <string name="addtask_saved_academic">Flexible academic task saved and queued for triage!</string>
-    <string name="addtask_saved_category">%1$s task saved and queued for triage!</string>
-    <string name="addtask_save_failed">Could not save the task. Please try again.</string>
-    <string name="addtask_subtitle_flexible_category">Flexible %1$s Mode Active</string>
-    <string name="addtask_name_hint_generic">e.g., Grocery run or Society meeting</string>
-    <string name="addtask_name_required">Give the activity a name before saving.</string>
-
-    <!-- ==================================================================
+                        <string name="addtask_name_hint_generic">e.g., Grocery run or Society meeting</string>
+        <!-- ==================================================================
          SCREEN 5 - BIOMETRICS  (port of Prototype/biometrics.html)
          ================================================================== -->
-    <string name="bio_event_pill">Biometric Event Detected</string>
-    <string name="bio_health_connect">Health Connect</string>
+        <string name="bio_health_connect">Health Connect</string>
     <string name="bio_anomaly_tag">SYNC ANOMALY</string>
     <string name="bio_anomaly_time">- 07:12 AM</string>
-    <string name="bio_anomaly_title">Health Connect Alert: &lt; 5 Hours Sleep Detected</string>
-    <string name="bio_anomaly_body">Last night\'s recorded sleep: 4h 18m (Target: 8h 00m). Severe restorative deficit.</string>
-    <string name="bio_metrics_title">SLEEP DEBT &amp; STRESS METRICS</string>
+            <string name="bio_metrics_title">SLEEP DEBT &amp; STRESS METRICS</string>
     <string name="bio_deficit_badge">-40% Deficit</string>
     <string name="bio_baseline_label">Baseline Average</string>
     <string name="bio_lastnight_label">Last Night (Recorded)</string>
     <string name="bio_hrv_label">HRV SCORE</string>
-    <string name="bio_hrv_state">Sympathetic Stress</string>
-    <string name="bio_hrv_state_sub">Elevated nervous load</string>
-    <string name="bio_trend_label">7-Day Sleep Trend</string>
-    <string name="bio_trend_state">Critical Dip</string>
-    <string name="bio_penalty_title">Cognitive Penalty Processing</string>
-    <string name="bio_penalty_sub">Applying Biometric Penalty to Today\'s Cognitive Capacity...</string>
-    <string name="bio_penalty_rate">WORKLOAD DEPLETION RATE</string>
-    <string name="bio_penalty_footnote">Calculating Cognitive Load Shedding recommendations via on-device TFLite...</string>
-    <string name="bio_override">Override Sensor Metric</string>
-    <string name="bio_no_data">No biometric records stored yet.</string>
-    <string name="bio_hrv_unavailable">Not recorded</string>
+            <string name="bio_trend_label">7-Day Sleep Trend</string>
+        <string name="bio_penalty_title">Cognitive Penalty Processing</string>
+        <string name="bio_penalty_rate">WORKLOAD DEPLETION RATE</string>
+        <string name="bio_override">Override Sensor Metric</string>
+        <string name="bio_hrv_unavailable">Not recorded</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST  (port of Prototype/daily-harvest.html)
          ================================================================== -->
     <string name="harvest_streak_badge">MORNING HARVEST - DAY %1$d</string>
-    <string name="harvest_greeting">Good Morning, Maya!</string>
-    <string name="harvest_subtitle">Look what grew overnight on your tree.</string>
-    <string name="harvest_tooltip">1 Apple = 1 Task completed yesterday</string>
-    <string name="harvest_tooltip_badge">+%1$d</string>
-    <!-- Both of these name the size of the crop, so both follow APPLES_GROWN. The
-         singular matters: a one-task day must not read "Collect 1 Apples". -->
-    <plurals name="harvest_dino_bubble_apples">
-        <item quantity="one">"1 ripe apple! Yum!"</item>
-        <item quantity="other">"%1$d ripe apples! Yum!"</item>
-    </plurals>
+                <string name="harvest_tooltip_badge">+%1$d</string>
+    <!-- The Dino's bubble here is per coaching tone, in the dino_*.xml files as
+         dino_harvest_apples_*. It is a plural in every tone, because the singular
+         matters: a one-task day must not read "1 apples". -->
     <string name="harvest_yesterday">Yesterday</string>
     <string name="harvest_yesterday_pct">100%</string>
     <string name="harvest_yesterday_more">+2 more logged</string>
     <string name="harvest_feast_title">Weekly Feast Tracker</string>
     <string name="harvest_feast_day">SUNDAY</string>
-    <string name="harvest_stash_label">Current Stash: %1$s. Feast day is Sunday!</string>
-    <string name="harvest_stash_apples">%1$d Apples</string>
+        <string name="harvest_stash_apples">%1$d Apples</string>
     <string name="harvest_progress_ratio">%1$d / %2$d</string>
     <string name="harvest_milestone_start">0 Mon</string>
     <string name="harvest_milestone_mid">Midweek %1$d</string>
@@ -328,13 +275,10 @@
         <item quantity="one">Collect %1$d Apple</item>
         <item quantity="other">Collect %1$d Apples</item>
     </plurals>
-    <string name="harvest_start_day">Start Maya\'s Day</string>
+    <string name="harvest_start_day">Start %1$s\'s Day</string>
     <string name="harvest_launch">Launch Dashboard</string>
     <string name="harvest_skip">Skip for now</string>
-    <string name="harvest_skip_confirm">Skip collecting your overnight harvest for now?</string>
-    <string name="harvest_toast_title">%1$d Apples Stashed in Basket!</string>
-    <string name="harvest_toast_sub">Dino excitement +100%% | %1$d total</string>
-    <string name="cd_harvest_dino">CapCoach Dino looking up excitedly</string>
+                <string name="cd_harvest_dino">CapCoach Dino looking up excitedly</string>
     <string name="cd_apple_tree">Your weekly apple tree harvest</string>
     <string name="cd_harvest_basket">Basket holding this week\'s collected apples</string>
 
@@ -342,19 +286,15 @@
          SCREEN 7 - WEEKLY FEAST  (port of Prototype/feast.html)
          ================================================================== -->
     <string name="feast_pill">SUNDAY FEAST - DAY %1$d</string>
-    <string name="feast_title">Feed Coach Dino!</string>
-    <string name="feast_subtitle">You harvested %1$d apples from completing %1$d study &amp; shift blocks this week!</string>
-    <string name="feast_bubble_hungry">"Om nom! I\'m starving! Feed me!"</string>
-    <string name="feast_bubble_all">"WHOAAAA! ALL OF THEM AT ONCE?! YES!"</string>
-    <string name="feast_bubble_done">"100% Satiated! Ready to crush Midterms!"</string>
-    <string name="feast_bubble_hug">"I love you! You preserved my rest this week!"</string>
+            <!-- Every Dino bubble on this screen is per coaching tone, in the dino_*.xml files:
+         dino_feast_hungry_*, dino_feast_all_*, dino_feast_done_*, dino_feast_hug_* and the
+         five idle lines dino_feast_quote_1..5_*. -->
     <string name="feast_stash_label">BASKET STASH</string>
     <string name="feast_stash_total">/ %1$d apples</string>
     <string name="feast_satiety_label">DINO SATIETY</string>
     <string name="feast_capacity_label">Weekly Feast Capacity</string>
     <string name="feast_progress_text">%1$d of %2$d Eaten</string>
-    <string name="feast_tray_title">Tap apples to feed one-by-one:</string>
-    <string name="feast_tray_subtitle">1 Apple = +25 Stamina</string>
+        <string name="feast_tray_subtitle">1 Apple = +25 Stamina</string>
     <!-- Labels for the four quick-feed apples in the tray. -->
     <string name="feast_apple_cs101">CS101</string>
     <string name="feast_apple_shift">Shift 4h</string>
@@ -362,36 +302,39 @@
     <string name="feast_apple_study">Study 2h</string>
     <string name="feast_feed_all">Feast All Apples (%1$d) &amp; Recharge Dino</string>
     <string name="feast_feed_remaining">Feast All Remaining (%1$d) Apples</string>
-    <string name="feast_complete">Feast Complete! Dino 100% Recharged</string>
-    <string name="feast_done">Done for now - Head to Dashboard</string>
-    <string name="feast_full_toast">Dino\'s belly is completely full! Great work this week!</string>
-    <string name="feast_complete_toast">Weekly Feast Complete! Dino at Max Stamina (+400 XP)</string>
-    <string name="feast_quote_1">"CRUNCH! So sweet &amp; crunchy!"</string>
-    <string name="feast_quote_2">"YUUUM! Midterm stress dissolved!"</string>
-    <string name="feast_quote_3">"Nom nom! Protected sleep tastes good!"</string>
-    <string name="feast_quote_4">"BURP! Best Sunday feast ever!"</string>
-    <string name="feast_quote_5">"Full energy! Ready for next week!"</string>
-    <string name="cd_feast_dino">CapCoach Dino waiting to be fed</string>
+        <string name="feast_done">Done for now - Head to Dashboard</string>
+            <string name="cd_feast_dino">CapCoach Dino waiting to be fed</string>
     <string name="cd_feed_apple">Feed one apple to the Dino</string>
 
     <!-- ==================================================================
          SCREEN 8 - SETTINGS  (port of Prototype/settings.html)
          ================================================================== -->
     <string name="settings_title">Settings</string>
+
+    <!-- Profile. The name edits the same preference Screen 2 fills in, so the morning
+         greeting on Daily Harvest follows whatever is typed here. -->
+    <string name="settings_profile">PROFILE</string>
+    <string name="settings_profile_hint">You</string>
+    <string name="settings_photo_title">Profile Photo</string>
+    <string name="settings_photo_sub">Shown in the top bar on every screen</string>
+    <string name="settings_change_photo">Change Photo</string>
+    <string name="settings_remove_photo">Remove</string>
+    <string name="settings_display_name_label">DISPLAY NAME</string>
+    <string name="settings_display_name_hint">Used in your morning greeting</string>
+
+    <string name="settings_tone">COACH TONE</string>
+    <string name="settings_tone_hint">Voice</string>
+    <string name="settings_tone_preview">Dino says: %1$s</string>
+
     <string name="settings_appearance">APPEARANCE</string>
     <string name="settings_appearance_hint">Display</string>
     <string name="settings_theme_mode">Theme Mode</string>
-    <string name="settings_theme_sub">Switch UI between dark contrast &amp; crisp bright surfaces</string>
-    <string name="settings_theme_night">Night</string>
+        <string name="settings_theme_night">Night</string>
     <string name="settings_theme_bright">Bright</string>
     <string name="settings_institutional">INSTITUTIONAL DATA CONTROLS</string>
-    <string name="settings_share_title">Share anonymized burnout data</string>
-    <string name="settings_share_sub">UNIVERSITY B2B ANALYTICS LINK</string>
+        <string name="settings_share_sub">UNIVERSITY B2B ANALYTICS LINK</string>
     <string name="settings_link_status">Academic Link Status</string>
-    <string name="settings_link_disconnected">Disconnected</string>
-    <string name="settings_link_active">Anonymized Active</string>
-    <string name="settings_link_info">This link is opt-in and off by default. Nothing leaves your device until you enable it, and only aggregated, non-identifying burnout statistics are ever shared.</string>
-    <string name="cd_telemetry_switch">Share anonymized burnout data</string>
+                <string name="cd_telemetry_switch">Share anonymized burnout data</string>
 
     <!-- ==================================================================
          SCREEN 9 - COMPANION / VOICE  (port of Prototype/companion.html)
@@ -399,8 +342,56 @@
     <string name="voice_command_default">"Hey Dino, reschedule my shift"</string>
     <string name="voice_status_ready">VOICE READY</string>
     <string name="voice_status_listening">LISTENING</string>
-    <string name="voice_instruction">TAP MICROPHONE TO TALK</string>
-    <string name="voice_cta">READY TO LISTEN</string>
-    <string name="voice_unavailable">"Voice input is unavailable on this device"</string>
-    <string name="voice_retry">"Tap microphone to try again"</string>
-</resources>
+    <!-- ==================================================================
+         CHROME LIFTED OUT OF JAVA
+         These were string literals inside setText / setHint / Toast calls, where
+         no translator can reach them and lint reports them. They are deliberately
+         tone neutral, because tone_hype.xml's header classes units, field labels
+         and permission messages as fixed chrome rather than coach voice.
+         ================================================================== -->
+
+    <!-- Unit formatting. The Biometrics penalty bar, the Feast satiety ring and the
+         Daily Harvest progress ring each print a bare percentage. -->
+    <string name="percent_value">%1$d%%</string>
+
+    <!-- A task row's "09:00 - 10:30". The separator is typographic, not something
+         the user typed. -->
+    <string name="dash_task_time_range">%1$s - %2$s</string>
+
+    <!-- The Companion screens echo the user's own words back inside quotes. -->
+    <string name="voice_transcript_quoted">\"%1$s\"</string>
+
+    <!-- Dictation field hint in the Add Task sheet. -->
+    <string name="addtask_dictation_listening">Listening\u2026</string>
+    <string name="addtask_dictation_error">Didn\'t catch that. Try again.</string>
+
+    <!-- Permission and availability messages. -->
+    <string name="addtask_mic_permission_required">Microphone permission required.</string>
+    <string name="limits_calendar_permission_required">Calendar access is required.</string>
+    <string name="bio_health_connect_unavailable">%1$s unavailable on this device</string>
+    <string name="onboard_health_connect_missing">Health Connect is not installed on this device.</string>
+
+    <!-- Shown once Set Limits has written the baseline. -->
+    <string name="limits_baseline_saved">Baseline saved</string>
+
+    <!-- Titles this app writes into the device calendar. -->
+    <string name="limits_recovery_block_title">Mandatory Brain Rest</string>
+    <string name="calendar_untitled_event">Untitled Event</string>
+    <string name="calendar_triage_prefix">CapCoach Triage: %1$s</string>
+
+    <!-- The red "!" dot on the Biometrics anomaly card. A glyph, but it is still
+         on-screen text and lint counts it. -->
+    <string name="bio_anomaly_badge">!</string>
+
+    <!-- Week-strip day letters, Monday first. Was a String[] literal in
+         DashboardFragment, shared with the load chart's axis. -->
+    <string-array name="day_letters">
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+        <item>S</item>
+    </string-array>
+                </resources>

@@ -94,20 +94,24 @@
             </FrameLayout>
 
             <TextView
+                android:id="@+id/greetingText"
                 style="@style/Text.Heading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_sm"
                 android:gravity="center"
-                android:text="@string/harvest_greeting"
-                android:textColor="@color/text_primary_dark" />
+                android:textColor="@color/text_primary_dark"
+                tools:text="Good Morning, Maya!" />
 
+            <!-- Hype wording: the design-time default, rewritten for the user's tone in
+                 DailyHarvestFragment. -->
             <TextView
+                android:id="@+id/harvestSubtitle"
                 style="@style/Text.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/harvest_subtitle" />
+                android:text="@string/harvest_subtitle_hype" />
 
             <!-- Tree stage -->
             <FrameLayout
@@ -131,11 +135,12 @@
                         android:background="@drawable/bg_apple" />
 
                     <TextView
+                        android:id="@+id/harvestTooltip"
                         style="@style/Text.MicroLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/space_xs"
-                        android:text="@string/harvest_tooltip"
+                        android:text="@string/harvest_tooltip_hype"
                         android:textColor="@color/brand_mint" />
 
                     <TextView

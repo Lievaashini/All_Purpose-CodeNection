@@ -128,7 +128,13 @@
          The glyph is tinted @color/on_brand rather than @color/bg_dark: bg_dark is
          the app BACKGROUND and flips to near-white in bright mode, which is why the
          old Settings avatar drew a washed-out white person on a mint circle.
-         on_brand is deliberately identical in both palettes. -->
+         on_brand is deliberately identical in both palettes.
+
+         avatarPhoto is the user's own picture and avatarGlyph is the fallback; they are
+         alternatives, never both visible. The photo is match_parent so it fills the plate
+         and Glide circle-crops it to the plate's round background. Adding it as a second
+         child of a fixed-size FrameLayout cannot move the toggle beside it - the plate is
+         @dimen/avatar_size either way, which is what keeps the three screens aligned. -->
     <FrameLayout
         android:id="@+id/avatarBadge"
         android:layout_width="@dimen/avatar_size"
@@ -138,6 +144,15 @@
         android:contentDescription="@string/cd_brand_avatar">
 
         <ImageView
+            android:id="@+id/avatarPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/cd_profile_photo"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/avatarGlyph"
             android:layout_width="@dimen/header_avatar_icon"
             android:layout_height="@dimen/header_avatar_icon"
             android:layout_gravity="center"

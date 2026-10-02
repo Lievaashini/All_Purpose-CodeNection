@@ -23,7 +23,9 @@ import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
+import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.Task;
+import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.shell.AppHeader;
@@ -95,9 +97,6 @@ public class DashboardFragment extends Fragment {
 
     private static final int CRASH_CEILING_PERCENT = 90;
     private static final long TOAST_VISIBLE_MS = 4200L;
-
-    /** Narrow day letters, Monday first. Matches the prototype's M T W T F S S. */
-    private static final String[] DAY_LETTERS = {"M", "T", "W", "T", "F", "S", "S"};
 
     private static final String ISO_PATTERN = "yyyy-MM-dd";
 
@@ -335,11 +334,21 @@ public class DashboardFragment extends Fragment {
         renderChart();
     }
 
+    /**
+     * Narrow day letters, Monday first, read from strings.xml so they can be
+     * translated. A fresh array every call: the load chart keeps whatever it is
+     * handed, which is why the old static was cloned on the way in.
+     */
+    @NonNull
+    private String[] dayLetters() {
+        return getResources().getStringArray(R.array.day_letters);
+    }
+
     private void renderChart() {
         if (loadChart == null) {
             return;
         }
-        loadChart.setLoads(WEEK_LOADS.clone(), DAY_LETTERS.clone(), selectedDay, heavyIndex);
+        loadChart.setLoads(WEEK_LOADS.clone(), dayLetters(), selectedDay, heavyIndex);
     }
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */
@@ -366,6 +375,9 @@ public class DashboardFragment extends Fragment {
         int todayLetter = ContextCompat.getColor(requireContext(), R.color.brand_mint);
         int idleNumber = ContextCompat.getColor(requireContext(), R.color.text_primary_dark);
 
+        // Read once for the whole strip rather than once per pill.
+        String[] letters = dayLetters();
+
         for (int i = 0; i < weekStrip.getChildCount(); i++) {
             View pill = weekStrip.getChildAt(i);
             boolean active = i == selectedDay;
@@ -380,7 +392,7 @@ public class DashboardFragment extends Fragment {
             if (letter != null) {
                 // Only the real today says TODAY. Any other cell keeps its own letter,
                 // so selecting Thursday cannot turn Thursday into today.
-                letter.setText(today ? getString(R.string.dash_today) : DAY_LETTERS[i]);
+                letter.setText(today ? getString(R.string.dash_today) : letters[i]);
                 letter.setTextColor(active ? activeText : (today ? todayLetter : idleLetter));
                 letter.setTypeface(null, active || today
                         ? android.graphics.Typeface.BOLD
@@ -447,32 +459,34 @@ public class DashboardFragment extends Fragment {
         Context context = requireContext();
         int value = selectedLoad;
 
-        int stateRes;
-        int headlineRes;
+        CoachVoice.Line stateLine;
+        CoachVoice.Line headlineLine;
         int colorRes;
         int dinoRes;
 
         if (value <= 55) {
-            stateRes = R.string.dash_state_optimal;
-            headlineRes = R.string.dash_headline_balanced;
+            stateLine = CoachVoice.Line.DASH_STATE_OPTIMAL;
+            headlineLine = CoachVoice.Line.DASH_HEADLINE_BALANCED;
             colorRes = R.color.status_green;
             dinoRes = R.drawable.dino_happy;
         } else if (value <= 75) {
-            stateRes = R.string.dash_state_elevated;
-            headlineRes = R.string.dash_headline_elevated;
+            stateLine = CoachVoice.Line.DASH_STATE_ELEVATED;
+            headlineLine = CoachVoice.Line.DASH_HEADLINE_ELEVATED;
             colorRes = R.color.status_amber;
             dinoRes = R.drawable.dino_steady;
         } else {
-            stateRes = R.string.dash_state_overload;
-            headlineRes = R.string.dash_headline_overload;
+            stateLine = CoachVoice.Line.DASH_STATE_OVERLOAD;
+            headlineLine = CoachVoice.Line.DASH_HEADLINE_OVERLOAD;
             colorRes = R.color.status_red;
             dinoRes = R.drawable.dino_overload;
         }
 
         int color = ContextCompat.getColor(context, colorRes);
 
+        // The load decides WHICH state, the coaching tone decides how it is worded.
+        ToneType tone = tone();
         if (stateLabel != null) {
-            stateLabel.setText(stateRes);
+            stateLabel.setText(stateLine.pick(tone));
             stateLabel.setTextColor(color);
         }
         if (stateDot != null) {
@@ -483,7 +497,7 @@ public class DashboardFragment extends Fragment {
             loadPercent.setTextColor(color);
         }
         if (headline != null) {
-            headline.setText(headlineRes);
+            headline.setText(headlineLine.pick(tone));
         }
         if (telemetry != null) {
             telemetry.setText(getString(
@@ -568,6 +582,8 @@ public class DashboardFragment extends Fragment {
             tasksList.setVisibility(View.GONE);
         }
         if (emptyState != null) {
+            // Set here rather than in the layout: the layout cannot know the coaching tone.
+            emptyState.setText(CoachVoice.Line.DASH_NO_TASKS.pick(tone()));
             emptyState.setVisibility(View.VISIBLE);
         }
         if (taskCounter != null) {
@@ -599,7 +615,7 @@ public class DashboardFragment extends Fragment {
             title.setText(task.getTaskName());
         }
         if (time != null) {
-            time.setText(task.getStartTime() + " - " + task.getEndTime());
+            time.setText(getString(R.string.dash_task_time_range, task.getStartTime(), task.getEndTime()));
         }
 
         // The tag names the user's own category. It used to print "Work"/"Classes" off
@@ -875,12 +891,16 @@ public class DashboardFragment extends Fragment {
      * into Lieva's Room database via TaskRepository, with de-duplication.
      */
     private void syncCalendar() {
-        Toast.makeText(requireContext(), "Syncing Google Calendar...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(),
+                getString(CoachVoice.Line.DASH_SYNC_STARTING.pick(tone())),
+                Toast.LENGTH_SHORT).show();
 
         List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
 
         if (nativeEvents == null || nativeEvents.isEmpty()) {
-            Toast.makeText(requireContext(), "No upcoming events found.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(),
+                    getString(CoachVoice.Line.DASH_SYNC_NONE.pick(tone())),
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -931,7 +951,9 @@ public class DashboardFragment extends Fragment {
                 }
             });
         }
-        Toast.makeText(requireContext(), "Sync complete!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(),
+                getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
+                Toast.LENGTH_SHORT).show();
     }
     private void openTriage() {
         TriageSheetFragment sheet = new TriageSheetFragment();
@@ -963,9 +985,15 @@ public class DashboardFragment extends Fragment {
             return;
         }
         Toast.makeText(requireContext(),
-                getString(R.string.dash_saved_other_week, isoDate),
+                getString(CoachVoice.Line.DASH_SAVED_OTHER_WEEK.pick(tone()), isoDate),
                 Toast.LENGTH_LONG).show();
         reloadTasks();
+    }
+
+    /** The coaching tone chosen in onboarding or Settings. */
+    @NonNull
+    private ToneType tone() {
+        return OnboardingPrefs.getTone(requireContext());
     }
 
     private int indexOfWeekDate(@NonNull String isoDate) {
@@ -985,6 +1013,17 @@ public class DashboardFragment extends Fragment {
     public void showRebalanceToast() {
         if (rebalanceToast == null) {
             return;
+        }
+        // Both lines are tone-dependent, so they are written on the way in rather than
+        // sitting in the layout.
+        ToneType tone = tone();
+        TextView title = rebalanceToast.findViewById(R.id.toastTitle);
+        if (title != null) {
+            title.setText(CoachVoice.Line.TOAST_REBALANCED_TITLE.pick(tone));
+        }
+        TextView sub = rebalanceToast.findViewById(R.id.toastSub);
+        if (sub != null) {
+            sub.setText(CoachVoice.Line.TOAST_REBALANCED_SUB.pick(tone));
         }
         rebalanceToast.removeCallbacks(hideToast);
         rebalanceToast.setAlpha(0f);

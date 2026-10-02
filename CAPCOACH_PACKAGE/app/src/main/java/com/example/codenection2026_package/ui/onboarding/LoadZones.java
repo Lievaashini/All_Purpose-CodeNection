@@ -2,9 +2,9 @@ package com.example.codenection2026_package.ui.onboarding;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 
 import com.example.codenection2026_package.R;
+import com.example.codenection2026_package.model.CoachVoice;
 
 /**
  * Zone grading for the "Total Committed Load" banner.
@@ -45,18 +45,22 @@ public final class LoadZones {
 
     /** The three graded states, in increasing severity. */
     public enum Zone {
-        SAFE(R.string.zone_safe, R.color.status_green),
-        ELEVATED(R.string.zone_elevated, R.color.status_amber),
-        OVERLOAD(R.string.zone_overload, R.color.status_red);
+        SAFE(CoachVoice.Line.ZONE_SAFE, R.color.status_green),
+        ELEVATED(CoachVoice.Line.ZONE_ELEVATED, R.color.status_amber),
+        OVERLOAD(CoachVoice.Line.ZONE_OVERLOAD, R.color.status_red);
 
-        @StringRes
-        public final int labelRes;
+        /**
+         * The pill's wording. A slot rather than a string resource, because the wording
+         * depends on the user's coaching tone as well as the zone.
+         */
+        @NonNull
+        public final CoachVoice.Line label;
 
         @ColorRes
         public final int colorRes;
 
-        Zone(@StringRes int labelRes, @ColorRes int colorRes) {
-            this.labelRes = labelRes;
+        Zone(@NonNull CoachVoice.Line label, @ColorRes int colorRes) {
+            this.label = label;
             this.colorRes = colorRes;
         }
     }
@@ -112,40 +116,52 @@ public final class LoadZones {
 
     /** Work slider status bands. */
     public enum WorkBand {
-        SAFE(R.string.work_status_safe,
-                R.string.work_warning_safe,
-                R.string.dino_work_safe_speech,
+        SAFE(CoachVoice.Line.WORK_STATUS_SAFE,
+                CoachVoice.Line.WORK_WARNING_SAFE,
+                CoachVoice.Line.DINO_WORK_SAFE,
                 R.color.status_green),
 
-        CAUTION(R.string.work_status_caution,
-                R.string.work_warning_caution,
-                R.string.dino_work_caution_speech,
+        CAUTION(CoachVoice.Line.WORK_STATUS_CAUTION,
+                CoachVoice.Line.WORK_WARNING_CAUTION,
+                CoachVoice.Line.DINO_WORK_CAUTION,
                 R.color.status_amber),
 
-        RISK(R.string.work_status_risk,
-                R.string.work_warning_risk,
-                R.string.dino_work_risk_speech,
+        RISK(CoachVoice.Line.WORK_STATUS_RISK,
+                CoachVoice.Line.WORK_WARNING_RISK,
+                CoachVoice.Line.DINO_WORK_RISK,
                 R.color.status_red);
 
-        @StringRes
-        public final int statusLabelRes;
+        /**
+         * The status word next to the dot. A slot rather than a string resource, because
+         * the wording depends on the user's coaching tone as well as the band.
+         */
+        @NonNull
+        public final CoachVoice.Line statusLabel;
 
-        @StringRes
-        public final int warningTextRes;
+        /**
+         * The callout under the slider. A slot rather than a string resource, because the
+         * wording depends on the user's coaching tone as well as the band.
+         */
+        @NonNull
+        public final CoachVoice.Line warningText;
 
-        @StringRes
-        public final int dinoSpeechRes;
+        /**
+         * The guard's line for this band. A slot rather than a string resource, because the
+         * wording depends on the user's coaching tone as well as the band.
+         */
+        @NonNull
+        public final CoachVoice.Line dinoQuote;
 
         @ColorRes
         public final int colorRes;
 
-        WorkBand(@StringRes int statusLabelRes,
-                 @StringRes int warningTextRes,
-                 @StringRes int dinoSpeechRes,
+        WorkBand(@NonNull CoachVoice.Line statusLabel,
+                 @NonNull CoachVoice.Line warningText,
+                 @NonNull CoachVoice.Line dinoQuote,
                  @ColorRes int colorRes) {
-            this.statusLabelRes = statusLabelRes;
-            this.warningTextRes = warningTextRes;
-            this.dinoSpeechRes = dinoSpeechRes;
+            this.statusLabel = statusLabel;
+            this.warningText = warningText;
+            this.dinoQuote = dinoQuote;
             this.colorRes = colorRes;
         }
     }

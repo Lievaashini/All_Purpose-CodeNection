@@ -15,7 +15,9 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.HealthConnectManager;
+import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.ToneType;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 import com.google.android.material.card.MaterialCardView;
 
 
@@ -102,6 +104,11 @@ public class OnboardingFragment extends Fragment {
         healthStatusDot = view.findViewById(R.id.healthStatusDot);
         healthStatusText = view.findViewById(R.id.healthStatusText);
 
+        // --- Tone-aware prose ---
+        // The layout carries the Hype wording so the preview and a cold first run look
+        // right; this pass swaps in the stored tone's wording.
+        bindToneCopy(view);
+
         // --- Hero Dino sprite ---
         // setImageResource() would freeze an animated GIF on its first frame, so the
         // sprite goes through Glide instead. The layout keeps android:src purely as a
@@ -128,7 +135,10 @@ public class OnboardingFragment extends Fragment {
         bindToneCard(cardChill, ToneType.CHILL);
         bindToneCard(cardPlain, ToneType.PLAIN);
 
-        selectTone(ToneType.HYPE, false);
+        // Opens on the tone already stored rather than always on Hype, so a user who picked
+        // Chill in Settings finds Chill selected here. On a first run nothing is stored yet
+        // and this falls back to Hype, which is the prototype's default.
+        selectTone(OnboardingPrefs.getTone(requireContext()), false);
 
         // --- Health Connect card ---
         View healthCard = view.findViewById(R.id.healthConnectCard);
@@ -137,7 +147,7 @@ public class OnboardingFragment extends Fragment {
                 if (healthManager.isClientAvailable()) {
                     requestHealthPermissionLauncher.launch(healthManager.getRequiredPermissions());
                 } else {
-                    toast("Health Connect is not installed on this device.");
+                    toast(getString(R.string.onboard_health_connect_missing));
                 }
             });
         }
@@ -151,7 +161,10 @@ public class OnboardingFragment extends Fragment {
                 // Receive the text from the dialog and update the Onboarding screen
                 dialog.setOnVoiceResultListener((raw, clean) -> {
                     if (dinoDialogue != null) {
-                        dinoDialogue.setText("You said: " + clean);
+                        // Was a hard-coded English prefix in Java. Extracted so it is
+                        // translatable; it stays tone-neutral because it is the app echoing
+                        // the user's own words back, not the Dino speaking.
+                        dinoDialogue.setText(getString(R.string.dino_you_said, clean));
                     }
                 });
 
@@ -180,6 +193,23 @@ public class OnboardingFragment extends Fragment {
         }
     }
 
+    /**
+     * Rewrites this screen's tone-aware prose in the user's coaching tone.
+     *
+     * <p>Read once, at creation: the tone cards further down change the <i>stored</i>
+     * preference, and the wording they select shows up the next time this screen or Settings
+     * is opened. The Dino's greeting is the only line that re-words on the tap itself.
+     */
+    private void bindToneCopy(@NonNull View view) {
+        if (getContext() == null) {
+            return;
+        }
+        ToneCopy.on(view, OnboardingPrefs.getTone(requireContext()))
+                .set(R.id.onboardingSubtitle, CoachVoice.Line.ONBOARD_SUBTITLE)
+                .set(R.id.onboardingFootnote, CoachVoice.Line.ONBOARD_FOOTNOTE)
+                .set(R.id.toneSectionLabel, CoachVoice.Line.TONE_SECTION_LABEL);
+    }
+
     private void bindToneCard(@Nullable MaterialCardView card, @NonNull ToneType tone) {
         if (card == null) {
             return;
@@ -191,12 +221,27 @@ public class OnboardingFragment extends Fragment {
     private void selectTone(@NonNull ToneType tone, boolean animateDialogue) {
         selectedTone = tone;
 
+        // Persisted here so the choice survives this screen: OnboardingPrefs.saveTone was
+        // written for exactly this call and had no caller, which is why a tone picked on
+        // this screen never reached Settings. Writing during the restore above too is
+        // harmless - it stores the value that was just read.
+        OnboardingPrefs.saveTone(requireContext(), tone);
+
+        // Re-word the rest of the screen straight away. Picking a tone IS the interaction on
+        // this screen, so leaving the title, section label and footnote in the previous voice
+        // until the screen is reopened would read as the choice not having taken effect.
+        // Harmless on the initial restore, which simply sets the tone it just read.
+        if (getView() != null) {
+            bindToneCopy(getView());
+        }
+
         applyToneCard(cardHype, tone == ToneType.HYPE, R.color.brand_mint);
         applyToneCard(cardChill, tone == ToneType.CHILL, R.color.secondary_blue);
         applyToneCard(cardPlain, tone == ToneType.PLAIN, R.color.tertiary_gold_container);
 
         if (dinoDialogue != null) {
-            dinoDialogue.setText(tone.speechRes);
+            dinoDialogue.setText(
+                    com.example.codenection2026_package.model.CoachVoice.Line.DINO_ONBOARDING.pick(tone));
             if (animateDialogue) {
                 dinoDialogue.setAlpha(0f);
                 dinoDialogue.animate().alpha(1f).setDuration(180L).start();

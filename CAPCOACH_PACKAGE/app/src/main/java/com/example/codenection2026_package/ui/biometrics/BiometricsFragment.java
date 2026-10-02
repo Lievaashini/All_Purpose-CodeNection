@@ -25,8 +25,12 @@ import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.HealthConnectManager;
 import com.example.codenection2026_package.api.HealthConnectReader;
 import com.example.codenection2026_package.model.Biometrics;
+import com.example.codenection2026_package.model.CoachVoice;
+import com.example.codenection2026_package.model.ToneType;
+import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
+import com.example.codenection2026_package.ui.shell.ToneCopy;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -139,6 +143,8 @@ public class BiometricsFragment extends Fragment {
         eventDot = view.findViewById(R.id.eventDot);
         penaltyDot = view.findViewById(R.id.penaltyDot);
 
+        bindToneCopy(view);
+
         // Fetch data from Health Connect directly
         List<Biometrics> records = createSource().loadAll(requireContext());
         Biometrics newest = newestRecord(records);
@@ -172,6 +178,34 @@ public class BiometricsFragment extends Fragment {
         startPenaltyAnimation();
         eventDotPulse = startDotPulse(eventDot);
         penaltyDotPulse = startDotPulse(penaltyDot);
+    }
+
+    /**
+     * Rewrites the screen's prose in the user's coaching tone.
+     *
+     * <p>A layout cannot know which tone the user picked, so the wording that reads as the
+     * app talking is resolved here rather than left to the layout's {@code android:text}.
+     * The layout keeps the Hype variant, which gives a sensible design-time preview and a
+     * graceful fallback if this pass ever runs without a tone.
+     *
+     * <p>Null-tolerant per view, like the rest of the shell's view binding: a missing id
+     * costs one line of copy rather than crashing the screen.
+     */
+    private void bindToneCopy(@NonNull View view) {
+        if (getContext() == null) {
+            return;
+        }
+        ToneType tone = OnboardingPrefs.getTone(requireContext());
+
+        ToneCopy.on(view, tone)
+                .set(R.id.bioEventPill, CoachVoice.Line.BIO_EVENT_PILL)
+                .set(R.id.bioAnomalyTitle, CoachVoice.Line.BIO_ANOMALY_TITLE)
+                .set(R.id.bioAnomalyBody, CoachVoice.Line.BIO_ANOMALY_BODY)
+                .set(R.id.bioHrvState, CoachVoice.Line.BIO_HRV_STATE)
+                .set(R.id.bioHrvStateSub, CoachVoice.Line.BIO_HRV_STATE_SUB)
+                .set(R.id.bioTrendState, CoachVoice.Line.BIO_TREND_STATE)
+                .set(R.id.bioPenaltySub, CoachVoice.Line.BIO_PENALTY_SUB)
+                .set(R.id.bioPenaltyFootnote, CoachVoice.Line.BIO_PENALTY_FOOTNOTE);
     }
 
     /**
@@ -377,7 +411,7 @@ public class BiometricsFragment extends Fragment {
             penaltyBar.setBackgroundResource(fill);
         }
 
-        penaltyPercent.setText(Math.round(fraction * 100) + "%");
+        penaltyPercent.setText(getString(R.string.percent_value, Math.round(fraction * 100)));
     }
 
     // ==================================================================
@@ -417,14 +451,16 @@ public class BiometricsFragment extends Fragment {
             HealthConnectManager manager = new HealthConnectManager(requireContext());
             if (!manager.isClientAvailable()) {
                 Toast.makeText(requireContext(),
-                        getString(R.string.bio_health_connect) + " unavailable on this device",
+                        getString(R.string.bio_health_connect_unavailable,
+                                getString(R.string.bio_health_connect)),
                         Toast.LENGTH_SHORT).show();
             }
         } catch (RuntimeException e) {
             // Health Connect is not installable on every device; the screen still works
             // from stored records, so a missing provider is not fatal.
             Toast.makeText(requireContext(),
-                    getString(R.string.bio_health_connect) + " unavailable on this device",
+                    getString(R.string.bio_health_connect_unavailable,
+                            getString(R.string.bio_health_connect)),
                     Toast.LENGTH_SHORT).show();
         }
     }
