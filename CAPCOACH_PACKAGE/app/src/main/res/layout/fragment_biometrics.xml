@@ -37,6 +37,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/eventPillRow"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="@dimen/space_sm"
@@ -93,6 +94,7 @@
 
             <!-- ============ Anomaly alert card ============ -->
             <LinearLayout
+                android:id="@+id/anomalyCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_md"
@@ -166,6 +168,7 @@
                                 android:background="@drawable/dot_idle" />
 
                             <TextView
+                                android:id="@+id/anomalyTime"
                                 style="@style/Text.MicroLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -227,6 +230,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/deficitBadge"
                             style="@style/Text.MicroLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -349,13 +353,11 @@
                     </LinearLayout>
 
                     <!--
-                      TREND CHART SLOT.
-                      ui/widget/TrendChartView.java does not exist yet, so this is a plain
-                      View standing in for it with the trend track background. Once that
-                      widget lands, replace this element with the TrendChartView and hand it
-                      the seven day sleep series. Keep the id, the height and the margin.
+                      Seven nightly sleep totals, oldest first, handed over in Java.
+                      The placeholder this replaces drew only the track background, which is
+                      why the row looked empty: there was no widget to draw the series.
                     -->
-                    <View
+                    <com.example.codenection2026_package.ui.widget.TrendChartView
                         android:id="@+id/sleepTrendChart"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/trend_chart_height"
