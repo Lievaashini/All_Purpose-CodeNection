@@ -78,7 +78,6 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/sheetTitle"
                     style="@style/Text.Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

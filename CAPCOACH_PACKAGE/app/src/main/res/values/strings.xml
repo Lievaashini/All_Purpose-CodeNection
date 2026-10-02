@@ -237,16 +237,6 @@
     <string name="addtask_save_academic">Save Academic Task</string>
     <string name="addtask_save_category">Save %1$s Task</string>
     <string name="addtask_cancel">Cancel</string>
-    <!-- Edit Task. Chrome rather than coaching tone: a button verb and three short
-         confirmations, the same boundary the other functional strings follow. -->
-    <string name="edittask_title">Edit Task</string>
-    <string name="edittask_save">Save Changes</string>
-    <string name="edittask_delete_confirm">Delete this task? This cannot be undone.</string>
-    <string name="edittask_delete">Delete</string>
-    <string name="edittask_deleted">Task deleted</string>
-    <string name="edittask_delete_failed">Could not delete this task.</string>
-    <string name="edittask_updated">Changes saved</string>
-    <string name="edittask_update_failed">Could not save your changes.</string>
                         <string name="addtask_name_hint_generic">e.g., Grocery run or Society meeting</string>
         <!-- ==================================================================
          SCREEN 5 - BIOMETRICS  (port of Prototype/biometrics.html)
