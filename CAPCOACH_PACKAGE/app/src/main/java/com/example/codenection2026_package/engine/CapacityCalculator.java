@@ -10,24 +10,13 @@ import java.util.Map;
 
 public class CapacityCalculator {
 
-    // Documented project constants
     private static final double TIME_MENTAL_WEIGHT = 1.5;
     private static final double POOR_SLEEP_PENALTY = 2.0;
     private static final int POOR_SLEEP_THRESHOLD_MINUTES = 5 * 60;
 
-    /**
-     * Calculates the load for one category.
-     *
-     * Formula:
-     * Category Load =
-     * (Self-Reported Daily Input / Baseline Commitment)
-     * × Mood Modifier
-     *
-     * @param dailyInputHours current workload/input for the category
-     * @param baselineHours user's baseline commitment for the category
-     * @param moodModifier modifier supplied by the check-in/input system
-     * @return category load as a percentage
-     */
+    private static final double CAPACITY_THRESHOLD = 90.0;
+    private static final double CAPACITY_EPSILON = 0.000001;
+
     public double calculateCategoryLoad(
             double dailyInputHours,
             double baselineHours,
@@ -42,18 +31,8 @@ public class CapacityCalculator {
                 * 100.0;
     }
 
-    /**
-     * Calculates the weighted overall capacity.
-     *
-     * Time and Mental categories receive the documented 1.5x weight.
-     *
-     * @param categoryLoads category name -> calculated load percentage
-     * @param weightedCategories categories that should receive the 1.5x weight
-     * @return overall capacity percentage
-     */
     public double calculateOverallCapacity(
-            Map<String, Double> categoryLoads,
-            List<String> weightedCategories
+            Map<String, Double> categoryLoads
     ) {
         if (categoryLoads == null || categoryLoads.isEmpty()) {
             return 0.0;
@@ -65,12 +44,7 @@ public class CapacityCalculator {
         for (Map.Entry<String, Double> entry : categoryLoads.entrySet()) {
 
             double load = entry.getValue();
-            double weight = 1.0;
-
-            if (weightedCategories != null
-                    && weightedCategories.contains(entry.getKey())) {
-                weight = TIME_MENTAL_WEIGHT;
-            }
+            double weight = getCategoryWeight(entry.getKey());
 
             weightedTotal += load * weight;
             totalWeight += weight;
@@ -83,14 +57,24 @@ public class CapacityCalculator {
         return weightedTotal / totalWeight;
     }
 
-    /**
-     * Applies the documented 2.0x sleep penalty when sleep
-     * is below the project's poor-sleep threshold.
-     *
-     * @param capacity current capacity percentage
-     * @param biometrics biometric record
-     * @return capacity after the sleep penalty
-     */
+    private double getCategoryWeight(String category) {
+        if (category == null) {
+            return 1.0;
+        }
+
+        switch (category) {
+            case "Academic":
+            case "Work":
+                return TIME_MENTAL_WEIGHT;
+
+            case "Errand":
+            case "Social":
+            case "Co-curricular":
+            default:
+                return 1.0;
+        }
+    }
+
     public double applySleepPenalty(
             double capacity,
             Biometrics biometrics
@@ -108,16 +92,7 @@ public class CapacityCalculator {
         return capacity;
     }
 
-    /**
-     * Calculates the duration of a task in hours.
-     *
-     * Completed tasks are not counted as active workload.
-     *
-     * @param task task from the Room database
-     * @return task duration in hours
-     */
     public double calculateTaskHours(Task task) {
-
         if (task == null || task.isCompleted()) {
             return 0.0;
         }
@@ -130,29 +105,17 @@ public class CapacityCalculator {
         LocalTime start = LocalTime.parse(task.getStartTime());
         LocalTime end = LocalTime.parse(task.getEndTime());
 
-        long minutes;
+        long minutes = Duration.between(start, end).toMinutes();
 
-        if (end.isAfter(start)) {
-            minutes = Duration.between(start, end).toMinutes();
-        } else {
-            // Handles tasks that cross midnight.
-            minutes = Duration.between(start, end.plusHours(24))
-                    .toMinutes();
+        // Handle tasks that cross midnight.
+        if (minutes < 0) {
+            minutes += 1440;
         }
 
         return minutes / 60.0;
     }
 
-    /**
-     * Calculates the total active workload from a list of tasks.
-     *
-     * Completed tasks are automatically excluded.
-     *
-     * @param tasks tasks retrieved from the Room database
-     * @return total active task hours
-     */
     public double calculateTotalTaskHours(List<Task> tasks) {
-
         if (tasks == null || tasks.isEmpty()) {
             return 0.0;
         }
@@ -166,24 +129,11 @@ public class CapacityCalculator {
         return totalHours;
     }
 
-    /**
-     * Determines whether the capacity has reached
-     * the documented 90% trigger threshold.
-     */
     public boolean hasReachedNinetyPercent(double capacity) {
-        return capacity >= 90.0;
+        return capacity + CAPACITY_EPSILON >= CAPACITY_THRESHOLD;
     }
 
-    /**
-     * Returns the current capacity state.
-     *
-     * < 50%   = Thriving
-     * 50-79%  = Normal
-     * 80-100% = Stacked
-     * > 100%  = Overload
-     */
     public CapacityState getCapacityState(double capacity) {
-
         if (capacity < 50.0) {
             return CapacityState.THRIVING;
         }
