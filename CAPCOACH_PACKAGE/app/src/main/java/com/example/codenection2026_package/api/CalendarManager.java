@@ -57,15 +57,19 @@ public class CalendarManager {
         List<CalendarEvent> eventsList = new ArrayList<>();
         ContentResolver contentResolver = context.getContentResolver();
 
-        // 1. Reset to the start of today (00:00:00) so morning events are included
+        // 1. Reset to the start of today (00:00:00)
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
+
+        // Step BACKWARD 7 days so Monday/Tuesday don't get falsely deleted
+        cal.add(Calendar.DAY_OF_YEAR, -7);
         long startRange = cal.getTimeInMillis();
 
-        cal.add(Calendar.DAY_OF_YEAR, 7);
+        // Step FORWARD 14 days (covers the rest of this week + next week)
+        cal.add(Calendar.DAY_OF_YEAR, 14);
         long endRange = cal.getTimeInMillis();
 
         // 2. Query Instances instead of Events so recurring events are expanded

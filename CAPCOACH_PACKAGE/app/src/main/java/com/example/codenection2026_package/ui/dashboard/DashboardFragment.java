@@ -670,7 +670,15 @@ public class DashboardFragment extends Fragment {
         row.setOnLongClickListener(v -> {
             Object rowTag = v.getTag();
             if (rowTag instanceof Task) {
-                openEditTask((Task) rowTag, category);
+                Task clickedTask = (Task) rowTag;
+
+                //Prevents completed task from edits
+                if (clickedTask.isCompleted()) {
+                    Toast.makeText(requireContext(), "Completed tasks cannot be edited.", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+
+                openEditTask(clickedTask, category);
                 return true;
             }
             return false;
@@ -936,65 +944,104 @@ public class DashboardFragment extends Fragment {
                 getString(CoachVoice.Line.DASH_SYNC_STARTING.pick(tone())),
                 Toast.LENGTH_SHORT).show();
 
-        List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
-
-        if (nativeEvents == null || nativeEvents.isEmpty()) {
-            Toast.makeText(requireContext(),
-                    getString(CoachVoice.Line.DASH_SYNC_NONE.pick(tone())),
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         Context appContext = requireContext().getApplicationContext();
 
-        for (CalendarManager.CalendarEvent event : nativeEvents) {
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
 
-            // TO BE DELETED LOGCAT TEST LINE:
-            android.util.Log.d("CapCoachAPI", "Syncing Event: " + event.title + " | ID: " + event.eventId + " | Date: " + event.dateStr);
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                if (!isAdded()) return;
 
-            // Search the database for this exact Google Calendar ID ON THIS EXACT Date and Time
-            TaskRepository.findByCalendarIdAndDateAndTime(appContext, event.eventId, event.dateStr, event.startTimeStr, existingTask -> {
-                if (existingTask != null) {
-                    // THE EVENT ALREADY EXISTS!
-                    // Update its times in case the user rescheduled it in Google Calendar
-                    existingTask.setDate(event.dateStr);
-                    existingTask.setStartTime(event.startTimeStr);
-                    existingTask.setEndTime(event.endTimeStr);
-                    existingTask.setTaskName(event.title);
+                // 1. GATHER ALL DATES: The 7 visible days + everything Google returned
+                Set<String> datesToSync = new HashSet<>();
+                for (String d : weekDates) {
+                    if (d != null) datesToSync.add(d);
+                }
+                if (nativeEvents != null) {
+                    for (CalendarManager.CalendarEvent e : nativeEvents) {
+                        datesToSync.add(e.dateStr);
+                    }
+                }
 
-                    TaskRepository.update(appContext, existingTask, success -> {
-                        if (Boolean.TRUE.equals(success) && isAdded()) {
-                            reloadTasks(); // Refresh UI in case it moved to the currently viewed day
-                        }
-                    });
+                // 2. Loop through every distinct date in our wide window
+                for (String dateStr : datesToSync) {
 
-                } else {
-                    // IT DOES NOT EXIST. Insert a new row.
-                    Task importedTask = new Task(
-                            "INFLEXIBLE",
-                            event.title,
-                            null,
-                            event.dateStr,
-                            event.startTimeStr,
-                            event.endTimeStr
-                    );
-                    importedTask.setPriority(Task.PRIORITY_MED);
-                    importedTask.setDeferralHours(0);
-                    importedTask.setCalendarEventId(event.eventId); // SAVE THE STABLE ID
-
-                    TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {
-                        if (rowId != null && rowId > 0 && isAdded()) {
-                            if (indexOfWeekDate(event.dateStr) == selectedDay) {
-                                reloadTasks();
+                    // Filter the native Google events down to JUST this specific day
+                    List<CalendarManager.CalendarEvent> nativeForDay = new ArrayList<>();
+                    if (nativeEvents != null) {
+                        for (CalendarManager.CalendarEvent e : nativeEvents) {
+                            if (dateStr.equals(e.dateStr)) {
+                                nativeForDay.add(e);
                             }
+                        }
+                    }
+
+                    // 3. Pull CapCoach's local tasks for this specific day
+                    TaskRepository.loadByDate(appContext, dateStr, localFeed -> {
+                        if (localFeed == null) return;
+
+                        // --- STEP A: KILL GHOSTS ---
+                        for (TaskRepository.FeedItem item : localFeed) {
+                            Task localTask = item.getTask();
+                            if (localTask.getCalendarEventId() != null) {
+                                boolean stillExistsInGoogle = false;
+                                for (CalendarManager.CalendarEvent ne : nativeForDay) {
+                                    if (ne.eventId == localTask.getCalendarEventId()) {
+                                        stillExistsInGoogle = true;
+                                        break;
+                                    }
+                                }
+                                if (!stillExistsInGoogle) {
+                                    localTask.setCompleted(true);
+                                    // The "Free Apples" exploit is fixed. Physically delete the Ghost
+                                    // from the local database instead of marking it complete.
+                                    TaskRepository.delete(appContext, localTask, success -> {});
+                                }
+                            }
+                        }
+
+                        // --- STEP B: ADD NEW / UPDATE EXISTING ---
+                        for (CalendarManager.CalendarEvent ne : nativeForDay) {
+                            Task matchedLocal = null;
+                            for (TaskRepository.FeedItem item : localFeed) {
+                                Task localTask = item.getTask();
+                                if (localTask.getCalendarEventId() != null &&
+                                        localTask.getCalendarEventId() == ne.eventId) {
+                                    matchedLocal = localTask;
+                                    break;
+                                }
+                            }
+
+                            if (matchedLocal != null) {
+                                matchedLocal.setStartTime(ne.startTimeStr);
+                                matchedLocal.setEndTime(ne.endTimeStr);
+                                matchedLocal.setTaskName(ne.title);
+                                TaskRepository.update(appContext, matchedLocal, success -> {});
+                            } else {
+                                Task importedTask = new Task(
+                                        "INFLEXIBLE", ne.title, null,
+                                        ne.dateStr, ne.startTimeStr, ne.endTimeStr
+                                );
+                                importedTask.setPriority(Task.PRIORITY_MED);
+                                importedTask.setDeferralHours(0);
+                                importedTask.setCalendarEventId(ne.eventId);
+
+                                TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {});
+                            }
+                        }
+
+                        // Automatically refresh the UI if the user is currently looking at this day
+                        if (indexOfWeekDate(dateStr) == selectedDay && isAdded()) {
+                            reloadTasks();
                         }
                     });
                 }
+
+                Toast.makeText(appContext,
+                        getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
+                        Toast.LENGTH_SHORT).show();
             });
-        }
-        Toast.makeText(requireContext(),
-                getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
-                Toast.LENGTH_SHORT).show();
+        });
     }
     private void openTriage() {
         TriageSheetFragment sheet = new TriageSheetFragment();

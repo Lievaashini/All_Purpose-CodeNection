@@ -2,10 +2,12 @@ package com.example.codenection2026_package.ui.edittask;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
 
@@ -98,7 +100,49 @@ public class EditTaskSheetFragment extends AddTaskSheetFragment {
         if (args == null) {
             return;
         }
-        beginEdit(taskFrom(args), args.getString(ARG_CATEGORY));
+
+        Task task = taskFrom(args);
+        beginEdit(task, args.getString(ARG_CATEGORY));
+
+        // --- UI LOCKDOWN FOR GOOGLE CALENDAR EVENTS ---
+        if (task.getCalendarEventId() != null) {
+
+            // 1. Lock Time and Name fields
+            View taskNameInput = view.findViewById(R.id.taskNameInput);
+            if (taskNameInput != null) { taskNameInput.setEnabled(false); taskNameInput.setAlpha(0.6f); }
+
+            View dateButton = view.findViewById(R.id.dateButton);
+            if (dateButton != null) { dateButton.setEnabled(false); dateButton.setAlpha(0.6f); }
+
+            View startTimeButton = view.findViewById(R.id.startTimeButton);
+            if (startTimeButton != null) { startTimeButton.setEnabled(false); startTimeButton.setAlpha(0.6f); }
+
+            View endTimeButton = view.findViewById(R.id.endTimeButton);
+            if (endTimeButton != null) { endTimeButton.setEnabled(false); endTimeButton.setAlpha(0.6f); }
+
+            // 2. LOCK FLEXIBILITY. Google events MUST remain INFLEXIBLE.
+            View cardFlexible = view.findViewById(R.id.cardFlexible);
+            if (cardFlexible != null) {
+                cardFlexible.setEnabled(false);
+                cardFlexible.setAlpha(0.3f); // Visually disable the flexible option
+            }
+
+            View cardInflexible = view.findViewById(R.id.cardInflexible);
+            if (cardInflexible != null) {
+                cardInflexible.setEnabled(false); // Prevent clicking
+            }
+
+            // 3. Hide the Delete Button to prevent the re-import loop
+            View deleteBtn = view.findViewById(R.id.deleteTaskButton);
+            if (deleteBtn != null) { deleteBtn.setVisibility(View.GONE); }
+
+            // 4. Update the subtitle to explain the lockdown
+            TextView modalSubtitle = view.findViewById(R.id.modalSubtitle);
+            if (modalSubtitle != null) {
+                modalSubtitle.setText("LOCKED: Synced from Google Calendar");
+                modalSubtitle.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_muted_dark));
+            }
+        }
     }
 
     /** Rebuilds the row from the arguments, ids and all. */
