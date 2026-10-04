@@ -134,7 +134,7 @@
 
     <string name="bio_event_pill_plain">Biometric event detected</string>
     <string name="bio_anomaly_title_plain">Health Connect: &lt; 5h sleep</string>
-    <string name="bio_anomaly_body_plain">Last night: 4h 18m sleep. Target 8h 00m. Restorative deficit.</string>
+    <string name="bio_anomaly_body_plain">Last night: %1$s sleep. Target %2$s. Restorative deficit.</string>
     <string name="bio_hrv_state_plain">Sympathetic stress</string>
     <string name="bio_hrv_state_sub_plain">Nervous load elevated</string>
     <string name="bio_trend_state_plain">Critical dip</string>

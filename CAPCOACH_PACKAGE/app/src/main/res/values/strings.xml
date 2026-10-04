@@ -120,6 +120,8 @@
     <string name="cd_back">Back</string>
     <string name="cd_brand_home">CapCoach home</string>
     <string name="cd_close_modal">Close</string>
+    <!-- Destructive action in the Edit Task sheet. GONE in the Add Task flow. -->
+    <string name="cd_delete_task">Delete this task</string>
 
     <!-- ==================================================================
          SCREEN 3 - DASHBOARD  (port of Prototype/dashboard.html)
@@ -235,15 +237,29 @@
     <string name="addtask_save_academic">Save Academic Task</string>
     <string name="addtask_save_category">Save %1$s Task</string>
     <string name="addtask_cancel">Cancel</string>
+    <!-- Edit Task. Chrome rather than coaching tone: a button verb and three short
+         confirmations, the same boundary the other functional strings follow. -->
+    <string name="edittask_title">Edit Task</string>
+    <string name="edittask_save">Save Changes</string>
+    <string name="edittask_delete_confirm">Delete this task? This cannot be undone.</string>
+    <string name="edittask_delete">Delete</string>
+    <string name="edittask_deleted">Task deleted</string>
+    <string name="edittask_delete_failed">Could not delete this task.</string>
+    <string name="edittask_updated">Changes saved</string>
+    <string name="edittask_update_failed">Could not save your changes.</string>
                         <string name="addtask_name_hint_generic">e.g., Grocery run or Society meeting</string>
         <!-- ==================================================================
          SCREEN 5 - BIOMETRICS  (port of Prototype/biometrics.html)
          ================================================================== -->
         <string name="bio_health_connect">Health Connect</string>
     <string name="bio_anomaly_tag">SYNC ANOMALY</string>
-    <string name="bio_anomaly_time">- 07:12 AM</string>
+    <!-- Bound at runtime to the end of the latest sleep session. -->
+    <string name="bio_anomaly_time">- %1$s</string>
             <string name="bio_metrics_title">SLEEP DEBT &amp; STRESS METRICS</string>
-    <string name="bio_deficit_badge">-40% Deficit</string>
+    <!-- Bound at runtime to the real shortfall against the 8h target. The literal
+         percent has to be escaped because this string carries a format argument. -->
+    <string name="bio_deficit_badge">-%1$d%% Deficit</string>
+    <string name="bio_deficit_none">No Deficit</string>
     <string name="bio_baseline_label">Baseline Average</string>
     <string name="bio_lastnight_label">Last Night (Recorded)</string>
     <string name="bio_hrv_label">HRV SCORE</string>
@@ -251,7 +267,14 @@
         <string name="bio_penalty_title">Cognitive Penalty Processing</string>
         <string name="bio_penalty_rate">WORKLOAD DEPLETION RATE</string>
         <string name="bio_override">Override Sensor Metric</string>
-        <string name="bio_hrv_unavailable">Not recorded</string>
+        <!-- Shown for any metric Health Connect returned no reading for: both sleep
+             rows and the HRV score. One resource, so the three cannot drift apart. -->
+        <string name="bio_not_recorded">Not recorded</string>
+
+        <!-- Value formatters. These were built inline in Java before. -->
+        <string name="bio_sleep_hours">%1$s hrs</string>
+        <string name="bio_hrv_value">%1$s ms</string>
+        <string name="bio_duration_hm">%1$dh %2$02dm</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST  (port of Prototype/daily-harvest.html)

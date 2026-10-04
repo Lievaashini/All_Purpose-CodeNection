@@ -78,6 +78,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/sheetTitle"
                     style="@style/Text.Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -111,6 +112,24 @@
                     android:src="@drawable/ic_light_mode"
                     app:tint="@color/accent_amber" />
             </FrameLayout>
+
+            <!-- Edit mode only. Add Task never shows it: it stays GONE here, and the
+                 Edit Task sheet makes it VISIBLE and attaches the row deletion.
+                 Sits at the trailing edge with @id/sheetClose because both are
+                 sheet-level actions; the title block absorbs the extra width, so the
+                 badge, theme toggle and close button keep the same alignment. -->
+            <ImageView
+                android:id="@+id/deleteTaskButton"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/cd_delete_task"
+                android:focusable="true"
+                android:padding="@dimen/space_md"
+                android:src="@drawable/ic_delete"
+                android:visibility="gone"
+                app:tint="@color/status_red" />
 
             <ImageView
                 android:id="@+id/sheetClose"
