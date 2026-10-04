@@ -11,8 +11,12 @@ import java.util.Map;
 public class CapacityCalculator {
 
     private static final double TIME_MENTAL_WEIGHT = 1.5;
-    private static final double POOR_SLEEP_PENALTY = 2.0;
-    private static final int POOR_SLEEP_THRESHOLD_MINUTES = 5 * 60;
+
+    // Maximum sleep penalty for extremely poor sleep.
+    private static final double MAX_SLEEP_PENALTY = 2.0;
+
+    // At 5 hours of sleep, the penalty becomes 1.0x.
+    private static final int SLEEP_PENALTY_THRESHOLD_MINUTES = 5 * 60;
 
     private static final double CAPACITY_THRESHOLD = 90.0;
     private static final double CAPACITY_EPSILON = 0.000001;
@@ -75,6 +79,12 @@ public class CapacityCalculator {
         }
     }
 
+    /**
+     * Applies a gradual sleep penalty based on sleep duration.
+     *
+     * Less sleep results in a higher penalty.
+     * 5 hours or more results in no penalty.
+     */
     public double applySleepPenalty(
             double capacity,
             Biometrics biometrics
@@ -83,13 +93,43 @@ public class CapacityCalculator {
             return capacity;
         }
 
-        if (biometrics.getSleepDurationMinutes()
-                < POOR_SLEEP_THRESHOLD_MINUTES) {
+        int sleepMinutes = biometrics.getSleepDurationMinutes();
 
-            return capacity * POOR_SLEEP_PENALTY;
+        double sleepPenalty = calculateSleepPenalty(sleepMinutes);
+
+        return capacity * sleepPenalty;
+    }
+
+    /**
+     * Calculates the sleep penalty using linear interpolation.
+     *
+     * 0 minutes of sleep   -> 2.0x penalty
+     * 300 minutes of sleep -> 1.0x penalty
+     */
+    private double calculateSleepPenalty(int sleepMinutes) {
+
+        // 5 hours or more: no penalty.
+        if (sleepMinutes >= SLEEP_PENALTY_THRESHOLD_MINUTES) {
+            return 1.0;
         }
 
-        return capacity;
+        // Zero or negative sleep: maximum penalty.
+        if (sleepMinutes <= 0) {
+            return MAX_SLEEP_PENALTY;
+        }
+
+        /*
+         * Linear interpolation between:
+         *
+         * 0 minutes   = 2.0x
+         * 300 minutes = 1.0x
+         */
+        double sleepRatio =
+                (double) sleepMinutes
+                        / SLEEP_PENALTY_THRESHOLD_MINUTES;
+
+        return MAX_SLEEP_PENALTY
+                - ((MAX_SLEEP_PENALTY - 1.0) * sleepRatio);
     }
 
     public double calculateTaskHours(Task task) {
