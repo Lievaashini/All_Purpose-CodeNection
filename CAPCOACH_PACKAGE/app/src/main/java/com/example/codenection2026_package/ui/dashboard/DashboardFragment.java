@@ -27,6 +27,7 @@ import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
+import com.example.codenection2026_package.ui.edittask.EditTaskSheetFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
@@ -663,7 +664,47 @@ public class DashboardFragment extends Fragment {
             toggleDone(row); // This visually checks it off
         }
 
+        // Long-press opens the Edit Task sheet. The standard Android gesture for "act on this
+        // item" is used rather than a tap, so the row keeps its unclaimed tap gesture and the
+        // check box keeps its own target: a tap on the box still only ticks the task off.
+        row.setOnLongClickListener(v -> {
+            Object rowTag = v.getTag();
+            if (rowTag instanceof Task) {
+                openEditTask((Task) rowTag, category);
+                return true;
+            }
+            return false;
+        });
+
         return row;
+    }
+
+    /**
+     * Opens the Edit Task sheet for one row.
+     *
+     * <p>The category name travels with the task because the row only stores its id: the
+     * sheet's spinner is indexed by position, so it needs the canonical name to preselect the
+     * entry the task was actually filed under.
+     */
+    private void openEditTask(@NonNull Task task, @Nullable String category) {
+        EditTaskSheetFragment sheet = EditTaskSheetFragment.newInstance(task, category);
+        sheet.setOnTaskChangedListener(this::onTaskChanged);
+        sheet.show(getChildFragmentManager(), EditTaskSheetFragment.TAG);
+    }
+
+    /**
+     * The edit sheet rewrote or removed a row.
+     *
+     * <p>Same treatment as a save: if the row belongs to a day of the week on screen, go there
+     * so the change is visible straight away.
+     */
+    private void onTaskChanged(@NonNull String isoDate) {
+        int index = indexOfWeekDate(isoDate);
+        if (index >= 0 && index != selectedDay) {
+            selectDay(index);
+            return;
+        }
+        reloadTasks();
     }
 
     /** @return the localised label for a canonical category name */
