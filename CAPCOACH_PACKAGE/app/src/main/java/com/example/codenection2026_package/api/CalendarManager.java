@@ -69,7 +69,7 @@ public class CalendarManager {
         long startRange = cal.getTimeInMillis();
 
         // Step FORWARD 14 days (covers the rest of this week + next week)
-        cal.add(Calendar.DAY_OF_YEAR, 21);
+        cal.add(Calendar.DAY_OF_YEAR, 22);
         long endRange = cal.getTimeInMillis();
 
         // 2. Query Instances instead of Events so recurring events are expanded
@@ -92,7 +92,11 @@ public class CalendarManager {
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
         try (Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder)) {
-            if (cursor != null && cursor.getCount() > 0) {
+
+            // FIX 1: If the provider crashes and returns a null cursor, abort and return null!
+            if (cursor == null) return null;
+
+            if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
                     long eventId = cursor.getLong(0);
                     String title = cursor.getString(1);
