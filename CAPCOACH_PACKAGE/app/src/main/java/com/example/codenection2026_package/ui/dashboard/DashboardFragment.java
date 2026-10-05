@@ -940,14 +940,17 @@ public class DashboardFragment extends Fragment {
      * Pulls the user's native Google Calendar events and maps them directly
      * into Lieva's Room database via TaskRepository, with de-duplication.
      */
+    /**
+     * Pulls the user's native Google Calendar events and maps them directly
+     * into Lieva's Room database via TaskRepository, with de-duplication.
+     */
     private void syncCalendar() {
         Toast.makeText(requireContext(),
                 getString(CoachVoice.Line.DASH_SYNC_STARTING.pick(tone())),
                 Toast.LENGTH_SHORT).show();
 
         // THE GUARDRAIL: Check for permission explicitly.
-        // This prevents the data-loss bug , WITHOUT
-        // blocking empty calendars from triggering the Ghost Killer.
+        // This prevents the data-loss bug WITHOUT blocking empty calendars.
         if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_CALENDAR) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(requireContext(), "Calendar permission denied. Cannot sync.", Toast.LENGTH_SHORT).show();
             return;
@@ -961,33 +964,53 @@ public class DashboardFragment extends Fragment {
             new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
                 if (!isAdded()) return;
 
-                // 1. GATHER ALL DATES: The 7 visible days + everything Google returned
+                // GUARDRAIL: If it returns NULL, the read failed. Abort to prevent wiping data.
+                if (nativeEvents == null) {
+                    Toast.makeText(requireContext(), "Sync failed. Could not read calendar.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (nativeEvents.isEmpty()) {
+                    Toast.makeText(requireContext(), getString(CoachVoice.Line.DASH_SYNC_NONE.pick(tone())), Toast.LENGTH_SHORT).show();
+                }
+
+                // 1. GATHER ALL DATES: Generate the EXACT 22-day window queried in CalendarManager.
+                // This ensures we check every day for ghosts, even if they aren't on the visible week strip.
                 Set<String> datesToSync = new HashSet<>();
-                for (String d : weekDates) {
-                    if (d != null) datesToSync.add(d);
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                cal.add(Calendar.DAY_OF_YEAR, -7);
+
+                SimpleDateFormat iso = new SimpleDateFormat(ISO_PATTERN, Locale.US);
+                for (int i = 0; i < 22; i++) { // 7 days back + today + 14 days forward = 22 days
+                    datesToSync.add(iso.format(cal.getTime()));
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
                 }
-                if (nativeEvents != null) {
-                    for (CalendarManager.CalendarEvent e : nativeEvents) {
-                        datesToSync.add(e.dateStr);
-                    }
-                }
+
+                // Track how many days have finished processing to know when to refresh the UI
+                final int totalDays = datesToSync.size();
+                final int[] daysProcessed = {0};
 
                 // 2. Loop through every distinct date in our wide window
                 for (String dateStr : datesToSync) {
 
                     // Filter the native Google events down to JUST this specific day
                     List<CalendarManager.CalendarEvent> nativeForDay = new ArrayList<>();
-                    if (nativeEvents != null) {
-                        for (CalendarManager.CalendarEvent e : nativeEvents) {
-                            if (dateStr.equals(e.dateStr)) {
-                                nativeForDay.add(e);
-                            }
+                    for (CalendarManager.CalendarEvent e : nativeEvents) {
+                        if (dateStr.equals(e.dateStr)) {
+                            nativeForDay.add(e);
                         }
                     }
 
                     // 3. Pull CapCoach's local tasks for this specific day
                     TaskRepository.loadByDate(appContext, dateStr, localFeed -> {
-                        if (localFeed == null) return;
+                        if (localFeed == null) {
+                            checkAndReload(totalDays, daysProcessed);
+                            return;
+                        }
 
                         // --- STEP A: KILL GHOSTS ---
                         for (TaskRepository.FeedItem item : localFeed) {
@@ -1001,10 +1024,14 @@ public class DashboardFragment extends Fragment {
                                     }
                                 }
                                 if (!stillExistsInGoogle) {
-                                    localTask.setCompleted(true);
-                                    // The "Free Apples" exploit is fixed. Physically delete the Ghost
-                                    // from the local database instead of marking it complete.
-                                    TaskRepository.delete(appContext, localTask, success -> {});
+
+                                    // LOGCAT GHOSTKILLER TEST:
+                                    android.util.Log.d("CapCoachAPI", "Ghost Killer: Deleting hidden ghost event: " + localTask.getTaskName() + " on " + localTask.getDate());
+
+                                    // Ghost detected! Physically delete it and wait for success.
+                                    TaskRepository.delete(appContext, localTask, success -> {
+                                        if (isAdded() && indexOfWeekDate(dateStr) == selectedDay) reloadTasks();
+                                    });
                                 }
                             }
                         }
@@ -1025,7 +1052,9 @@ public class DashboardFragment extends Fragment {
                                 matchedLocal.setStartTime(ne.startTimeStr);
                                 matchedLocal.setEndTime(ne.endTimeStr);
                                 matchedLocal.setTaskName(ne.title);
-                                TaskRepository.update(appContext, matchedLocal, success -> {});
+                                TaskRepository.update(appContext, matchedLocal, success -> {
+                                    if (isAdded() && indexOfWeekDate(dateStr) == selectedDay) reloadTasks();
+                                });
                             } else {
                                 Task importedTask = new Task(
                                         "INFLEXIBLE", ne.title, null,
@@ -1035,22 +1064,27 @@ public class DashboardFragment extends Fragment {
                                 importedTask.setDeferralHours(0);
                                 importedTask.setCalendarEventId(ne.eventId);
 
-                                TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {});
+                                TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {
+                                    if (isAdded() && indexOfWeekDate(ne.dateStr) == selectedDay) reloadTasks();
+                                });
                             }
                         }
 
-                        // Automatically refresh the UI if the user is currently looking at this day
-                        if (indexOfWeekDate(dateStr) == selectedDay && isAdded()) {
-                            reloadTasks();
-                        }
+                        checkAndReload(totalDays, daysProcessed);
                     });
                 }
-
-                Toast.makeText(appContext,
-                        getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
-                        Toast.LENGTH_SHORT).show();
             });
         }).start();
+    }
+
+    /** Helper to trigger the final UI toast when the loop completes. */
+    private void checkAndReload(int totalDays, int[] daysProcessed) {
+        daysProcessed[0]++;
+        if (daysProcessed[0] == totalDays && isAdded()) {
+            Toast.makeText(requireContext(),
+                    getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
+                    Toast.LENGTH_SHORT).show();
+        }
     }
     private void openTriage() {
         TriageSheetFragment sheet = new TriageSheetFragment();

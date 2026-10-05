@@ -69,7 +69,7 @@ public class CalendarManager {
         long startRange = cal.getTimeInMillis();
 
         // Step FORWARD 14 days (covers the rest of this week + next week)
-        cal.add(Calendar.DAY_OF_YEAR, 14);
+        cal.add(Calendar.DAY_OF_YEAR, 21);
         long endRange = cal.getTimeInMillis();
 
         // 2. Query Instances instead of Events so recurring events are expanded
@@ -119,6 +119,7 @@ public class CalendarManager {
             }
         } catch (SecurityException e) {
             Log.e(TAG, "Calendar permission not granted: " + e.getMessage());
+            return null;
         }
         return eventsList;
     }
