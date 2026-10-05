@@ -615,14 +615,9 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (suppressCategoryCallback) {
-                    return;
-                }
-                // Work is the only protected category; every other one stays
-                // sheddable. Applying the mode again relabels the card, the subtitle
-                // and the save button with the category the user just picked.
-                mode = isWorkCategory(position) ? MODE_INFLEXIBLE : MODE_FLEXIBLE;
-                applyMode();
+                if (suppressCategoryCallback) return;
+                // REMOVED: mode = isWorkCategory(position) ? ...
+                applyMode(); // Only repaint the tags, not forcing the mode to flip
             }
 
             @Override
@@ -778,12 +773,6 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         boolean flexible = MODE_FLEXIBLE.equals(next);
         int position = categorySpinner == null ? -1 : categorySpinner.getSelectedItemPosition();
         boolean onWork = isWorkCategory(position);
-
-        if (flexible && onWork) {
-            setCategorySelection(CategoryRepository.indexOf(CategoryRepository.ACADEMIC));
-        } else if (!flexible && !onWork) {
-            setCategorySelection(CategoryRepository.indexOf(CategoryRepository.WORK));
-        }
 
         mode = flexible ? MODE_FLEXIBLE : MODE_INFLEXIBLE;
         applyMode();

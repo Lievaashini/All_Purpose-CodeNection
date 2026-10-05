@@ -670,7 +670,16 @@ public class DashboardFragment extends Fragment {
         row.setOnLongClickListener(v -> {
             Object rowTag = v.getTag();
             if (rowTag instanceof Task) {
-                openEditTask((Task) rowTag, category);
+                Task clickedTask = (Task) rowTag;
+
+                //Prevents completed task from edits
+                if (clickedTask.isCompleted()) {
+                    //TO BE REPLACED WITH LINES IN STRINGS.XML
+                    Toast.makeText(requireContext(), "Completed tasks cannot be edited.", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+
+                openEditTask(clickedTask, category);
                 return true;
             }
             return false;
@@ -931,70 +940,151 @@ public class DashboardFragment extends Fragment {
      * Pulls the user's native Google Calendar events and maps them directly
      * into Lieva's Room database via TaskRepository, with de-duplication.
      */
+    /**
+     * Pulls the user's native Google Calendar events and maps them directly
+     * into Lieva's Room database via TaskRepository, with de-duplication.
+     */
     private void syncCalendar() {
         Toast.makeText(requireContext(),
                 getString(CoachVoice.Line.DASH_SYNC_STARTING.pick(tone())),
                 Toast.LENGTH_SHORT).show();
 
-        List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
-
-        if (nativeEvents == null || nativeEvents.isEmpty()) {
-            Toast.makeText(requireContext(),
-                    getString(CoachVoice.Line.DASH_SYNC_NONE.pick(tone())),
-                    Toast.LENGTH_SHORT).show();
+        // THE GUARDRAIL: Check for permission explicitly.
+        // This prevents the data-loss bug WITHOUT blocking empty calendars.
+        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_CALENDAR) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(requireContext(), "Calendar permission denied. Cannot sync.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Context appContext = requireContext().getApplicationContext();
 
-        for (CalendarManager.CalendarEvent event : nativeEvents) {
+        new Thread(() -> {
+            List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
 
-            // TO BE DELETED LOGCAT TEST LINE:
-            android.util.Log.d("CapCoachAPI", "Syncing Event: " + event.title + " | ID: " + event.eventId + " | Date: " + event.dateStr);
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                if (!isAdded()) return;
 
-            // Search the database for this exact Google Calendar ID ON THIS EXACT Date and Time
-            TaskRepository.findByCalendarIdAndDateAndTime(appContext, event.eventId, event.dateStr, event.startTimeStr, existingTask -> {
-                if (existingTask != null) {
-                    // THE EVENT ALREADY EXISTS!
-                    // Update its times in case the user rescheduled it in Google Calendar
-                    existingTask.setDate(event.dateStr);
-                    existingTask.setStartTime(event.startTimeStr);
-                    existingTask.setEndTime(event.endTimeStr);
-                    existingTask.setTaskName(event.title);
+                // GUARDRAIL: If it returns NULL, the read failed. Abort to prevent wiping data.
+                if (nativeEvents == null) {
+                    Toast.makeText(requireContext(), "Sync failed. Could not read calendar.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                    TaskRepository.update(appContext, existingTask, success -> {
-                        if (Boolean.TRUE.equals(success) && isAdded()) {
-                            reloadTasks(); // Refresh UI in case it moved to the currently viewed day
+                if (nativeEvents.isEmpty()) {
+                    Toast.makeText(requireContext(), getString(CoachVoice.Line.DASH_SYNC_NONE.pick(tone())), Toast.LENGTH_SHORT).show();
+                }
+
+                // 1. GATHER ALL DATES: Generate the EXACT 22-day window queried in CalendarManager.
+                // This ensures we check every day for ghosts, even if they aren't on the visible week strip.
+                Set<String> datesToSync = new HashSet<>();
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                cal.add(Calendar.DAY_OF_YEAR, -7);
+
+                SimpleDateFormat iso = new SimpleDateFormat(ISO_PATTERN, Locale.US);
+                for (int i = 0; i < 22; i++) { // 7 days back + today + 14 days forward = 22 days
+                    datesToSync.add(iso.format(cal.getTime()));
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                }
+
+                // Track how many days have finished processing to know when to refresh the UI
+                final int totalDays = datesToSync.size();
+                final int[] daysProcessed = {0};
+
+                // 2. Loop through every distinct date in our wide window
+                for (String dateStr : datesToSync) {
+
+                    // Filter the native Google events down to JUST this specific day
+                    List<CalendarManager.CalendarEvent> nativeForDay = new ArrayList<>();
+                    for (CalendarManager.CalendarEvent e : nativeEvents) {
+                        if (dateStr.equals(e.dateStr)) {
+                            nativeForDay.add(e);
                         }
-                    });
+                    }
 
-                } else {
-                    // IT DOES NOT EXIST. Insert a new row.
-                    Task importedTask = new Task(
-                            "INFLEXIBLE",
-                            event.title,
-                            null,
-                            event.dateStr,
-                            event.startTimeStr,
-                            event.endTimeStr
-                    );
-                    importedTask.setPriority(Task.PRIORITY_MED);
-                    importedTask.setDeferralHours(0);
-                    importedTask.setCalendarEventId(event.eventId); // SAVE THE STABLE ID
+                    // 3. Pull CapCoach's local tasks for this specific day
+                    TaskRepository.loadByDate(appContext, dateStr, localFeed -> {
+                        if (localFeed == null) {
+                            checkAndReload(totalDays, daysProcessed);
+                            return;
+                        }
 
-                    TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {
-                        if (rowId != null && rowId > 0 && isAdded()) {
-                            if (indexOfWeekDate(event.dateStr) == selectedDay) {
-                                reloadTasks();
+                        // --- STEP A: KILL GHOSTS ---
+                        for (TaskRepository.FeedItem item : localFeed) {
+                            Task localTask = item.getTask();
+                            if (localTask.getCalendarEventId() != null) {
+                                boolean stillExistsInGoogle = false;
+                                for (CalendarManager.CalendarEvent ne : nativeForDay) {
+                                    if (ne.eventId == localTask.getCalendarEventId()) {
+                                        stillExistsInGoogle = true;
+                                        break;
+                                    }
+                                }
+                                if (!stillExistsInGoogle) {
+
+                                    // LOGCAT GHOSTKILLER TEST:
+                                    android.util.Log.d("CapCoachAPI", "Ghost Killer: Deleting hidden ghost event: " + localTask.getTaskName() + " on " + localTask.getDate());
+
+                                    // Ghost detected! Physically delete it and wait for success.
+                                    TaskRepository.delete(appContext, localTask, success -> {
+                                        if (isAdded() && indexOfWeekDate(dateStr) == selectedDay) reloadTasks();
+                                    });
+                                }
                             }
                         }
+
+                        // --- STEP B: ADD NEW / UPDATE EXISTING ---
+                        for (CalendarManager.CalendarEvent ne : nativeForDay) {
+                            Task matchedLocal = null;
+                            for (TaskRepository.FeedItem item : localFeed) {
+                                Task localTask = item.getTask();
+                                if (localTask.getCalendarEventId() != null &&
+                                        localTask.getCalendarEventId() == ne.eventId) {
+                                    matchedLocal = localTask;
+                                    break;
+                                }
+                            }
+
+                            if (matchedLocal != null) {
+                                matchedLocal.setStartTime(ne.startTimeStr);
+                                matchedLocal.setEndTime(ne.endTimeStr);
+                                matchedLocal.setTaskName(ne.title);
+                                TaskRepository.update(appContext, matchedLocal, success -> {
+                                    if (isAdded() && indexOfWeekDate(dateStr) == selectedDay) reloadTasks();
+                                });
+                            } else {
+                                Task importedTask = new Task(
+                                        "INFLEXIBLE", ne.title, null,
+                                        ne.dateStr, ne.startTimeStr, ne.endTimeStr
+                                );
+                                importedTask.setPriority(Task.PRIORITY_MED);
+                                importedTask.setDeferralHours(0);
+                                importedTask.setCalendarEventId(ne.eventId);
+
+                                TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {
+                                    if (isAdded() && indexOfWeekDate(ne.dateStr) == selectedDay) reloadTasks();
+                                });
+                            }
+                        }
+
+                        checkAndReload(totalDays, daysProcessed);
                     });
                 }
             });
+        }).start();
+    }
+
+    /** Helper to trigger the final UI toast when the loop completes. */
+    private void checkAndReload(int totalDays, int[] daysProcessed) {
+        daysProcessed[0]++;
+        if (daysProcessed[0] == totalDays && isAdded()) {
+            Toast.makeText(requireContext(),
+                    getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
+                    Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(requireContext(),
-                getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
-                Toast.LENGTH_SHORT).show();
     }
     private void openTriage() {
         TriageSheetFragment sheet = new TriageSheetFragment();
