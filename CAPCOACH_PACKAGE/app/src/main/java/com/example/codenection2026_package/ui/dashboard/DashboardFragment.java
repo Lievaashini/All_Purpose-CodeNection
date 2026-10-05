@@ -674,6 +674,7 @@ public class DashboardFragment extends Fragment {
 
                 //Prevents completed task from edits
                 if (clickedTask.isCompleted()) {
+                    //TO BE REPLACED WITH LINES IN STRINGS.XML
                     Toast.makeText(requireContext(), "Completed tasks cannot be edited.", Toast.LENGTH_SHORT).show();
                     return true;
                 }
@@ -944,9 +945,17 @@ public class DashboardFragment extends Fragment {
                 getString(CoachVoice.Line.DASH_SYNC_STARTING.pick(tone())),
                 Toast.LENGTH_SHORT).show();
 
+        // THE GUARDRAIL: Check for permission explicitly.
+        // This prevents the data-loss bug , WITHOUT
+        // blocking empty calendars from triggering the Ghost Killer.
+        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_CALENDAR) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(requireContext(), "Calendar permission denied. Cannot sync.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Context appContext = requireContext().getApplicationContext();
 
-        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+        new Thread(() -> {
             List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
 
             new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
@@ -1041,7 +1050,7 @@ public class DashboardFragment extends Fragment {
                         getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
                         Toast.LENGTH_SHORT).show();
             });
-        });
+        }).start();
     }
     private void openTriage() {
         TriageSheetFragment sheet = new TriageSheetFragment();

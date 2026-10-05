@@ -139,6 +139,7 @@ public class EditTaskSheetFragment extends AddTaskSheetFragment {
             // 4. Update the subtitle to explain the lockdown
             TextView modalSubtitle = view.findViewById(R.id.modalSubtitle);
             if (modalSubtitle != null) {
+                //TO BE REPLACED WITH LINES IN STRINGS.XML
                 modalSubtitle.setText("LOCKED: Synced from Google Calendar");
                 modalSubtitle.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_muted_dark));
             }
