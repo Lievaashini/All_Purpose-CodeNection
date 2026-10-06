@@ -25,6 +25,8 @@ import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.shell.ToneCopy;
 
+import java.util.Calendar;
+
 /**
  * SCREEN 6 - DAILY HARVEST. Port of Prototype/daily-harvest.html.
  *
@@ -43,8 +45,7 @@ import com.example.codenection2026_package.ui.shell.ToneCopy;
  */
 public class DailyHarvestFragment extends Fragment {
 
-    /** The prototype starts at 12 stashed and harvests 4 more. */
-    private static final int STARTING_STASH = 12;
+    private int currentStash = 0;
     private static final int FEAST_GOAL = 20;
     private static final int STREAK_DAY = 4;
 
@@ -53,12 +54,11 @@ public class DailyHarvestFragment extends Fragment {
      * tree overnight.
      *
      * <p>This is the number the whole screen is about: one completed task becomes one
-     * apple. It is a constant here only because nothing else supplies it yet - hand this
-     * the real count from Role 1's completed-task query (or the feast stash) and the tree,
+     * apple.
      * the basket, the badge and the progress bar all follow automatically, because every
      * one of them is derived from this value rather than hard-coded in the layout.
      */
-    private static final int APPLES_GROWN = 4;
+    private int applesGrown = 0;
 
     /**
      * Where apples sit on the tree crown, as a fraction of the stage size.
@@ -90,6 +90,7 @@ public class DailyHarvestFragment extends Fragment {
     private View harvestToast;
     private ViewGroup appleContainer;
     private ImageView dinoSprite;
+    private String yesterdayIsoKey = "";
 
     /** True once the apples have been collected; the CTA then becomes "start my day". */
     private boolean collected = false;
@@ -118,9 +119,6 @@ public class DailyHarvestFragment extends Fragment {
         collectButton = view.findViewById(R.id.collectButton);
         greetingText = view.findViewById(R.id.greetingText);
 
-        // Prose that depends on the coaching tone cannot live in the layout, which has no
-        // way to know which tone the user picked. The layout carries the Hype wording as a
-        // design-time preview and a graceful fallback; this pass rewrites it.
         ToneCopy.on(view, tone())
                 .set(R.id.harvestSubtitle, CoachVoice.Line.HARVEST_SUBTITLE)
                 .set(R.id.harvestTooltip, CoachVoice.Line.HARVEST_TOOLTIP);
@@ -139,10 +137,7 @@ public class DailyHarvestFragment extends Fragment {
         if (streakText != null) {
             streakText.setText(getString(R.string.harvest_streak_badge, STREAK_DAY));
         }
-        TextView tooltipBadge = view.findViewById(R.id.tooltipBadge);
-        if (tooltipBadge != null) {
-            tooltipBadge.setText(getString(R.string.harvest_tooltip_badge, APPLES_GROWN));
-        }
+
         TextView milestoneMid = view.findViewById(R.id.milestoneMid);
         if (milestoneMid != null) {
             milestoneMid.setText(getString(R.string.harvest_milestone_mid, FEAST_GOAL / 2));
@@ -152,18 +147,59 @@ public class DailyHarvestFragment extends Fragment {
             milestoneGoal.setText(getString(R.string.harvest_milestone_goal, FEAST_GOAL));
         }
 
-        // The tree is a STATIC blank vector, not the apple_tree_full GIF. It must render
-        // empty and still: the only fruit on it is the apples added by growApples() from
-        // yesterday's completed tasks, so an animated pre-loaded crop would contradict
-        // what the screen is telling the user. The Dino stays an animated GIF.
         if (isAdded()) {
             Glide.with(this).load(R.drawable.dino_happy).into(dinoSprite);
         }
 
-        growApples();
-        renderCounters(STARTING_STASH);
-        renderCropCopy();
-        wireActions(view);
+        // --- LIVE DATABASE LOGIC ---
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, -1);
+        String yesterdayIso = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(cal.getTime());
+
+        this.yesterdayIsoKey = "harvest_" + yesterdayIso;
+
+        com.example.codenection2026_package.data.TaskRepository.getDailyAppleCount(requireContext(), yesterdayIso, dailyCount -> {
+            if (!isAdded()) return;
+
+            // EXPLOIT FIX: Check if we already collected these today
+            android.content.SharedPreferences prefs = requireContext().getSharedPreferences("GamificationPrefs", android.content.Context.MODE_PRIVATE);
+            boolean alreadyHarvested = prefs.getBoolean(yesterdayIsoKey, false);
+
+            // If already harvested, set to 0 so the UI skips to "Start Day"
+            this.applesGrown = alreadyHarvested ? 0 : dailyCount;
+
+
+            // Now get the weekly stash (Anchored to YESTERDAY to protect Monday morning harvests)
+            Calendar yesterdayCal = Calendar.getInstance();
+            yesterdayCal.add(Calendar.DAY_OF_YEAR, -1);
+
+            // Calculate Monday-to-Sunday relative to yesterday
+            int yesterdayDayIndex = (yesterdayCal.get(Calendar.DAY_OF_WEEK) + 5) % 7; // Mon = 0
+
+            Calendar weekStartCal = (Calendar) yesterdayCal.clone();
+            weekStartCal.add(Calendar.DAY_OF_YEAR, -yesterdayDayIndex); // Shift to Monday
+            String startDate = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(weekStartCal.getTime());
+
+            Calendar weekEndCal = (Calendar) weekStartCal.clone();
+            weekEndCal.add(Calendar.DAY_OF_YEAR, 6); // Shift to Sunday
+            String endDate = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(weekEndCal.getTime());
+
+            com.example.codenection2026_package.data.TaskRepository.getWeeklyAppleCount(requireContext(), startDate, endDate, weeklyCount -> {
+                if (!isAdded()) return;
+
+                this.currentStash = weeklyCount;
+
+                TextView tooltipBadge = view.findViewById(R.id.tooltipBadge);
+                if (tooltipBadge != null) {
+                    tooltipBadge.setText(getString(R.string.harvest_tooltip_badge, applesGrown));
+                }
+
+                growApples();
+                renderCounters(currentStash);
+                renderCropCopy();
+                wireActions(view);
+            });
+        });
     }
 
     /**
@@ -175,18 +211,29 @@ public class DailyHarvestFragment extends Fragment {
      * attribute, so without this the button renders as a bare basket icon on a green
      * pill with no label at all.
      *
-     * <p>Both strings are plurals because {@link #APPLES_GROWN} is not always four, and
+     * <p>Both strings are plurals because {@link #applesGrown} is not always four, and
      * "Collect 1 Apples" is the kind of detail that makes a prototype look unfinished.
      */
     private void renderCropCopy() {
         if (collectButton != null) {
-            collectButton.setText(getResources().getQuantityString(
-                    R.plurals.harvest_collect_apples, APPLES_GROWN, APPLES_GROWN));
+            if (applesGrown == 0) {
+                // BUG FIX: Skip the collection phase entirely if there are 0 apples.
+                collectButton.setText(getString(R.string.harvest_start_day, displayName()));
+                collected = true; // Makes the button immediately jump to the dashboard
+            } else {
+                collectButton.setText(getResources().getQuantityString(
+                        R.plurals.harvest_collect_apples, applesGrown, applesGrown));
+            }
         }
+
         if (dinoChatBubble != null) {
-            dinoChatBubble.setText(getResources().getQuantityString(
-                    CoachVoice.harvestApples(OnboardingPrefs.getTone(requireContext())),
-                    APPLES_GROWN, APPLES_GROWN));
+            if (applesGrown == 0) {
+                dinoChatBubble.setText("No apples today. Let's get to work!");
+            } else {
+                dinoChatBubble.setText(getResources().getQuantityString(
+                        CoachVoice.harvestApples(OnboardingPrefs.getTone(requireContext())),
+                        applesGrown, applesGrown));
+            }
         }
     }
 
@@ -233,7 +280,7 @@ public class DailyHarvestFragment extends Fragment {
                 return;
             }
 
-            for (int i = 0; i < APPLES_GROWN; i++) {
+            for (int i = 0; i < applesGrown; i++) {
                 float[] spot = APPLE_SPOTS[i % APPLE_SPOTS.length];
 
                 View apple = new View(requireContext());
@@ -417,18 +464,21 @@ public class DailyHarvestFragment extends Fragment {
             return;
         }
 
-        int total = STARTING_STASH + APPLES_GROWN;
-        renderCounters(total);
+        // Use the real live stash count
+        renderCounters(currentStash);
 
         if (collectButton != null) {
             collectButton.setText(getString(R.string.harvest_start_day, displayName()));
         }
-
         // The tree itself is a fixed blank vector and is deliberately left alone here.
         // Its apples were animated away in triggerHarvest(), so it is already bare again -
         // swapping in a "sparse" tree sprite would draw a second, contradictory crop.
 
-        showToast(total);
+        showToast(currentStash);
+
+        // EXPLOIT FIX: Save that we collected yesterday's apples
+        requireContext().getSharedPreferences("GamificationPrefs", android.content.Context.MODE_PRIVATE)
+                .edit().putBoolean(yesterdayIsoKey, true).apply();
     }
 
     private void showToast(int total) {
@@ -438,7 +488,7 @@ public class DailyHarvestFragment extends Fragment {
         TextView title = harvestToast.findViewById(R.id.toastTitle);
         TextView sub = harvestToast.findViewById(R.id.toastSub);
         if (title != null) {
-            title.setText(getString(CoachVoice.Line.HARVEST_TOAST_TITLE.pick(tone()), APPLES_GROWN));
+            title.setText(getString(CoachVoice.Line.HARVEST_TOAST_TITLE.pick(tone()), applesGrown));
         }
         if (sub != null) {
             sub.setText(getString(CoachVoice.Line.HARVEST_TOAST_SUB.pick(tone()), total));

@@ -272,4 +272,32 @@ public final class TaskRepository {
             MAIN.post(() -> callback.onResult(result));
         });
     }
+
+    public static void getDailyAppleCount(@NonNull Context context, @NonNull String dateStr, @NonNull Callback<Integer> callback) {
+        final Context appContext = context.getApplicationContext();
+        IO.execute(() -> {
+            int count = 0;
+            try {
+                count = AppDatabase.get(appContext).taskDao().countCompletedOnDate(dateStr);
+            } catch (Exception e) {
+                android.util.Log.e("CapCoachDB", "Failed to count daily apples", e);
+            }
+            final int finalCount = count;
+            MAIN.post(() -> callback.onResult(finalCount));
+        });
+    }
+
+    public static void getWeeklyAppleCount(@NonNull Context context, @NonNull String startDate, @NonNull String endDate, @NonNull Callback<Integer> callback) {
+        final Context appContext = context.getApplicationContext();
+        IO.execute(() -> {
+            int count = 0;
+            try {
+                count = AppDatabase.get(appContext).taskDao().countCompletedInDateRange(startDate, endDate);
+            } catch (Exception e) {
+                android.util.Log.e("CapCoachDB", "Failed to count weekly apples", e);
+            }
+            final int finalCount = count;
+            MAIN.post(() -> callback.onResult(finalCount));
+        });
+    }
 }
