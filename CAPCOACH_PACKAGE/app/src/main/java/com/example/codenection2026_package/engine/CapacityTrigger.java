@@ -36,15 +36,22 @@ public class CapacityTrigger {
             return LoadShedder.KEEP;
         }
 
-        // Do not run ML triage unless the overload threshold is reached.
+        // Do not run ML triage unless the 90% threshold is reached.
         if (!shouldTrigger(capacity)) {
+            return LoadShedder.KEEP;
+        }
+
+        // Completed or non-deferrable tasks must not be moved.
+        if (task.isCompleted() || task.getDeferralHours() <= 0) {
             return LoadShedder.KEEP;
         }
 
         int recoveryDebtScore = clampToMlRange(capacity);
 
         int daysUntilDue =
-                TaskFeatureExtractor.calculateDaysUntilDue(task.getDate());
+                TaskFeatureExtractor.calculateDaysUntilDue(
+                        task.getDate()
+                );
 
         int durationMinutes =
                 TaskFeatureExtractor.calculateDurationMinutes(
@@ -52,20 +59,19 @@ public class CapacityTrigger {
                         task.getEndTime()
                 );
 
-        int taskPriorityWeight =
-                TaskFeatureExtractor.extractPriorityWeight(
-                        task.getPriority()
-                );
+        // Use the Task model's canonical priority conversion.
+        int taskPriorityWeight = task.getPriorityWeight();
 
         int isFixedTime =
                 CLASSIFICATION_INFLEXIBLE.equalsIgnoreCase(
                         task.getClassification()
                 ) ? 1 : 0;
 
+        // Normalize the category name before checking for Social.
         int isRecoveryActivity =
-                RECOVERY_CATEGORY.equalsIgnoreCase(categoryName)
-                        ? 1
-                        : 0;
+                RECOVERY_CATEGORY.equalsIgnoreCase(
+                        categoryName == null ? "" : categoryName.trim()
+                ) ? 1 : 0;
 
         return LoadShedder.predictTaskAction(
                 recoveryDebtScore,
