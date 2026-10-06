@@ -4,12 +4,19 @@
 
   Layer order, bottom to top:
     1. ObservableScrollView  the scrolling feed (capacity card, week strip,
-                             weekly load chart, simulation banner, filter chips,
-                             schedule, sync strip)
+                             weekly load chart, filter chips, schedule, sync
+                             strip). The simulation banner also lives inside this
+                             feed, but it ships HIDDEN - see its own comment below.
     2. header                fixed 64dp bar pinned to the top
     3. rebalanceToast        fixed notice pinned below the header
     4. addTaskFab            floating "Add Task" button above the bottom nav
     5. bottomNavInclude      fixed 64dp nav bar pinned to the bottom
+
+  The dashboard's three pop-ups - Rebalance (triage sheet), Daily Harvest and
+  Weekly Feast - are no longer triggered by a button on this screen. They are
+  meant to be raised by app logic once its own condition is met, so the demo
+  trigger bar that used to open them is hidden. The exact calls a logic owner
+  writes are documented in docs/DASHBOARD_POPUPS_HANDOFF.md.
 
   Java (DashboardFragment) inflates item_day_pill.xml into @id/weekStrip and
   item_task_row.xml into @id/tasksList, and repaints the capacity card from the
@@ -247,15 +254,47 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ============ Simulation banner ============ -->
+            <!-- ============ Simulation banner - HIDDEN, not deleted ============
+                 The three controls this bar carried - Rebalance, Daily pop-up and
+                 Weekly pop-up - are all pop-ups: each one should be raised by app
+                 logic at the moment its own condition is met (a day over the crash
+                 ceiling, the morning after, Sunday), not by the user hunting for a
+                 button on the dashboard. This bar was only ever the prototype's demo
+                 trigger, so it is taken off the screen while the real triggers are
+                 written. It is hidden rather than removed so the UI can be brought
+                 back for a demo without re-authoring it.
+
+                 A new id, @+id/simulationBanner, was added for the handoff so a logic
+                 owner can drive this bar without editing the layout again -
+                     requireView().findViewById(R.id.simulationBanner)
+                             .setVisibility(View.VISIBLE);
+                 to bring the demo buttons back, or GONE to take them away for good.
+                 tools:visibility="visible" keeps the bar on screen in the Android
+                 Studio preview only, so UI work on it stays possible.
+
+                 The three button ids below are deliberately LEFT IN PLACE and are
+                 still wired by DashboardFragment.setupActions() (lines 928-937). A
+                 GONE parent still inflates its children, so those findViewById()
+                 calls keep resolving and nothing in Java had to change for this bar
+                 to disappear. Deleting the ids instead would have turned all three of
+                 those wires into silent no-ops.
+
+                 WARNING: this bar was the only way to open the three pop-ups, so
+                 until the trigger logic exists they are unreachable from this screen.
+                 Every call the logic owner needs - and what is still missing for the
+                 daily and weekly ones to be pop-ups rather than full screens - is in
+                 docs/DASHBOARD_POPUPS_HANDOFF.md. -->
             <LinearLayout
+                android:id="@+id/simulationBanner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_md"
                 android:background="@drawable/bg_sim_banner"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="@dimen/space_sm">
+                android:padding="@dimen/space_sm"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <ImageView
                     android:layout_width="18dp"
