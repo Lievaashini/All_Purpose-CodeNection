@@ -42,6 +42,17 @@
     <string name="dino_addtask_guard_plain">"Shift locked. No conflicts detected."</string>
     <string name="dino_addtask_sched_plain">Buffer: %1$s. Priority %2$s excluded from shedding.</string>
 
+    <!-- Spontaneous dashboard reaction bubble. See tone_hype.xml for the shared
+         rules. Plain is the only tone that prints the figure, so these carry a real
+         %1$d and a doubled %% literal. That %% is correct here and must not be
+         "fixed": these slots ARE passed through String.format, so %% reaches the
+         screen as a single % and a lone % would crash the call. -->
+    <string name="dino_react_thriving_plain">Capacity: %1$d%%. You have bandwidth.</string>
+    <string name="dino_react_normal_plain">Capacity: %1$d%%. Manageable.</string>
+    <string name="dino_react_stacked_plain">Capacity: %1$d%%. Approaching overload.</string>
+    <string name="dino_react_overload_plain">Capacity: %1$d%%. Overloaded — action recommended.</string>
+    <string name="dino_react_sleep_plain">Sleep logged: %1$dh. Recovery +1.</string>
+
     <!-- ==================================================================
          SCREEN 1 - ONBOARDING
          ================================================================== -->

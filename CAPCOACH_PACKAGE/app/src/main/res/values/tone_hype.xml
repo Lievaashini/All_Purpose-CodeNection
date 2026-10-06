@@ -58,6 +58,25 @@
     <string name="dino_addtask_guard_hype" formatted="false">"Locking shift. 0% chance of study-hall collisions."</string>
     <string name="dino_addtask_sched_hype">Shedding buffer: %1$s. Priority %2$s is held back from the shed list!</string>
 
+    <!-- Spontaneous dashboard reaction bubble - the Dino leaning in next to its own
+         card to comment on the selected day. It pops up repeatedly while the
+         dashboard is open, so these lines are meant to be re-read, not read once.
+
+         One slot per CapacityCalculator capacity state, plus one for a good night's
+         sleep. Every slot takes %1$d: the four state slots print the real capacity
+         percentage in Plain, and the sleep slot prints the real hours in all three
+         tones; Hype and Chill simply leave the argument unused, so the bubble can
+         never disagree with the number on the card.
+
+         Unlike the dino_* dialogue above, these are NOT wrapped in literal quotes:
+         they render inside a drawn speech bubble, where quote marks would only
+         double the frame. -->
+    <string name="dino_react_thriving_hype">Look at you, thriving 😌</string>
+    <string name="dino_react_normal_hype">Busy but you got this.</string>
+    <string name="dino_react_stacked_hype">Okay this week\'s a LOT huh</string>
+    <string name="dino_react_overload_hype">Bro. BRO. Sleep exists.</string>
+    <string name="dino_react_sleep_hype">%1$d hours?? Look at you go</string>
+
     <!-- ==================================================================
          SCREEN 1 - ONBOARDING
          ================================================================== -->

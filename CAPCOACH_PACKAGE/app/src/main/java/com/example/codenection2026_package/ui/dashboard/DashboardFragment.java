@@ -27,6 +27,7 @@ import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
+import com.example.codenection2026_package.ui.companion.DinoReactionBubble;
 import com.example.codenection2026_package.ui.edittask.EditTaskSheetFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.shell.AppHeader;
@@ -141,6 +142,21 @@ public class DashboardFragment extends Fragment {
     private int selectedLoad;
 
     /**
+     * The Dino's reaction bubble, which leans in beside the mascot on the capacity card
+     * and comments on the selected day from time to time.
+     *
+     * <p>Started per view in {@link #onViewCreated} and stopped in {@link #onDestroyView},
+     * like everything else bound to the view here. It is handed a live reader of
+     * {@link #selectedLoad} rather than a snapshot, because it pops repeatedly at random
+     * times and the user will usually have moved to another day in between. That also
+     * means it keeps working unchanged once the load chart is wired to real data: it will
+     * simply read whatever the card is showing at the moment it speaks, rather than a
+     * value captured when the screen opened.
+     */
+    @Nullable
+    private DinoReactionBubble dinoReaction;
+
+    /**
      * The canonical category the user last filtered by, or null for "All". Held as a
      * name rather than a chip reference so a reload can re-apply it to fresh rows.
      */
@@ -197,6 +213,14 @@ public class DashboardFragment extends Fragment {
         setupFilters();
         setupActions(view);
 
+        // The Dino's reaction bubble. Anchored to the mascot itself so its tail points at
+        // the Dino, and given a live view of selectedLoad so each remark reacts to whichever
+        // day is on screen when it speaks. Two things make it talk: arriving here, which is
+        // this call, and moving to another day, which selectDay() reports.
+        dinoReaction = new DinoReactionBubble(this);
+        dinoReaction.attach(R.id.heroMascot, () -> selectedLoad);
+        dinoReaction.onDashboardEntered();
+
         // Rows arrive asynchronously, so the empty state is on screen until they do.
         reloadTasks();
     }
@@ -227,6 +251,16 @@ public class DashboardFragment extends Fragment {
         filterPills = null;
         loadChart = null;
         rebalanceToast = null;
+
+        // The bubble reschedules itself indefinitely and is hosted in a PopupWindow, which
+        // outlives the view hierarchy it was anchored to. Stopping it here is what prevents
+        // a pending remark from firing against a dead view, or a live bubble from floating
+        // over whatever screen replaces the dashboard.
+        if (dinoReaction != null) {
+            dinoReaction.stop();
+            dinoReaction = null;
+        }
+
         super.onDestroyView();
     }
 
@@ -354,6 +388,11 @@ public class DashboardFragment extends Fragment {
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */
     private void selectDay(int index) {
+        // Read before the assignment: only a genuine move to a different day is "viewing
+        // another day", so re-tapping the day already selected says nothing new and the
+        // Dino stays quiet rather than repeating itself.
+        boolean dayChanged = index != selectedDay;
+
         selectedDay = index;
         selectedLoad = (int) WEEK_LOADS[index];
         renderChart();
@@ -362,6 +401,12 @@ public class DashboardFragment extends Fragment {
         renderCapacityCard();
         renderScheduleTitle();
         reloadTasks();
+
+        // Every caller reaches here only on a real change, but the guard is kept here so
+        // that stays true no matter who calls this next.
+        if (dayChanged && dinoReaction != null) {
+            dinoReaction.onDayViewed();
+        }
     }
 
     private void renderDays() {
