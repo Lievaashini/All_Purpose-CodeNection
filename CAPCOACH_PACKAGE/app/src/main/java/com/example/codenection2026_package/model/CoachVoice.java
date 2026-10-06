@@ -71,6 +71,36 @@ public final class CoachVoice {
                 R.string.dino_addtask_sched_chill,
                 R.string.dino_addtask_sched_plain),
 
+        /**
+         * The dashboard's spontaneous reaction bubble, one slot per capacity state.
+         *
+         * <p>The state itself is not decided here: {@code CapacityCalculator.getCapacityState}
+         * owns the banding, and the caller picks the matching constant. These five are
+         * therefore pure wording, exactly like the rest of the enum.
+         *
+         * <p><b>All five take a format argument</b>, so they must not be handed to
+         * {@link com.example.codenection2026_package.ui.shell.ToneCopy}, which resolves a
+         * slot with no arguments. The Plain variants print the real capacity percentage and
+         * {@link #DINO_REACT_SLEEP} prints the real sleep hours in every tone, so the call
+         * site is {@code getString(line.pick(tone), value)}. The Hype and Chill variants
+         * carry no specifier and simply ignore the extra argument.
+         */
+        DINO_REACT_THRIVING(R.string.dino_react_thriving_hype,
+                R.string.dino_react_thriving_chill,
+                R.string.dino_react_thriving_plain),
+        DINO_REACT_NORMAL(R.string.dino_react_normal_hype,
+                R.string.dino_react_normal_chill,
+                R.string.dino_react_normal_plain),
+        DINO_REACT_STACKED(R.string.dino_react_stacked_hype,
+                R.string.dino_react_stacked_chill,
+                R.string.dino_react_stacked_plain),
+        DINO_REACT_OVERLOAD(R.string.dino_react_overload_hype,
+                R.string.dino_react_overload_chill,
+                R.string.dino_react_overload_plain),
+        DINO_REACT_SLEEP(R.string.dino_react_sleep_hype,
+                R.string.dino_react_sleep_chill,
+                R.string.dino_react_sleep_plain),
+
         // ==================== SCREEN 1 - ONBOARDING ====================
 
         ONBOARD_SUBTITLE(R.string.onboard_subtitle_hype,
