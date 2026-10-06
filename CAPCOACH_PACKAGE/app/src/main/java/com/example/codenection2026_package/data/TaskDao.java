@@ -45,6 +45,14 @@ public interface TaskDao {
     @Query("SELECT * FROM tasks WHERE classification = :classification ORDER BY date ASC, startTime ASC")
     List<Task> findByClassification(String classification);
 
+    // For Daily Harvest: Count tasks completed exactly yesterday
+    @Query("SELECT COUNT(*) FROM tasks WHERE is_completed = 1 AND date = :targetDate")
+    int countCompletedOnDate(String targetDate);
+
+    // For Weekly Feast: Count tasks completed over the last 7 days
+    @Query("SELECT COUNT(*) FROM tasks WHERE is_completed = 1 AND date >= :startDate AND date <= :endDate")
+    int countCompletedInDateRange(String startDate, String endDate);
+
     // Update an existing task
     @Update
     void update(Task task);
