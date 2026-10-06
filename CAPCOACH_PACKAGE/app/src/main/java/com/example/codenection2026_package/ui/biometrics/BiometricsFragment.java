@@ -155,6 +155,16 @@ public class BiometricsFragment extends Fragment {
         startPenaltyAnimation();
         eventDotPulse = startDotPulse(eventDot);
         penaltyDotPulse = startDotPulse(penaltyDot);
+
+        // If Health Connect is empty, check if we've already educated the user.
+        if (snapshot.lastNightMinutes == 0) {
+            android.content.SharedPreferences prefs = requireContext().getSharedPreferences("BioPrefs", Context.MODE_PRIVATE);
+            boolean hasSeenDialog = prefs.getBoolean("hide_clock_dialog", false);
+
+            if (!hasSeenDialog) {
+                view.postDelayed(this::showNoWearableFallbackDialog, 500);
+            }
+        }
     }
 
     // ==================================================================
@@ -816,5 +826,42 @@ public class BiometricsFragment extends Fragment {
         if (animator != null) {
             animator.cancel();
         }
+    }
+
+    /**
+     * Alerts users without smartwatches and provides a 1-click shortcut to the Clock app.
+     */
+    private void showNoWearableFallbackDialog() {
+        // EXPLOIT FIX: Mark this dialog as "seen" immediately so it never nags the user again!
+        requireContext().getSharedPreferences("BioPrefs", Context.MODE_PRIVATE)
+                .edit().putBoolean("hide_clock_dialog", true).apply();
+
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("No Sleep Data Found")
+                .setMessage("No smartwatch? No problem.\n\nSet your normal sleep hours in the Android Clock's 'Bedtime' tab. (You can turn the actual wake-up alarm OFF!).\n\nYour phone will silently track your sleep using motion and screen time, and sync it directly to CapCoach!")
+                .setPositiveButton("Set it up now", (dialog, which) -> {
+                    // 1. Try the official Android standard Intent
+                    android.content.Intent intent = new android.content.Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS);
+                    try {
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        // 2. Xiaomi / MIUI Brute-Force Fallback
+                        try {
+                            android.content.Intent miuiIntent = requireContext().getPackageManager().getLaunchIntentForPackage("com.android.deskclock");
+                            if (miuiIntent != null) {
+                                startActivity(miuiIntent);
+                            } else {
+                                throw new RuntimeException("Clock package not found");
+                            }
+                        } catch (Exception e2) {
+                            // 3. Ultimate Fallback: The user has a completely non-standard OS
+                            android.widget.Toast.makeText(requireContext(),
+                                    "Clock app blocked by device manufacturer. Please open your alarms manually.",
+                                    android.widget.Toast.LENGTH_LONG).show();
+                        }
+                    }
+                })
+                .setNegativeButton("Maybe later", null)
+                .show();
     }
 }
