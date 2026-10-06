@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -23,6 +24,7 @@ import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
+import com.example.codenection2026_package.engine.CapacityCalculator;
 import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.model.ToneType;
@@ -38,9 +40,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -67,8 +71,26 @@ import java.util.Set;
  * main thread; until the first answer arrives the feed shows its "no tasks yet" empty
  * state, which is also what a genuinely free day looks like.
  *
- * <p>The capacity card and the weekly load chart still run on the prototype's demo
- * percentages - the biometrics model that will supply them is not wired yet.
+ * <p><b>The weekly load chart and the capacity card are computed from Room, not demo
+ * data.</b> Each of the seven days is queried through {@link TaskRepository} and its
+ * tasks are handed to {@link CapacityCalculator}, which is the engine's own definition
+ * of load - so the bars, the amber "heaviest day" marker, the strip dots and the card's
+ * percentage all describe the same number and all move when a task is added, edited or
+ * ticked off.
+ *
+ * <p>What is still not real, and is called out here so it is not mistaken for wired:
+ * <ul>
+ *   <li><b>Sleep</b> - the telemetry line still prints {@link #DEMO_SLEEP_HOURS}. The
+ *       {@code biometrics} table exists and {@link CapacityCalculator#applySleepPenalty}
+ *       can consume it, but nothing writes rows into it yet (the biometrics screen reads
+ *       Health Connect live), so there is no per-day figure to apply.</li>
+ *   <li><b>Mood</b> - no mood value exists anywhere in the app, so the engine's neutral
+ *       multiplier is passed (see {@link #NEUTRAL_MOOD_MODIFIER}).</li>
+ *   <li><b>Errand and Social baselines</b> - onboarding only collects weekly study, work
+ *       and co-curricular hours, so those two categories have no committed budget to
+ *       measure against and are left out of the average. See
+ *       {@link #dailyBaselineHours(String)}.</li>
+ * </ul>
  */
 public class DashboardFragment extends Fragment {
 
@@ -91,10 +113,15 @@ public class DashboardFragment extends Fragment {
     };
 
     /**
-     * The prototype's seven charted loads, in week order from Monday. Demo data:
-     * nothing computes these yet.
+     * The mood term of {@link CapacityCalculator#calculateCategoryLoad}.
+     *
+     * <p>No mood input exists anywhere in the app - there is no mood column, no mood
+     * prompt and no mood key in onboarding - so the engine's neutral value is passed.
+     * 1.0 is the multiplicative identity: the load comes out exactly as the hours and
+     * the baseline say, and wiring a real mood later means replacing this one constant
+     * rather than re-deriving the numbers.
      */
-    private static final float[] WEEK_LOADS = {65f, 50f, 40f, 75f, 88f, 25f, 20f};
+    private static final double NEUTRAL_MOOD_MODIFIER = 1.0;
 
     private static final int CRASH_CEILING_PERCENT = 90;
     private static final long TOAST_VISIBLE_MS = 4200L;
@@ -128,17 +155,47 @@ public class DashboardFragment extends Fragment {
     private final int[] weekOfYear = new int[7];
     private final String[] monthTitles = new String[7];
 
+    /**
+     * The seven computed loads, in week order from Monday, as percentages.
+     *
+     * <p>Filled by {@link #loadWeekLoads()} from the tasks Room holds for each date in
+     * {@link #weekDates}. Zero until the first answer arrives, which is also what a
+     * genuinely free day shows.
+     */
+    private final float[] weekLoads = new float[7];
+
+    /**
+     * The engine's load model. Stateless and pure, and used exactly as its author wrote
+     * it - this screen supplies the inputs and reads the result, and never re-derives
+     * the maths.
+     */
+    private final CapacityCalculator capacityCalculator = new CapacityCalculator();
+
     /** 0 = Mon ... 6 = Sun. Today's own cell. */
     private int todayIndex;
 
-    /** The cell drawn amber: the heaviest load of the week in the demo data. */
-    private int heavyIndex = 4;
+    /**
+     * The cell drawn amber: the heaviest load of the week, or -1 while no day is heavy.
+     * Recomputed from {@link #weekLoads} on every recalculation, so the marker follows
+     * the real busiest day rather than a baked-in index.
+     */
+    private int heavyIndex = -1;
 
     /** 0 = Mon ... 6 = Sun. The cell the user is looking at; starts on today. */
     private int selectedDay;
 
     /** Load shown in the capacity card, in percent. Tracks the selected day. */
     private int selectedLoad;
+
+    /**
+     * The mascot drawable currently on screen - the green, amber or red Dino - so the
+     * GIF is handed to Glide only when the state actually changes.
+     *
+     * <p>Zeroed in {@link #onDestroyView()}, because the next view starts with an empty
+     * ImageView that has to be filled again.
+     */
+    @DrawableRes
+    private int shownDinoRes;
 
     /**
      * The canonical category the user last filtered by, or null for "All". Held as a
@@ -199,6 +256,9 @@ public class DashboardFragment extends Fragment {
 
         // Rows arrive asynchronously, so the empty state is on screen until they do.
         reloadTasks();
+
+        // The chart and the card need the whole week, not just the selected day.
+        loadWeekLoads();
     }
 
     @Override
@@ -227,6 +287,7 @@ public class DashboardFragment extends Fragment {
         filterPills = null;
         loadChart = null;
         rebalanceToast = null;
+        shownDinoRes = 0;
         super.onDestroyView();
     }
 
@@ -283,18 +344,28 @@ public class DashboardFragment extends Fragment {
             cursor.add(Calendar.DAY_OF_YEAR, 1);
         }
 
+        // Nothing is heavy yet: the loads are still zero until Room answers, so this
+        // honestly returns -1 and no cell is painted amber on the first frame.
         heavyIndex = heaviestLoadIndex();
 
         // Land on today, which is also what the capacity card starts on.
         selectedDay = todayIndex;
-        selectedLoad = (int) WEEK_LOADS[selectedDay];
+        selectedLoad = Math.round(weekLoads[selectedDay]);
     }
 
-    /** @return the index of the largest demo load, so the amber bar is never a guess */
-    private static int heaviestLoadIndex() {
-        int heaviest = 0;
-        for (int i = 1; i < WEEK_LOADS.length; i++) {
-            if (WEEK_LOADS[i] > WEEK_LOADS[heaviest]) {
+    /**
+     * @return the index of the week's largest load, or -1 when no day carries any load
+     *         at all. A zero week must not crown Monday as "the heavy day": that would
+     *         paint an amber bar, an amber "0%" label and an amber strip dot on a week
+     *         where every day is equally empty.
+     */
+    private int heaviestLoadIndex() {
+        int heaviest = -1;
+        for (int i = 0; i < weekLoads.length; i++) {
+            if (weekLoads[i] <= 0f) {
+                continue;
+            }
+            if (heaviest < 0 || weekLoads[i] > weekLoads[heaviest]) {
                 heaviest = i;
             }
         }
@@ -338,7 +409,7 @@ public class DashboardFragment extends Fragment {
     /**
      * Narrow day letters, Monday first, read from strings.xml so they can be
      * translated. A fresh array every call: the load chart keeps whatever it is
-     * handed, which is why the old static was cloned on the way in.
+     * handed, which is why {@link #weekLoads} is cloned on the way in.
      */
     @NonNull
     private String[] dayLetters() {
@@ -349,13 +420,14 @@ public class DashboardFragment extends Fragment {
         if (loadChart == null) {
             return;
         }
-        loadChart.setLoads(WEEK_LOADS.clone(), dayLetters(), selectedDay, heavyIndex);
+        loadChart.setLoads(weekLoads.clone(), dayLetters(), selectedDay, heavyIndex);
     }
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */
     private void selectDay(int index) {
         selectedDay = index;
-        selectedLoad = (int) WEEK_LOADS[index];
+        // Straight off the computed week; reloadTasks() then refreshes it from Room.
+        selectedLoad = Math.round(weekLoads[index]);
         renderChart();
         renderWeekLabel();
         renderDays();
@@ -430,6 +502,168 @@ public class DashboardFragment extends Fragment {
         }
         String day = dayNames[selectedDay] + " " + dayNumbers[selectedDay];
         currentDayTitle.setText(getString(R.string.dash_schedule_title, day));
+    }
+
+    // ==================================================================
+    // Capacity: the week's loads, computed from Room
+    // ==================================================================
+
+    /**
+     * Loads all seven days of the visible week and repaints the chart, the strip's dots
+     * and the capacity card.
+     *
+     * <p>Seven small queries rather than one range query, deliberately:
+     * {@link TaskRepository} exposes {@link TaskRepository#loadByDate} and nothing wider,
+     * and widening it would mean editing the data layer another member owns. Each day
+     * repaints as its own answer lands, so the bars fill in rather than the screen
+     * sitting blank behind a barrier.
+     *
+     * <p>Safe to call repeatedly, which is what the entry point, a finished calendar
+     * sync and an edit all do.
+     */
+    private void loadWeekLoads() {
+        if (!isAdded()) {
+            return;
+        }
+        Context appContext = requireContext().getApplicationContext();
+        for (int i = 0; i < weekDates.length; i++) {
+            final int dayIndex = i;
+            TaskRepository.loadByDate(appContext, weekDates[i], feed -> {
+                // Seven queries are in flight, and the user can leave the screen while
+                // they run: loadChart is nulled in onDestroyView, so this is the check
+                // that keeps a late answer off a dead view.
+                if (!isAdded() || loadChart == null) {
+                    return;
+                }
+                recalculateDayLoad(dayIndex, feed);
+            });
+        }
+    }
+
+    /**
+     * Recomputes one day's load from its tasks and repaints everything that shows it.
+     *
+     * <p>Completed tasks deliberately count for nothing:
+     * {@link CapacityCalculator#calculateTaskHours} returns zero for them, so ticking a
+     * row off visibly relieves that day's bar. That is the engine's meaning of load -
+     * what is still ahead of you - and this screen does not second-guess it.
+     */
+    private void recalculateDayLoad(int dayIndex,
+                                    @Nullable List<TaskRepository.FeedItem> feed) {
+        if (dayIndex < 0 || dayIndex >= weekLoads.length) {
+            return;
+        }
+
+        // 1. The day's hours, grouped by the category each task was filed under. The
+        //    category names are the canonical ones the engine's weights are keyed on.
+        Map<String, Double> inputHours = new HashMap<>();
+        if (feed != null) {
+            for (TaskRepository.FeedItem item : feed) {
+                String category = item.getCategoryName();
+                if (category == null) {
+                    // A row filed before categories existed has nothing to be measured
+                    // against, so it cannot contribute a load.
+                    continue;
+                }
+                double hours = taskHours(item.getTask());
+                if (hours > 0) {
+                    inputHours.put(category, inputHours.getOrDefault(category, 0.0) + hours);
+                }
+            }
+        }
+
+        // 2. Hours against the user's own daily baseline, category by category.
+        Map<String, Double> categoryLoads = new HashMap<>();
+        for (Map.Entry<String, Double> entry : inputHours.entrySet()) {
+            Double baseline = dailyBaselineHours(entry.getKey());
+            if (baseline == null) {
+                continue;
+            }
+            categoryLoads.put(entry.getKey(), capacityCalculator.calculateCategoryLoad(
+                    entry.getValue(), baseline, NEUTRAL_MOOD_MODIFIER));
+        }
+
+        // 3. The engine's weighted overall capacity for the day. An empty map is a
+        //    genuinely free day and comes back as 0.
+        weekLoads[dayIndex] = (float) capacityCalculator.calculateOverallCapacity(categoryLoads);
+
+        repaintLoads();
+    }
+
+    /**
+     * The engine parses the stored times itself, and a malformed row must not take the
+     * dashboard's main thread down with it. The repositories in this project report
+     * failures by falling back rather than by throwing, and this follows suit.
+     *
+     * @return the task's hours, or 0 when the row carries no usable window
+     */
+    private double taskHours(@NonNull Task task) {
+        try {
+            return capacityCalculator.calculateTaskHours(task);
+        } catch (RuntimeException e) {
+            android.util.Log.w("CapCoachAPI",
+                    "Skipping a task with an unparseable time window: " + task.getTaskName(), e);
+            return 0.0;
+        }
+    }
+
+    /**
+     * The per-day hours a category is measured against - the denominator that decides
+     * what "100% load" means.
+     *
+     * <p>Taken from the user's own onboarding answers rather than a constant here:
+     * onboarding collects <i>weekly</i> study, work and co-curricular hours, so the
+     * daily share is that figure over seven. The three sliders map onto the categories
+     * that have a committed budget - study to Academic, work to Work, co-curricular to
+     * Co-curricular.
+     *
+     * <p><b>Errand and Social return null on purpose.</b> Onboarding never asks for
+     * them, so there is no budget to measure a day against. Feeding them in anyway would
+     * be worse than leaving them out: {@code calculateCategoryLoad} returns 0 for a
+     * zero baseline, and {@link CapacityCalculator#calculateOverallCapacity} <i>averages</i>
+     * the categories it is handed, so a 0-load category would drag a heavy day's number
+     * down - a two hour errand run would make the card look calmer. Their share of a
+     * user-set budget is a question for the capacity owner, not a number for this screen
+     * to invent.
+     *
+     * @return hours per day, or null when the category has no baseline to measure against
+     */
+    @Nullable
+    private Double dailyBaselineHours(@NonNull String category) {
+        Context context = getContext();
+        if (context == null) {
+            return null;
+        }
+
+        int weeklyHours;
+        if (CategoryRepository.ACADEMIC.equals(category)) {
+            weeklyHours = OnboardingPrefs.getStudyHours(context);
+        } else if (CategoryRepository.WORK.equals(category)) {
+            weeklyHours = OnboardingPrefs.getWorkHours(context);
+        } else if (CategoryRepository.CO_CURRICULAR.equals(category)) {
+            weeklyHours = OnboardingPrefs.getCocurricularHours(context);
+        } else {
+            return null;
+        }
+
+        return weeklyHours > 0 ? weeklyHours / 7.0 : null;
+    }
+
+    /**
+     * Repaints the three surfaces that show load, from {@link #weekLoads} alone.
+     *
+     * <p>The strip is included because its amber dot follows the heaviest day, and the
+     * heaviest day moves as tasks are added, edited or ticked off.
+     */
+    private void repaintLoads() {
+        if (!isAdded()) {
+            return;
+        }
+        heavyIndex = heaviestLoadIndex();
+        selectedLoad = Math.round(weekLoads[selectedDay]);
+        renderChart();
+        renderDays();
+        renderCapacityCard();
     }
 
     // ==================================================================
@@ -508,9 +742,16 @@ public class DashboardFragment extends Fragment {
         }
 
         ImageView mascot = getView() == null ? null : getView().findViewById(R.id.heroMascot);
-        if (mascot != null) {
+        if (mascot != null && dinoRes != shownDinoRes) {
             // The mascot assets are animated GIFs, so they must go through Glide.
             // setImageResource would decode only the first frame and freeze it.
+            //
+            // Only on a real state change: re-issuing the same request on every repaint
+            // restarts the animation from its first frame, and this card is repainted a
+            // lot - once per day the week sweep answers, on every day tap, after every
+            // edit and after every tick. Caching the resource keeps a running GIF
+            // running, and still swaps it the instant the load crosses a threshold.
+            shownDinoRes = dinoRes;
             Glide.with(this).load(dinoRes).into(mascot);
         }
     }
@@ -532,6 +773,10 @@ public class DashboardFragment extends Fragment {
     /**
      * Loads the selected day's rows and paints them.
      *
+     * <p>The same answer also refreshes that day's load, so the bar, the strip dot and
+     * the capacity card stay in step with the feed the user is looking at - ticking a
+     * task off here visibly relieves the day.
+     *
      * <p>The query runs on {@link TaskRepository}'s worker thread and comes back on
      * the main thread, so this can be called from a click handler.
      */
@@ -539,11 +784,24 @@ public class DashboardFragment extends Fragment {
         if (tasksList == null || weekDates[selectedDay] == null) {
             return;
         }
-        TaskRepository.loadByDate(requireContext(), weekDates[selectedDay], tasks -> {
+
+        // Pinned at the moment of asking. The user can tap another day while this query
+        // is in flight, so the answer has to be filed against the day that was asked
+        // for, not against whatever happens to be selected when it lands.
+        final int dayIndex = selectedDay;
+        final String isoDate = weekDates[dayIndex];
+
+        TaskRepository.loadByDate(requireContext(), isoDate, tasks -> {
             if (!isAdded() || tasksList == null) {
                 return;
             }
-            renderTaskFeed(tasks);
+            recalculateDayLoad(dayIndex, tasks);
+
+            // The feed, unlike the load, is only repainted while this answer still
+            // describes the day on screen.
+            if (dayIndex == selectedDay) {
+                renderTaskFeed(tasks);
+            }
         });
     }
 
@@ -711,9 +969,13 @@ public class DashboardFragment extends Fragment {
         int index = indexOfWeekDate(isoDate);
         if (index >= 0 && index != selectedDay) {
             selectDay(index);
-            return;
+        } else {
+            reloadTasks();
         }
-        reloadTasks();
+
+        // An edit can also move a row to another date, which leaves the day it came
+        // from stale, so the whole week is recomputed rather than only the reported day.
+        loadWeekLoads();
     }
 
     /** @return the localised label for a canonical category name */
@@ -807,9 +1069,37 @@ public class DashboardFragment extends Fragment {
             TaskRepository.update(requireContext(), task, success -> {
                 if (!Boolean.TRUE.equals(success)) {
                     android.util.Log.e("CapCoachAPI", "Failed to save checkmark state to DB.");
+                    return;
                 }
+                // The engine counts only what is still ahead of the user, so this tick
+                // just changed that day's load - and with it the bar, the strip's dot and
+                // the Dino. Refreshed from Room rather than from the row, because the
+                // saved value is what the engine will read back.
+                refreshDayLoad(indexOfWeekDate(task.getDate()));
             });
         }
+    }
+
+    /**
+     * Recomputes one day's load from Room without rebuilding the feed.
+     *
+     * <p>Used when the change came from the feed itself - a row being ticked off - so the
+     * bars and the mascot follow the tick without the row list flickering under the
+     * user's finger the way a full {@link #reloadTasks()} would.
+     *
+     * @param dayIndex index into {@link #weekDates}, or -1 for a date outside this week
+     */
+    private void refreshDayLoad(int dayIndex) {
+        if (!isAdded() || loadChart == null
+                || dayIndex < 0 || dayIndex >= weekDates.length) {
+            return;
+        }
+        TaskRepository.loadByDate(requireContext(), weekDates[dayIndex], tasks -> {
+            if (!isAdded() || loadChart == null) {
+                return;
+            }
+            recalculateDayLoad(dayIndex, tasks);
+        });
     }
     /**
      * Counter and "All (n)" chip both count VISIBLE rows only, so a filter narrows
@@ -1084,6 +1374,10 @@ public class DashboardFragment extends Fragment {
             Toast.makeText(requireContext(),
                     getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
                     Toast.LENGTH_SHORT).show();
+
+            // A sync writes rows across the whole 22-day window, not just the day on
+            // screen, so every bar is recomputed once the sweep has finished.
+            loadWeekLoads();
         }
     }
     private void openTriage() {
@@ -1113,12 +1407,16 @@ public class DashboardFragment extends Fragment {
             } else {
                 reloadTasks();
             }
+            // The new row carries hours, so the day it landed on - and therefore which
+            // day is the week's heaviest - has changed.
+            loadWeekLoads();
             return;
         }
         Toast.makeText(requireContext(),
                 getString(CoachVoice.Line.DASH_SAVED_OTHER_WEEK.pick(tone()), isoDate),
                 Toast.LENGTH_LONG).show();
         reloadTasks();
+        loadWeekLoads();
     }
 
     /** The coaching tone chosen in onboarding or Settings. */
