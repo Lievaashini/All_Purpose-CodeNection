@@ -236,8 +236,7 @@ public class BiometricsFragment extends Fragment {
         // The existing helpers own both of these. Debt is measured against the target, and
         // the resulting 0-100 score is exactly the recoveryDebtScore LoadShedder expects.
         double debtHours = HealthConnectReader.getSleepDebtHours(lastNight, TARGET_SLEEP_HOURS);
-        int debtScore = HealthConnectReader.calculateRecoveryDebtScore(debtHours, hasSleep);
-
+        int debtScore = HealthConnectReader.calculateRecoveryDebtScore(debtHours, hrvMs, hasSleep);
         int deficitPercent = hasSleep && debtHours > 0
                 ? (int) Math.round(debtHours / TARGET_SLEEP_HOURS * 100.0)
                 : 0;
