@@ -42,6 +42,19 @@
     <string name="dino_addtask_guard_chill">"Shift locked in. Nothing collides with study time."</string>
     <string name="dino_addtask_sched_chill">Shedding buffer: %1$s. %2$s stays off the shed list.</string>
 
+    <!-- Spontaneous dashboard reaction bubble. See tone_hype.xml for the shared
+         rules: one slot per capacity state plus one for good sleep, every slot
+         takes %1$d, and no literal quotes because the bubble draws its own frame.
+
+         The 50-80% line deliberately names no weekday. Naming one would be wrong
+         six days out of seven, so it points at the user's own heaviest day, which
+         the dashboard already tracks. -->
+    <string name="dino_react_thriving_chill">You\'ve got room to breathe this week.</string>
+    <string name="dino_react_normal_chill">Steady week. Worth a look at your heaviest day.</string>
+    <string name="dino_react_stacked_chill">You\'re stacked. Let\'s find something to move.</string>
+    <string name="dino_react_overload_chill">This isn\'t sustainable — let\'s fix one thing.</string>
+    <string name="dino_react_sleep_chill">Nice, that\'ll help.</string>
+
     <!-- ==================================================================
          SCREEN 1 - ONBOARDING
          ================================================================== -->
@@ -131,7 +144,7 @@
 
     <string name="bio_event_pill_chill">Something in Your Biometrics</string>
     <string name="bio_anomaly_title_chill">Health Connect: &lt; 5 Hours Sleep Noted</string>
-    <string name="bio_anomaly_body_chill">Last night\'s sleep: 4h 18m, against a target of 8h 00m. Recovery came up short.</string>
+    <string name="bio_anomaly_body_chill">Last night\'s sleep: %1$s, against a target of %2$s. Recovery came up short.</string>
     <string name="bio_hrv_state_chill">Running Tense</string>
     <string name="bio_hrv_state_sub_chill">Nervous system is working hard</string>
     <string name="bio_trend_state_chill">A Real Dip</string>

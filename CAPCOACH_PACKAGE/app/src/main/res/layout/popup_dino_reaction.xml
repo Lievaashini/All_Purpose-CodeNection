@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Dino's spontaneous reaction bubble, shown next to the Dino on the dashboard.
+
+  Not a dialog and not a screen: it is a small speech bubble that leans in beside the
+  mascot already on the capacity card, says one line, and leaves. It is hosted in a
+  PopupWindow rather than inserted into fragment_dashboard.xml, so the capacity card's
+  own layout is untouched and the bubble can float over whatever is underneath.
+
+  ALL TEXT HERE IS A FALLBACK. The line depends on the coaching tone AND on the live
+  capacity state, so DinoReactionBubble writes the real copy at runtime; the layout only
+  carries the Hype wording as a preview for the layout editor.
+
+  The sprite is an animated GIF, so it is loaded with Glide in code and has no src here.
+
+  NEW FILE - additive. Nothing existing is modified.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dinoReactionRoot"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <!-- Tail, anchored under the Dino's plate. Drawn first so the bubble's top edge
+         covers its last dp and the two merge into one shape. The 16dp start offset puts
+         the 18dp tail's centre at 25dp, which is the centre of the 48dp mascot it is
+         anchored to - so the point lands squarely under the Dino rather than beside it. -->
+    <ImageView
+        android:id="@+id/dinoReactionTail"
+        android:layout_width="18dp"
+        android:layout_height="9dp"
+        android:layout_marginStart="16dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_bubble_tail_up" />
+
+    <LinearLayout
+        android:id="@+id/dinoReactionBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_speech_bubble"
+        android:elevation="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/space_md"
+        android:paddingTop="@dimen/space_sm"
+        android:paddingEnd="@dimen/space_xxs"
+        android:paddingBottom="@dimen/space_sm">
+
+        <!-- The reaction sprite: the Dino's own face reacting to the state. This is
+             where the humour of the feature lives, so it changes with the state while
+             the wording changes with the tone. -->
+        <ImageView
+            android:id="@+id/dinoReactionAvatar"
+            android:layout_width="@dimen/dino_card"
+            android:layout_height="@dimen/dino_card"
+            android:contentDescription="@string/dino_description"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/dinoReactionText"
+            style="@style/Text.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_sm"
+            android:maxWidth="196dp"
+            android:textColor="@color/text_primary_dark"
+            tools:text="Busy but you got this." />
+
+        <!-- The way out of this particular remark. Closing it costs nothing, because
+             nothing is on a clock: the Dino speaks again only when the user arrives on
+             the dashboard or moves to another day. 40dp keeps it comfortably tappable
+             while staying proportionate to a bubble this small. -->
+        <ImageView
+            android:id="@+id/dinoReactionClose"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_close_modal"
+            android:padding="11dp"
+            android:src="@drawable/ic_close"
+            app:tint="@color/text_muted_dark" />
+    </LinearLayout>
+
+</FrameLayout>

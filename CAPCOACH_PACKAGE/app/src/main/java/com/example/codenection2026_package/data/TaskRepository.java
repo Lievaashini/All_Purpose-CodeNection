@@ -241,4 +241,63 @@ public final class TaskRepository {
             MAIN.post(() -> callback.onResult(result));
         });
     }
+
+    /**
+     * Removes a task.
+     *
+     * <p>Here for the same reason {@link #save} and {@link #update} are: the Edit Task sheet
+     * runs on the main thread, and {@link TaskDao#delete} would throw there. The row is
+     * matched on its primary key, so the task handed in has to be one that came back from a
+     * query rather than a freshly built one.
+     *
+     * <p>The foreign key runs the other way - {@code Task} points at {@code Category} with
+     * {@code onDelete = SET_NULL} - so removing a task never disturbs the category it was
+     * filed under.
+     *
+     * @param callback receives true when the row was removed, false when the delete failed
+     */
+    public static void delete(@NonNull Context context,
+                              @NonNull Task task,
+                              @NonNull Callback<Boolean> callback) {
+        final Context appContext = context.getApplicationContext();
+        IO.execute(() -> {
+            boolean success = true;
+            try {
+                AppDatabase db = AppDatabase.get(appContext);
+                db.taskDao().delete(task);
+            } catch (RuntimeException e) {
+                success = false;
+            }
+            final Boolean result = success;
+            MAIN.post(() -> callback.onResult(result));
+        });
+    }
+
+    public static void getDailyAppleCount(@NonNull Context context, @NonNull String dateStr, @NonNull Callback<Integer> callback) {
+        final Context appContext = context.getApplicationContext();
+        IO.execute(() -> {
+            int count = 0;
+            try {
+                count = AppDatabase.get(appContext).taskDao().countCompletedOnDate(dateStr);
+            } catch (Exception e) {
+                android.util.Log.e("CapCoachDB", "Failed to count daily apples", e);
+            }
+            final int finalCount = count;
+            MAIN.post(() -> callback.onResult(finalCount));
+        });
+    }
+
+    public static void getWeeklyAppleCount(@NonNull Context context, @NonNull String startDate, @NonNull String endDate, @NonNull Callback<Integer> callback) {
+        final Context appContext = context.getApplicationContext();
+        IO.execute(() -> {
+            int count = 0;
+            try {
+                count = AppDatabase.get(appContext).taskDao().countCompletedInDateRange(startDate, endDate);
+            } catch (Exception e) {
+                android.util.Log.e("CapCoachDB", "Failed to count weekly apples", e);
+            }
+            final int finalCount = count;
+            MAIN.post(() -> callback.onResult(finalCount));
+        });
+    }
 }

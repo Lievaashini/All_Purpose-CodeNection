@@ -57,15 +57,19 @@ public class CalendarManager {
         List<CalendarEvent> eventsList = new ArrayList<>();
         ContentResolver contentResolver = context.getContentResolver();
 
-        // 1. Reset to the start of today (00:00:00) so morning events are included
+        // 1. Reset to the start of today (00:00:00)
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
+
+        // Step BACKWARD 7 days so Monday/Tuesday don't get falsely deleted
+        cal.add(Calendar.DAY_OF_YEAR, -7);
         long startRange = cal.getTimeInMillis();
 
-        cal.add(Calendar.DAY_OF_YEAR, 7);
+        // Step FORWARD 14 days (covers the rest of this week + next week)
+        cal.add(Calendar.DAY_OF_YEAR, 22);
         long endRange = cal.getTimeInMillis();
 
         // 2. Query Instances instead of Events so recurring events are expanded
@@ -88,7 +92,11 @@ public class CalendarManager {
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
         try (Cursor cursor = contentResolver.query(uri, projection, null, null, sortOrder)) {
-            if (cursor != null && cursor.getCount() > 0) {
+
+            // FIX 1: If the provider crashes and returns a null cursor, abort and return null!
+            if (cursor == null) return null;
+
+            if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
                     long eventId = cursor.getLong(0);
                     String title = cursor.getString(1);
@@ -115,6 +123,7 @@ public class CalendarManager {
             }
         } catch (SecurityException e) {
             Log.e(TAG, "Calendar permission not granted: " + e.getMessage());
+            return null;
         }
         return eventsList;
     }

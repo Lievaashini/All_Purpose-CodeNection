@@ -27,6 +27,8 @@ import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.addtask.AddTaskSheetFragment;
+import com.example.codenection2026_package.ui.companion.DinoReactionBubble;
+import com.example.codenection2026_package.ui.edittask.EditTaskSheetFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
@@ -140,6 +142,21 @@ public class DashboardFragment extends Fragment {
     private int selectedLoad;
 
     /**
+     * The Dino's reaction bubble, which leans in beside the mascot on the capacity card
+     * and comments on the selected day from time to time.
+     *
+     * <p>Started per view in {@link #onViewCreated} and stopped in {@link #onDestroyView},
+     * like everything else bound to the view here. It is handed a live reader of
+     * {@link #selectedLoad} rather than a snapshot, because it pops repeatedly at random
+     * times and the user will usually have moved to another day in between. That also
+     * means it keeps working unchanged once the load chart is wired to real data: it will
+     * simply read whatever the card is showing at the moment it speaks, rather than a
+     * value captured when the screen opened.
+     */
+    @Nullable
+    private DinoReactionBubble dinoReaction;
+
+    /**
      * The canonical category the user last filtered by, or null for "All". Held as a
      * name rather than a chip reference so a reload can re-apply it to fresh rows.
      */
@@ -196,6 +213,14 @@ public class DashboardFragment extends Fragment {
         setupFilters();
         setupActions(view);
 
+        // The Dino's reaction bubble. Anchored to the mascot itself so its tail points at
+        // the Dino, and given a live view of selectedLoad so each remark reacts to whichever
+        // day is on screen when it speaks. Two things make it talk: arriving here, which is
+        // this call, and moving to another day, which selectDay() reports.
+        dinoReaction = new DinoReactionBubble(this);
+        dinoReaction.attach(R.id.heroMascot, () -> selectedLoad);
+        dinoReaction.onDashboardEntered();
+
         // Rows arrive asynchronously, so the empty state is on screen until they do.
         reloadTasks();
     }
@@ -226,6 +251,16 @@ public class DashboardFragment extends Fragment {
         filterPills = null;
         loadChart = null;
         rebalanceToast = null;
+
+        // The bubble reschedules itself indefinitely and is hosted in a PopupWindow, which
+        // outlives the view hierarchy it was anchored to. Stopping it here is what prevents
+        // a pending remark from firing against a dead view, or a live bubble from floating
+        // over whatever screen replaces the dashboard.
+        if (dinoReaction != null) {
+            dinoReaction.stop();
+            dinoReaction = null;
+        }
+
         super.onDestroyView();
     }
 
@@ -353,6 +388,11 @@ public class DashboardFragment extends Fragment {
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */
     private void selectDay(int index) {
+        // Read before the assignment: only a genuine move to a different day is "viewing
+        // another day", so re-tapping the day already selected says nothing new and the
+        // Dino stays quiet rather than repeating itself.
+        boolean dayChanged = index != selectedDay;
+
         selectedDay = index;
         selectedLoad = (int) WEEK_LOADS[index];
         renderChart();
@@ -361,6 +401,12 @@ public class DashboardFragment extends Fragment {
         renderCapacityCard();
         renderScheduleTitle();
         reloadTasks();
+
+        // Every caller reaches here only on a real change, but the guard is kept here so
+        // that stays true no matter who calls this next.
+        if (dayChanged && dinoReaction != null) {
+            dinoReaction.onDayViewed();
+        }
     }
 
     private void renderDays() {
@@ -663,7 +709,56 @@ public class DashboardFragment extends Fragment {
             toggleDone(row); // This visually checks it off
         }
 
+        // Long-press opens the Edit Task sheet. The standard Android gesture for "act on this
+        // item" is used rather than a tap, so the row keeps its unclaimed tap gesture and the
+        // check box keeps its own target: a tap on the box still only ticks the task off.
+        row.setOnLongClickListener(v -> {
+            Object rowTag = v.getTag();
+            if (rowTag instanceof Task) {
+                Task clickedTask = (Task) rowTag;
+
+                //Prevents completed task from edits
+                if (clickedTask.isCompleted()) {
+                    //TO BE REPLACED WITH LINES IN STRINGS.XML
+                    Toast.makeText(requireContext(), "Completed tasks cannot be edited.", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+
+                openEditTask(clickedTask, category);
+                return true;
+            }
+            return false;
+        });
+
         return row;
+    }
+
+    /**
+     * Opens the Edit Task sheet for one row.
+     *
+     * <p>The category name travels with the task because the row only stores its id: the
+     * sheet's spinner is indexed by position, so it needs the canonical name to preselect the
+     * entry the task was actually filed under.
+     */
+    private void openEditTask(@NonNull Task task, @Nullable String category) {
+        EditTaskSheetFragment sheet = EditTaskSheetFragment.newInstance(task, category);
+        sheet.setOnTaskChangedListener(this::onTaskChanged);
+        sheet.show(getChildFragmentManager(), EditTaskSheetFragment.TAG);
+    }
+
+    /**
+     * The edit sheet rewrote or removed a row.
+     *
+     * <p>Same treatment as a save: if the row belongs to a day of the week on screen, go there
+     * so the change is visible straight away.
+     */
+    private void onTaskChanged(@NonNull String isoDate) {
+        int index = indexOfWeekDate(isoDate);
+        if (index >= 0 && index != selectedDay) {
+            selectDay(index);
+            return;
+        }
+        reloadTasks();
     }
 
     /** @return the localised label for a canonical category name */
@@ -890,70 +985,151 @@ public class DashboardFragment extends Fragment {
      * Pulls the user's native Google Calendar events and maps them directly
      * into Lieva's Room database via TaskRepository, with de-duplication.
      */
+    /**
+     * Pulls the user's native Google Calendar events and maps them directly
+     * into Lieva's Room database via TaskRepository, with de-duplication.
+     */
     private void syncCalendar() {
         Toast.makeText(requireContext(),
                 getString(CoachVoice.Line.DASH_SYNC_STARTING.pick(tone())),
                 Toast.LENGTH_SHORT).show();
 
-        List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
-
-        if (nativeEvents == null || nativeEvents.isEmpty()) {
-            Toast.makeText(requireContext(),
-                    getString(CoachVoice.Line.DASH_SYNC_NONE.pick(tone())),
-                    Toast.LENGTH_SHORT).show();
+        // THE GUARDRAIL: Check for permission explicitly.
+        // This prevents the data-loss bug WITHOUT blocking empty calendars.
+        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_CALENDAR) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(requireContext(), "Calendar permission denied. Cannot sync.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Context appContext = requireContext().getApplicationContext();
 
-        for (CalendarManager.CalendarEvent event : nativeEvents) {
+        new Thread(() -> {
+            List<CalendarManager.CalendarEvent> nativeEvents = calendarManager.logUpcomingWeekEvents();
 
-            // TO BE DELETED LOGCAT TEST LINE:
-            android.util.Log.d("CapCoachAPI", "Syncing Event: " + event.title + " | ID: " + event.eventId + " | Date: " + event.dateStr);
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                if (!isAdded()) return;
 
-            // Search the database for this exact Google Calendar ID ON THIS EXACT Date and Time
-            TaskRepository.findByCalendarIdAndDateAndTime(appContext, event.eventId, event.dateStr, event.startTimeStr, existingTask -> {
-                if (existingTask != null) {
-                    // THE EVENT ALREADY EXISTS!
-                    // Update its times in case the user rescheduled it in Google Calendar
-                    existingTask.setDate(event.dateStr);
-                    existingTask.setStartTime(event.startTimeStr);
-                    existingTask.setEndTime(event.endTimeStr);
-                    existingTask.setTaskName(event.title);
+                // GUARDRAIL: If it returns NULL, the read failed. Abort to prevent wiping data.
+                if (nativeEvents == null) {
+                    Toast.makeText(requireContext(), "Sync failed. Could not read calendar.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                    TaskRepository.update(appContext, existingTask, success -> {
-                        if (Boolean.TRUE.equals(success) && isAdded()) {
-                            reloadTasks(); // Refresh UI in case it moved to the currently viewed day
+                if (nativeEvents.isEmpty()) {
+                    Toast.makeText(requireContext(), getString(CoachVoice.Line.DASH_SYNC_NONE.pick(tone())), Toast.LENGTH_SHORT).show();
+                }
+
+                // 1. GATHER ALL DATES: Generate the EXACT 22-day window queried in CalendarManager.
+                // This ensures we check every day for ghosts, even if they aren't on the visible week strip.
+                Set<String> datesToSync = new HashSet<>();
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                cal.add(Calendar.DAY_OF_YEAR, -7);
+
+                SimpleDateFormat iso = new SimpleDateFormat(ISO_PATTERN, Locale.US);
+                for (int i = 0; i < 22; i++) { // 7 days back + today + 14 days forward = 22 days
+                    datesToSync.add(iso.format(cal.getTime()));
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                }
+
+                // Track how many days have finished processing to know when to refresh the UI
+                final int totalDays = datesToSync.size();
+                final int[] daysProcessed = {0};
+
+                // 2. Loop through every distinct date in our wide window
+                for (String dateStr : datesToSync) {
+
+                    // Filter the native Google events down to JUST this specific day
+                    List<CalendarManager.CalendarEvent> nativeForDay = new ArrayList<>();
+                    for (CalendarManager.CalendarEvent e : nativeEvents) {
+                        if (dateStr.equals(e.dateStr)) {
+                            nativeForDay.add(e);
                         }
-                    });
+                    }
 
-                } else {
-                    // IT DOES NOT EXIST. Insert a new row.
-                    Task importedTask = new Task(
-                            "INFLEXIBLE",
-                            event.title,
-                            null,
-                            event.dateStr,
-                            event.startTimeStr,
-                            event.endTimeStr
-                    );
-                    importedTask.setPriority(Task.PRIORITY_MED);
-                    importedTask.setDeferralHours(0);
-                    importedTask.setCalendarEventId(event.eventId); // SAVE THE STABLE ID
+                    // 3. Pull CapCoach's local tasks for this specific day
+                    TaskRepository.loadByDate(appContext, dateStr, localFeed -> {
+                        if (localFeed == null) {
+                            checkAndReload(totalDays, daysProcessed);
+                            return;
+                        }
 
-                    TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {
-                        if (rowId != null && rowId > 0 && isAdded()) {
-                            if (indexOfWeekDate(event.dateStr) == selectedDay) {
-                                reloadTasks();
+                        // --- STEP A: KILL GHOSTS ---
+                        for (TaskRepository.FeedItem item : localFeed) {
+                            Task localTask = item.getTask();
+                            if (localTask.getCalendarEventId() != null) {
+                                boolean stillExistsInGoogle = false;
+                                for (CalendarManager.CalendarEvent ne : nativeForDay) {
+                                    if (ne.eventId == localTask.getCalendarEventId()) {
+                                        stillExistsInGoogle = true;
+                                        break;
+                                    }
+                                }
+                                if (!stillExistsInGoogle) {
+
+                                    // LOGCAT GHOSTKILLER TEST:
+                                    android.util.Log.d("CapCoachAPI", "Ghost Killer: Deleting hidden ghost event: " + localTask.getTaskName() + " on " + localTask.getDate());
+
+                                    // Ghost detected! Physically delete it and wait for success.
+                                    TaskRepository.delete(appContext, localTask, success -> {
+                                        if (isAdded() && indexOfWeekDate(dateStr) == selectedDay) reloadTasks();
+                                    });
+                                }
                             }
                         }
+
+                        // --- STEP B: ADD NEW / UPDATE EXISTING ---
+                        for (CalendarManager.CalendarEvent ne : nativeForDay) {
+                            Task matchedLocal = null;
+                            for (TaskRepository.FeedItem item : localFeed) {
+                                Task localTask = item.getTask();
+                                if (localTask.getCalendarEventId() != null &&
+                                        localTask.getCalendarEventId() == ne.eventId) {
+                                    matchedLocal = localTask;
+                                    break;
+                                }
+                            }
+
+                            if (matchedLocal != null) {
+                                matchedLocal.setStartTime(ne.startTimeStr);
+                                matchedLocal.setEndTime(ne.endTimeStr);
+                                matchedLocal.setTaskName(ne.title);
+                                TaskRepository.update(appContext, matchedLocal, success -> {
+                                    if (isAdded() && indexOfWeekDate(dateStr) == selectedDay) reloadTasks();
+                                });
+                            } else {
+                                Task importedTask = new Task(
+                                        "INFLEXIBLE", ne.title, null,
+                                        ne.dateStr, ne.startTimeStr, ne.endTimeStr
+                                );
+                                importedTask.setPriority(Task.PRIORITY_MED);
+                                importedTask.setDeferralHours(0);
+                                importedTask.setCalendarEventId(ne.eventId);
+
+                                TaskRepository.save(appContext, importedTask, CategoryRepository.ACADEMIC, rowId -> {
+                                    if (isAdded() && indexOfWeekDate(ne.dateStr) == selectedDay) reloadTasks();
+                                });
+                            }
+                        }
+
+                        checkAndReload(totalDays, daysProcessed);
                     });
                 }
             });
+        }).start();
+    }
+
+    /** Helper to trigger the final UI toast when the loop completes. */
+    private void checkAndReload(int totalDays, int[] daysProcessed) {
+        daysProcessed[0]++;
+        if (daysProcessed[0] == totalDays && isAdded()) {
+            Toast.makeText(requireContext(),
+                    getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
+                    Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(requireContext(),
-                getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
-                Toast.LENGTH_SHORT).show();
     }
     private void openTriage() {
         TriageSheetFragment sheet = new TriageSheetFragment();

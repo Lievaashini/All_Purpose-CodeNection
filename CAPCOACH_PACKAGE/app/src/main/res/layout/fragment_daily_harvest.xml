@@ -277,11 +277,13 @@
                     </LinearLayout>
                 </LinearLayout>
 
+                <!-- HIDING THIS CONFUSING PROTOTYPE CARD FOR MVP -->
                 <LinearLayout
                     android:layout_width="140dp"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_surface_low"
                     android:orientation="vertical"
+                    android:visibility="gone"
                     android:padding="@dimen/space_sm">
 
                     <LinearLayout

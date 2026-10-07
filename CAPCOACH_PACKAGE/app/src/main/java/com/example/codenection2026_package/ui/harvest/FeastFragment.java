@@ -28,6 +28,7 @@ import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.shell.ToneCopy;
 
+import java.util.Calendar;
 import java.util.Random;
 
 /**
@@ -54,12 +55,13 @@ public class FeastFragment extends Fragment {
 
     /** Sunday is day 7 of the streak, per the prototype pill. */
     private static final int FEAST_DAY = 7;
-    /** The prototype's harvest total for the week. */
-    private static final int TOTAL_APPLES = 16;
     /** Munch sits quieter than the task-done chime on the Dashboard. */
     private static final float MUNCH_VOLUME = 0.6f;
 
-    private int remainingApples = TOTAL_APPLES;
+    /** The week's actual harvest total, loaded live from completed tasks. */
+    private int totalApples = 0;
+
+    private int remainingApples = totalApples;
     private int eatenApples = 0;
     private boolean isEating = false;
 
@@ -84,6 +86,8 @@ public class FeastFragment extends Fragment {
     private int munchSoundId;
     private boolean munchLoaded = false;
 
+    private String weekKey = "";
+
     @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -103,9 +107,6 @@ public class FeastFragment extends Fragment {
         dinoMouthOpen = view.findViewById(R.id.dinoMouthOpen);
         dinoBubble = view.findViewById(R.id.dinoBubble);
         if (dinoBubble != null) {
-            // The opening line arrives from the layout, which cannot know the coaching tone,
-            // so it is set here instead. Every later line on this screen already goes
-            // through CoachVoice.
             dinoBubble.setText(CoachVoice.Line.DINO_FEAST_HUNGRY.pick(tone()));
         }
         applesRemainingCount = view.findViewById(R.id.applesRemainingCount);
@@ -122,9 +123,6 @@ public class FeastFragment extends Fragment {
             dinoStage = (ViewGroup) stage;
         }
 
-        // Prose that depends on the coaching tone cannot live in the layout, which has no
-        // way to know which tone the user picked. The layout carries the Hype wording as a
-        // design-time preview and a graceful fallback; this pass rewrites it.
         ToneCopy.on(view, tone())
                 .set(R.id.feastTitle, CoachVoice.Line.FEAST_TITLE)
                 .set(R.id.feastTrayTitle, CoachVoice.Line.FEAST_TRAY_TITLE);
@@ -133,19 +131,53 @@ public class FeastFragment extends Fragment {
         if (pill != null) {
             pill.setText(getString(R.string.feast_pill, FEAST_DAY));
         }
-        TextView totalLabel = view.findViewById(R.id.applesTotalLabel);
-        if (totalLabel != null) {
-            totalLabel.setText(getString(R.string.feast_stash_total, TOTAL_APPLES));
-        }
-        TextView subtitle = view.findViewById(R.id.feastSubtitle);
-        if (subtitle != null) {
-            subtitle.setText(getString(CoachVoice.Line.FEAST_SUBTITLE.pick(tone()), TOTAL_APPLES));
-        }
 
         loadMunchSound();
-        buildAppleTray();
-        wireActions(view);
-        updateCounters();
+
+        // --- NEW LIVE DATABASE LOGIC ---
+        // Lock to the current Monday-to-Sunday week
+        Calendar startCal = Calendar.getInstance();
+        // Calendar.MONDAY is 2, SUNDAY is 1. This math converts it so Monday = 0 ... Sunday = 6
+        int todayIndex = (startCal.get(Calendar.DAY_OF_WEEK) + 5) % 7;
+
+        // Step back to this week's Monday
+        startCal.add(Calendar.DAY_OF_YEAR, -todayIndex);
+        String startDate = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(startCal.getTime());
+
+        // Step forward to this week's Sunday
+        Calendar endCal = Calendar.getInstance();
+        endCal.setTime(startCal.getTime());
+        endCal.add(Calendar.DAY_OF_YEAR, 6);
+        String endDate = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(endCal.getTime());
+
+        this.weekKey = "feast_" + startDate; // Save the week key for later
+
+        com.example.codenection2026_package.data.TaskRepository.getWeeklyAppleCount(requireContext(), startDate, endDate, count -> {
+            if (!isAdded()) return;
+
+            // EXPLOIT FIX: Read how many apples were already eaten this week
+            android.content.SharedPreferences prefs = requireContext().getSharedPreferences("GamificationPrefs", android.content.Context.MODE_PRIVATE);
+            int previouslyEaten = prefs.getInt(weekKey, 0);
+
+            this.totalApples = count;
+            this.eatenApples = previouslyEaten;
+
+            // Prevent negative numbers if a user unchecks a task after eating it
+            this.remainingApples = Math.max(0, count - previouslyEaten);
+
+            TextView totalLabel = view.findViewById(R.id.applesTotalLabel);
+            if (totalLabel != null) {
+                totalLabel.setText(getString(R.string.feast_stash_total, totalApples));
+            }
+            TextView subtitle = view.findViewById(R.id.feastSubtitle);
+            if (subtitle != null) {
+                subtitle.setText(getString(CoachVoice.Line.FEAST_SUBTITLE.pick(tone()), totalApples));
+            }
+
+            buildAppleTray();
+            wireActions(view);
+            updateCounters();
+        });
     }
 
     @Override
@@ -194,26 +226,29 @@ public class FeastFragment extends Fragment {
     //  Apple tray
     // ==================================================================
 
-    /** Four quick-feed buttons, mirroring the prototype's four apple buttons. */
-    private void buildAppleTray() {
+    /** Dynamically build quick-feed buttons based on actual completed tasks (Max 4). */
+     private void buildAppleTray() {
         if (appleGrid == null) {
             return;
         }
         appleGrid.removeAllViews();
+
+        // FIX: Check REMAINING apples, not total apples
+        if (remainingApples <= 0) {
+            return;
+        }
+
         LayoutInflater inflater = LayoutInflater.from(requireContext());
 
-        String[] labels = {
-                getString(R.string.feast_apple_cs101),
-                getString(R.string.feast_apple_shift),
-                getString(R.string.feast_apple_chem),
-                getString(R.string.feast_apple_study)
-        };
+        // Cap the tray at 4 buttons, but strictly limit it to what's actually left to eat
+        int trayCount = Math.min(remainingApples, 4);
 
-        for (String label : labels) {
+        for (int i = 0; i < trayCount; i++) {
             View button = inflater.inflate(R.layout.item_apple_button, appleGrid, false);
             TextView labelView = button.findViewById(R.id.appleButtonLabel);
             if (labelView != null) {
-                labelView.setText(label);
+                // Clean label, no category text
+                labelView.setText("Apple " + (i + 1));
             }
             button.setOnClickListener(v -> feedSingleApple(button));
             appleGrid.addView(button);
@@ -247,10 +282,17 @@ public class FeastFragment extends Fragment {
      * crumbs, float the XP, tick the counters, then chew and reset.
      */
     private void feedSingleApple(@Nullable View button) {
-        if (isEating || remainingApples <= 0) {
-            return;
-        }
+        if (isEating || remainingApples <= 0) return;
+
         isEating = true;
+        remainingApples--;
+        eatenApples++;
+
+        // EXPLOIT FIX: Save immediately before animation starts so exiting the screen doesn't cancel it
+        if (getContext() != null) {
+            requireActivity().getSharedPreferences("GamificationPrefs", android.content.Context.MODE_PRIVATE)
+                    .edit().putInt(weekKey, eatenApples).apply();
+        }
 
         if (button != null) {
             button.setEnabled(false);
@@ -264,25 +306,16 @@ public class FeastFragment extends Fragment {
             createCrumbs();
             createFloatingXp("+25 XP");
 
-            remainingApples--;
-            eatenApples++;
             updateCounters();
 
             closeMouth();
             chew(() -> {
-                if (button != null) {
-                    button.setEnabled(true);
-                    button.setAlpha(1f);
-                }
+                if (button != null) button.setVisibility(View.GONE);
                 isEating = false;
-                if (remainingApples == 0) {
-                    triggerFullFeastCelebration();
-                }
+                if (remainingApples == 0) triggerFullFeastCelebration();
             });
 
-            if (dinoBubble != null) {
-                dinoBubble.setText(randomHappyQuote());
-            }
+            if (dinoBubble != null) dinoBubble.setText(randomHappyQuote());
         });
     }
 
@@ -299,29 +332,35 @@ public class FeastFragment extends Fragment {
      * stays true for the whole cascade so taps cannot interleave.
      */
     private void feedAllApples() {
-        if (isEating) {
-            return;
-        }
+        if (isEating) return;
         if (remainingApples <= 0) {
             showToast(getString(CoachVoice.Line.FEAST_FULL_TOAST.pick(tone())));
             return;
         }
 
         isEating = true;
-        if (dinoBubble != null) {
-            dinoBubble.setText(CoachVoice.Line.DINO_FEAST_ALL.pick(tone()));
+
+        // Calculate what the new total will be after the animation
+        int applesToEat = remainingApples;
+        remainingApples = 0;
+        eatenApples += applesToEat;
+
+        // EXPLOIT FIX: Save immediately before animation starts
+        if (getContext() != null) {
+            requireActivity().getSharedPreferences("GamificationPrefs", android.content.Context.MODE_PRIVATE)
+                    .edit().putInt(weekKey, eatenApples).apply();
         }
+
+        if (dinoBubble != null) dinoBubble.setText(CoachVoice.Line.DINO_FEAST_ALL.pick(tone()));
+
         leanIn();
         openMouth();
 
-        final int count = remainingApples;
         if (dinoStage != null) {
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < applesToEat; i++) {
                 dinoStage.postDelayed(() -> spawnFlyingApple(() -> {
                     playMunch();
                     createCrumbs();
-                    remainingApples--;
-                    eatenApples++;
                     updateCounters();
                 }), i * 90L);
             }
@@ -331,11 +370,9 @@ public class FeastFragment extends Fragment {
                 closeMouth();
                 chew(() -> {
                     isEating = false;
-                    if (remainingApples == 0) {
-                        triggerFullFeastCelebration();
-                    }
+                    triggerFullFeastCelebration();
                 });
-            }, (count * 90L) + 450L);
+            }, (applesToEat * 90L) + 450L);
         } else {
             isEating = false;
         }
@@ -600,19 +637,34 @@ public class FeastFragment extends Fragment {
             applesRemainingCount.setText(String.valueOf(remainingApples));
         }
 
-        int percent = Math.round(eatenApples * 100f / TOTAL_APPLES);
+        // CRASH FIX: Prevent Division by Zero if the user has 0 tasks this week
+        int percent = (totalApples > 0) ? Math.round(eatenApples * 100f / totalApples) : 0;
+
         if (satietyPercentage != null) {
             satietyPercentage.setText(getString(R.string.percent_value, percent));
         }
         if (progressText != null) {
-            progressText.setText(getString(R.string.feast_progress_text, eatenApples, TOTAL_APPLES));
+            progressText.setText(getString(R.string.feast_progress_text, eatenApples, totalApples));
         }
         setBarFraction(progressBar, percent / 100f);
 
         if (feastAllButton != null) {
-            feastAllButton.setText(remainingApples > 0
-                    ? getString(R.string.feast_feed_remaining, remainingApples)
-                    : getString(CoachVoice.Line.FEAST_COMPLETE.pick(tone())));
+            if (totalApples == 0) {
+                // If they have 0 apples total for the week, they haven't earned a feast yet.
+                feastAllButton.setText("No Apples to Feast");
+                feastAllButton.setEnabled(false); // Disable the button so they can't click it
+                feastAllButton.setAlpha(0.5f);    // Make it look greyed out
+            } else if (remainingApples > 0) {
+                // They have apples left to feed the Dino
+                feastAllButton.setText(getString(R.string.feast_feed_remaining, remainingApples));
+                feastAllButton.setEnabled(true);
+                feastAllButton.setAlpha(1f);
+            } else {
+                // They had apples, and they successfully fed them all to the Dino!
+                feastAllButton.setText(getString(CoachVoice.Line.FEAST_COMPLETE.pick(tone())));
+                feastAllButton.setEnabled(false); // Disable it so they can't click it again
+                feastAllButton.setAlpha(0.5f);
+            }
         }
     }
 

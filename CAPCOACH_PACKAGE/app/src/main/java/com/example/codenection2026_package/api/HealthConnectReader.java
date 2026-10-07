@@ -81,20 +81,23 @@ public class HealthConnectReader {
     }
 
     /**
-     * Converts a raw sleep deficit (in hours) into a 0-100 Recovery Debt Score.
+     * Converts raw sleep deficit and HRV into a 0-100 Recovery Debt Score.
      * @param hasData Pass false if the Health Connect list was empty.
      */
-    public static int calculateRecoveryDebtScore(double sleepDeficitHours, boolean hasData) {
+    public static int calculateRecoveryDebtScore(double sleepDeficitHours, double hrvMs, boolean hasData) {
         if (!hasData) {
             return 50; // Neutral baseline for emulators and missing data
         }
 
-        if (sleepDeficitHours <= 0) {
-            return 0; // Fully rested
-        }
+        double score = sleepDeficitHours > 0 ? (sleepDeficitHours * 15.0) : 0;
 
-        // Adjusted to a softer scale (15 points per hour instead of 25)
-        double score = sleepDeficitHours * 15.0;
+        // NEW HRV INTEGRATION: Apply a sympathetic stress penalty.
+        // For young adults, an RMSSD below 40ms indicates poor recovery.
+        if (hrvMs > 0 && hrvMs < 40.0) {
+            // The lower the HRV, the higher the penalty multiplier (up to 30% worse)
+            double stressMultiplier = 1.0 + ((40.0 - hrvMs) / 100.0);
+            score *= stressMultiplier;
+        }
 
         if (score > 100) return 100;
         return (int) Math.round(score);

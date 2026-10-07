@@ -21,6 +21,7 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
@@ -111,8 +112,33 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         void onTaskSaved(@NonNull String isoDate);
     }
 
+    /**
+     * Tells the dashboard a row was edited or removed, so it can repaint.
+     *
+     * <p>Separate from {@link OnTaskSavedListener}: that one is only ever wired for the Add
+     * flow, and a delete has to refresh the feed too.
+     */
+    public interface OnTaskChangedListener {
+        void onTaskChanged(@NonNull String isoDate);
+    }
+
     @Nullable
     private OnTaskSavedListener onTaskSavedListener;
+
+    @Nullable
+    private OnTaskChangedListener onTaskChangedListener;
+
+    /**
+     * The row being edited, or null in the Add flow.
+     *
+     * <p>Editing is not a separate sheet implementation: the two flows collect exactly the
+     * same fields into exactly the same layout, so duplicating a thousand lines of form
+     * handling to change three of them would guarantee the two drift apart. Everything below
+     * that reads this field is inert while it is null, which is why the Add flow behaves
+     * byte for byte as it did before.
+     */
+    @Nullable
+    private Task editingTask;
 
     /** "inflexible" or "flexible". The prototype starts on the work card. */
     private String mode = MODE_INFLEXIBLE;
@@ -173,6 +199,219 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     /** Lets the dashboard refresh the feed once a row is written. */
     public void setOnTaskSavedListener(@Nullable OnTaskSavedListener listener) {
         this.onTaskSavedListener = listener;
+    }
+
+    /** Lets the dashboard repaint once a row is edited or removed. */
+    public void setOnTaskChangedListener(@Nullable OnTaskChangedListener listener) {
+        this.onTaskChangedListener = listener;
+    }
+
+    // ==================================================================
+    // Edit mode
+    // ==================================================================
+
+    /**
+     * Turns this sheet into the Edit Task sheet for one existing row.
+     *
+     * <p>Called by {@link com.example.codenection2026_package.ui.edittask.EditTaskSheetFragment}
+     * once the views exist. It fills every control from the row, renames the sheet, reveals
+     * the delete affordance and repaints, in that order.
+     *
+     * @param task         a row that came back from a query, so it carries its primary key
+     * @param categoryName the canonical category it was filed under, or null for a row that
+     *                     predates category filing
+     */
+    protected void beginEdit(@NonNull Task task, @Nullable String categoryName) {
+        editingTask = task;
+        mode = CLASSIFICATION_INFLEXIBLE.equals(task.getClassification())
+                ? MODE_INFLEXIBLE
+                : MODE_FLEXIBLE;
+
+        if (task.getDate() != null) {
+            dateIso = task.getDate();
+        }
+        startMinutes = parseMinutes(task.getStartTime(), DEFAULT_START_MINUTES);
+        endMinutes = parseMinutes(task.getEndTime(), DEFAULT_END_MINUTES);
+
+        setCategorySelection(CategoryRepository.indexOf(categoryName));
+        selectPriority(task.getPriority());
+        selectDeferral(task.getDeferralHours());
+        setupTimes();
+
+        // Paint the classification first and write the name last: applyMode() replaces the
+        // field when it still holds one of the example names, which is right for the Add flow
+        // and would quietly rename a real task here.
+        applyMode();
+        if (taskNameInput != null) {
+            taskNameInput.setText(task.getTaskName());
+        }
+
+        TextView title = root == null ? null : root.findViewById(R.id.sheetTitle);
+        if (title != null) {
+            title.setText(R.string.edittask_title);
+        }
+
+        showDeleteAffordance();
+    }
+
+    /**
+     * Reveals @id/deleteTaskButton, which the layout ships {@code gone} so the Add flow never
+     * shows a destructive action on a task that does not exist yet.
+     */
+    private void showDeleteAffordance() {
+        if (root == null) {
+            return;
+        }
+        View delete = root.findViewById(R.id.deleteTaskButton);
+        if (delete == null) {
+            return;
+        }
+        delete.setVisibility(View.VISIBLE);
+        delete.setOnClickListener(v -> confirmDelete());
+    }
+
+    /**
+     * Asks before removing the row.
+     *
+     * <p>A task is cheap to delete and impossible to get back, so a single stray tap next to
+     * the close button is not worth the risk.
+     */
+    private void confirmDelete() {
+        if (editingTask == null) {
+            return;
+        }
+        new AlertDialog.Builder(requireContext())
+                .setMessage(R.string.edittask_delete_confirm)
+                .setPositiveButton(R.string.edittask_delete, (dialog, which) -> deleteTask())
+                .setNegativeButton(R.string.addtask_cancel, null)
+                .show();
+    }
+
+    private void deleteTask() {
+        final Task task = editingTask;
+        if (task == null) {
+            return;
+        }
+        Context appContext = requireContext().getApplicationContext();
+        setSaving(true);
+
+        TaskRepository.delete(appContext, task, success -> {
+            if (!isAdded()) {
+                return;
+            }
+            setSaving(false);
+            if (!Boolean.TRUE.equals(success)) {
+                Toast.makeText(requireContext(), R.string.edittask_delete_failed,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(requireContext(), R.string.edittask_deleted,
+                    Toast.LENGTH_SHORT).show();
+            if (onTaskChangedListener != null) {
+                onTaskChangedListener.onTaskChanged(task.getDate());
+            }
+            dismiss();
+        });
+    }
+
+    /**
+     * Writes an edit back over the row it came from.
+     *
+     * <p>The original id and calendar event id are carried across, so the update lands on the
+     * same row rather than inserting a second one, and the shift keeps pointing at the
+     * calendar entry it already owns. The completed flag is carried too: editing a task is
+     * not the user un-ticking it.
+     *
+     * <p>The category is resolved first because {@link TaskRepository#update} writes the row
+     * exactly as handed to it - unlike {@link TaskRepository#save}, it does not look the
+     * category up. Without this the edit would quietly unfile the task.
+     */
+    private void updateExisting(@NonNull Context appContext,
+                                @NonNull Task edited,
+                                @NonNull String categoryName) {
+        final Task original = editingTask;
+        if (original == null) {
+            return;
+        }
+        edited.setId(original.getId());
+        edited.setCalendarEventId(original.getCalendarEventId());
+        edited.setCompleted(original.isCompleted());
+
+        TaskRepository.categoryId(appContext, categoryName, resolved -> {
+            if (!isAdded()) {
+                return;
+            }
+            // A failed lookup keeps the category the row already had rather than dropping it.
+            edited.setCategory_id(resolved != null ? resolved : original.getCategory_id());
+
+            TaskRepository.update(appContext, edited, success -> {
+                if (!isAdded()) {
+                    return;
+                }
+                setSaving(false);
+                if (!Boolean.TRUE.equals(success)) {
+                    Toast.makeText(requireContext(), R.string.edittask_update_failed,
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Toast.makeText(requireContext(), R.string.edittask_updated,
+                        Toast.LENGTH_SHORT).show();
+                if (onTaskChangedListener != null) {
+                    onTaskChangedListener.onTaskChanged(edited.getDate());
+                }
+                dismiss();
+            });
+        });
+    }
+
+    /** "17:00" as minutes from midnight, or {@code fallback} when it will not parse. */
+    private static int parseMinutes(@Nullable String hhmm, int fallback) {
+        if (hhmm == null) {
+            return fallback;
+        }
+        String[] parts = hhmm.split(":");
+        if (parts.length != 2) {
+            return fallback;
+        }
+        try {
+            int hours = Integer.parseInt(parts[0].trim());
+            int minutes = Integer.parseInt(parts[1].trim());
+            if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+                return fallback;
+            }
+            return (hours * 60) + minutes;
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    /** Restores the checked priority segment from the stored "HIGH"/"MED"/"LOW". */
+    private void selectPriority(@Nullable String priority) {
+        if (priorityGroup == null) {
+            return;
+        }
+        if (Task.PRIORITY_HIGH.equals(priority)) {
+            priorityGroup.check(R.id.priorityHigh);
+        } else if (Task.PRIORITY_LOW.equals(priority)) {
+            priorityGroup.check(R.id.priorityLow);
+        } else {
+            priorityGroup.check(R.id.priorityMed);
+        }
+    }
+
+    /** Restores the deferral window, falling back to the default when the row holds one
+     *  the spinner does not offer. */
+    private void selectDeferral(int hours) {
+        if (deferralSpinner == null) {
+            return;
+        }
+        for (int i = 0; i < DEFERRAL_HOURS.length; i++) {
+            if (DEFERRAL_HOURS[i] == hours) {
+                deferralSpinner.setSelection(i);
+                return;
+            }
+        }
+        deferralSpinner.setSelection(DEFAULT_DEFERRAL_INDEX);
     }
 
     @Nullable
@@ -376,14 +615,9 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (suppressCategoryCallback) {
-                    return;
-                }
-                // Work is the only protected category; every other one stays
-                // sheddable. Applying the mode again relabels the card, the subtitle
-                // and the save button with the category the user just picked.
-                mode = isWorkCategory(position) ? MODE_INFLEXIBLE : MODE_FLEXIBLE;
-                applyMode();
+                if (suppressCategoryCallback) return;
+                // REMOVED: mode = isWorkCategory(position) ? ...
+                applyMode(); // Only repaint the tags, not forcing the mode to flip
             }
 
             @Override
@@ -540,12 +774,6 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         int position = categorySpinner == null ? -1 : categorySpinner.getSelectedItemPosition();
         boolean onWork = isWorkCategory(position);
 
-        if (flexible && onWork) {
-            setCategorySelection(CategoryRepository.indexOf(CategoryRepository.ACADEMIC));
-        } else if (!flexible && !onWork) {
-            setCategorySelection(CategoryRepository.indexOf(CategoryRepository.WORK));
-        }
-
         mode = flexible ? MODE_FLEXIBLE : MODE_INFLEXIBLE;
         applyMode();
     }
@@ -679,9 +907,13 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         View save = root == null ? null : root.findViewById(R.id.saveTaskButton);
         if (save instanceof MaterialButton) {
             MaterialButton button = (MaterialButton) save;
-            button.setText(flexible
-                    ? getString(R.string.addtask_save_category, category)
-                    : getString(R.string.addtask_save_work));
+            // The Add flow names the category it is about to file under. An edit is not
+            // filing anything new, so it just says what the button does.
+            button.setText(editingTask != null
+                    ? getString(R.string.edittask_save)
+                    : (flexible
+                            ? getString(R.string.addtask_save_category, category)
+                            : getString(R.string.addtask_save_work)));
             button.setIconResource(flexible
                     ? R.drawable.ic_event_available
                     : R.drawable.ic_shield);
@@ -944,8 +1176,12 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         task.setDeferralHours(flexible ? selectedDeferralHours() : 0);
 
         // --- TWO-WAY SYNC LOGIC ---
-        // If it is an INFLEXIBLE work shift, push it to Android Calendar
-        if (!flexible) {
+        // If it is an INFLEXIBLE work shift, push it to Android Calendar.
+        //
+        // Never on an edit. CalendarManager can write an event but has no update or delete, so
+        // writing again would leave the original event in place and the shift would appear
+        // twice on the user's calendar. The row keeps the event id it already owns.
+        if (!flexible && editingTask == null) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat(ISO_PATTERN + " HH:mm", Locale.US);
                 Date startDate = sdf.parse(dateIso + " " + formatMinutes(startMinutes));
@@ -963,6 +1199,12 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
         Context appContext = requireContext().getApplicationContext();
         setSaving(true);
+
+        // An edit overwrites the row it came from; the Add flow inserts a new one.
+        if (editingTask != null) {
+            updateExisting(appContext, task, category);
+            return;
+        }
 
         final String savedCategory = category;
         TaskRepository.save(appContext, task, category, rowId -> {
