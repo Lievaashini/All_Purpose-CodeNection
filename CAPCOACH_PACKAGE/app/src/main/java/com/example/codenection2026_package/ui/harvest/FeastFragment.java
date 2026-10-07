@@ -3,6 +3,8 @@ package com.example.codenection2026_package.ui.harvest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.media.AudioAttributes;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -54,6 +56,8 @@ public class FeastFragment extends Fragment {
     private static final int FEAST_DAY = 7;
     /** The prototype's harvest total for the week. */
     private static final int TOTAL_APPLES = 16;
+    /** Munch sits quieter than the task-done chime on the Dashboard. */
+    private static final float MUNCH_VOLUME = 0.6f;
 
     private int remainingApples = TOTAL_APPLES;
     private int eatenApples = 0;
@@ -73,6 +77,12 @@ public class FeastFragment extends Fragment {
     private TextView feastToastText;
     private LinearLayout appleGrid;
     private ViewGroup dinoStage;
+
+    /** Plays the munch on every bite. Released in onDestroyView. */
+    @Nullable
+    private SoundPool soundPool;
+    private int munchSoundId;
+    private boolean munchLoaded = false;
 
     @NonNull
     @Override
@@ -132,9 +142,52 @@ public class FeastFragment extends Fragment {
             subtitle.setText(getString(CoachVoice.Line.FEAST_SUBTITLE.pick(tone()), TOTAL_APPLES));
         }
 
+        loadMunchSound();
         buildAppleTray();
         wireActions(view);
         updateCounters();
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (soundPool != null) {
+            soundPool.release();
+            soundPool = null;
+        }
+        munchLoaded = false;
+        super.onDestroyView();
+    }
+
+    // ==================================================================
+    //  Sound
+    // ==================================================================
+
+    /**
+     * SoundPool rather than MediaPlayer: the clip is short and fires in rapid bursts during
+     * "feed all", which SoundPool handles without stalling. Three streams lets bites overlap
+     * a little without turning into noise.
+     */
+    private void loadMunchSound() {
+        AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        soundPool = new SoundPool.Builder()
+                .setMaxStreams(3)
+                .setAudioAttributes(attributes)
+                .build();
+        soundPool.setOnLoadCompleteListener((pool, sampleId, status) ->
+                munchLoaded = status == 0);
+        munchSoundId = soundPool.load(requireContext(), R.raw.munch, 1);
+    }
+
+    /** Small pitch wobble so repeated bites don't sound identical. */
+    private void playMunch() {
+        if (soundPool == null || !munchLoaded) {
+            return;
+        }
+        float rate = 0.92f + random.nextFloat() * 0.16f;
+        soundPool.play(munchSoundId, MUNCH_VOLUME, MUNCH_VOLUME, 1, 0, rate);
     }
 
     // ==================================================================
@@ -207,6 +260,7 @@ public class FeastFragment extends Fragment {
         leanIn();
         openMouth();
         spawnFlyingApple(() -> {
+            playMunch();
             createCrumbs();
             createFloatingXp("+25 XP");
 
@@ -264,6 +318,7 @@ public class FeastFragment extends Fragment {
         if (dinoStage != null) {
             for (int i = 0; i < count; i++) {
                 dinoStage.postDelayed(() -> spawnFlyingApple(() -> {
+                    playMunch();
                     createCrumbs();
                     remainingApples--;
                     eatenApples++;
