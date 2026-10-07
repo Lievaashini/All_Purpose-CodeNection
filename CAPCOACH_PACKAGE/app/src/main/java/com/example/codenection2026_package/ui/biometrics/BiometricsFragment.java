@@ -838,24 +838,19 @@ public class BiometricsFragment extends Fragment {
      * Educates users on missing data and routes them directly to the manual slider.
      */
     private void showNoWearableFallbackDialog() {
-        // THE CRASH FIX (From teammate's review): Abort if fragment is detached
         if (!isAdded() || getContext() == null) {
             return;
         }
 
         new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                .setTitle("No Sleep Data Found")
-                .setMessage("CapCoach reads your sleep securely through Android Health Connect.\n\nIf you don't have a smartwatch, you can use phone-based trackers (like 'Sleep as Android') to sync your data automatically, or simply log your sleep manually right now.")
-                .setPositiveButton("Log Sleep Manually", (dialog, which) -> {
-                    // THE SAVE FIX: Only mark as seen if the user actually interacted
+                .setTitle(R.string.bio_no_data_title)
+                .setMessage(R.string.bio_no_data_msg)
+                .setPositiveButton(R.string.bio_log_manual_btn, (dialog, which) -> {
                     requireContext().getSharedPreferences("BioPrefs", Context.MODE_PRIVATE)
                             .edit().putBoolean("hide_clock_dialog", true).apply();
-
-                    // Launch manual sleep slider
                     showManualSleepSliderDialog();
                 })
-                .setNegativeButton("Maybe later", (dialog, which) -> {
-                    // Mark as seen here too, so they aren't nagged again
+                .setNegativeButton(R.string.bio_maybe_later_btn, (dialog, which) -> {
                     requireContext().getSharedPreferences("BioPrefs", Context.MODE_PRIVATE)
                             .edit().putBoolean("hide_clock_dialog", true).apply();
                 })
@@ -868,60 +863,50 @@ public class BiometricsFragment extends Fragment {
     private void showManualSleepSliderDialog() {
         Context context = requireContext();
 
-        // 1. Build a simple layout to hold the text and slider
         LinearLayout layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(60, 40, 60, 0);
 
-        // 2. The text that updates live as the user drags
         TextView valueText = new TextView(context);
-        valueText.setText("8.0 Hours");
+        valueText.setText(getString(R.string.bio_slider_value, 8.0f));
         valueText.setTextSize(18f);
         valueText.setTextColor(ContextCompat.getColor(context, R.color.text_primary_dark));
         valueText.setGravity(android.view.Gravity.CENTER);
 
-        // 3. The Material Slider
         com.google.android.material.slider.Slider slider = new com.google.android.material.slider.Slider(context);
         slider.setValueFrom(0.0f);
         slider.setValueTo(24.0f);
-        slider.setStepSize(0.5f); // 30-minute intervals
-        slider.setValue(8.0f);    // Default to 8 hours
+        slider.setStepSize(0.5f);
+        slider.setValue(8.0f);
 
-        // Update text when dragging
-        slider.addOnChangeListener((s, val, fromUser) -> valueText.setText(val + " Hours"));
+        slider.addOnChangeListener((s, val, fromUser) -> valueText.setText(getString(R.string.bio_slider_value, val)));
 
         layout.addView(valueText);
         layout.addView(slider);
 
-        // 4. Render the dialog
         new androidx.appcompat.app.AlertDialog.Builder(context)
-                .setTitle("Log Manual Sleep")
-                .setMessage("Drag to select how many hours you slept last night. This will be pushed to Health Connect.")
+                .setTitle(R.string.bio_manual_title)
+                .setMessage(R.string.bio_manual_msg)
                 .setView(layout)
-                .setPositiveButton("Save", (dialog, which) -> {
+                .setPositiveButton(R.string.bio_save_btn, (dialog, which) -> {
                     writeManualSleepToHealthConnect(slider.getValue());
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.bio_cancel_btn, null)
                 .show();
     }
 
     /**
      * Converts the slider value into a Health Connect SleepSessionRecord.
-     * Safely overwrites any previous manual entry from the last 24 hours.
      */
     private void writeManualSleepToHealthConnect(double hours) {
         new Thread(() -> {
             try {
                 HealthConnectClient client = HealthConnectClient.getOrCreate(requireContext());
-
                 Instant endTime = Instant.now();
 
-                // Delete any manual records written by CapCoach in the last 24 hours.
-                // Because of Android's sandbox, this will NOT delete smartwatch data from other apps
                 Instant searchStart = endTime.minus(24, ChronoUnit.HOURS);
                 HealthConnectHelper.deleteSleepDataSync(client, searchStart, endTime);
 
-                // 2. Back-calculate the start time for the new record based on the slider hours
                 Instant startTime = endTime.minus((long) (hours * 60), ChronoUnit.MINUTES);
                 ZoneOffset currentOffset = ZoneId.systemDefault().getRules().getOffset(endTime);
 
@@ -936,12 +921,15 @@ public class BiometricsFragment extends Fragment {
                         androidx.health.connect.client.records.metadata.Metadata.EMPTY
                 );
 
-                // 3. Write the fresh record to Android Health Connect API
                 HealthConnectHelper.writeSleepDataSync(client, Collections.singletonList(manualRecord));
 
-                // 4. Refresh the UI to immediately show the updated Biometric state
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "Sleep securely updated in Health Connect!", Toast.LENGTH_SHORT).show();
+                    // THE CRASH FIX: Abort UI updates if the user navigated away while the DB was writing!
+                    if (!isAdded() || getView() == null) {
+                        return;
+                    }
+
+                    Toast.makeText(requireContext(), R.string.bio_manual_success, Toast.LENGTH_SHORT).show();
 
                     Snapshot newSnapshot = read(requireContext());
                     bindAnomaly(getView(), newSnapshot);
@@ -949,7 +937,6 @@ public class BiometricsFragment extends Fragment {
                     bindTrend(getView(), newSnapshot);
                     bindDeficitAndPenalty(getView(), newSnapshot);
 
-                    // Restart the penalty progress bar animation with the new data
                     if (penaltyTrack != null && penaltyTrack.getWidth() > 0) {
                         cancelAnimator(penaltyAnimator);
                         penaltyAnimator = null;
@@ -958,19 +945,19 @@ public class BiometricsFragment extends Fragment {
                 });
 
             } catch (SecurityException e) {
-                // THE EDGE CASE FIX: User denied or revoked Health Connect permissions
-                requireActivity().runOnUiThread(() ->
-                        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                                .setTitle("Permission Required")
-                                .setMessage("CapCoach needs Health Connect permissions to save your manual sleep entry.\n\nPlease enable 'Write Sleep' access for CapCoach in your Android Settings.")
-                                .setPositiveButton("Got it", null)
-                                .show()
-                );
+                requireActivity().runOnUiThread(() -> {
+                    if (!isAdded() || getContext() == null) return;
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.bio_permission_title)
+                            .setMessage(R.string.bio_permission_msg)
+                            .setPositiveButton(R.string.bio_got_it_btn, null)
+                            .show();
+                });
             } catch (Exception e) {
-                // Generic fallback for actual database/I/O failures
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Failed to write data: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                );
+                requireActivity().runOnUiThread(() -> {
+                    if (!isAdded() || getContext() == null) return;
+                    Toast.makeText(requireContext(), getString(R.string.bio_manual_error, e.getMessage()), Toast.LENGTH_LONG).show();
+                });
             }
         }).start();
     }

@@ -248,14 +248,15 @@
     <string name="edittask_updated">Changes saved</string>
     <string name="edittask_update_failed">Could not save your changes.</string>
                         <string name="addtask_name_hint_generic">e.g., Grocery run or Society meeting</string>
-        <!-- ==================================================================
-         SCREEN 5 - BIOMETRICS  (port of Prototype/biometrics.html)
-         ================================================================== -->
-        <string name="bio_health_connect">Health Connect</string>
+    <!-- ==================================================================
+      SCREEN 5 - BIOMETRICS (port of Prototype/biometrics.html)
+      ================================================================== -->
+    <string name="bio_health_connect">Health Connect</string>
     <string name="bio_anomaly_tag">SYNC ANOMALY</string>
     <!-- Bound at runtime to the end of the latest sleep session. -->
-    <string name="bio_anomaly_time">- %1$s</string>
-            <string name="bio_metrics_title">SLEEP DEBT &amp; STRESS METRICS</string>
+    <string name="bio_anomaly_time">%1$s</string>
+
+    <string name="bio_metrics_title">SLEEP DEBT &amp; STRESS METRICS</string>
     <!-- Bound at runtime to the real shortfall against the 8h target. The literal
          percent has to be escaped because this string carries a format argument. -->
     <string name="bio_deficit_badge">-%1$d%% Deficit</string>
@@ -263,20 +264,40 @@
     <string name="bio_baseline_label">Baseline Average</string>
     <string name="bio_lastnight_label">Last Night (Recorded)</string>
     <string name="bio_hrv_label">HRV SCORE</string>
-            <string name="bio_trend_label">7-Day Sleep Trend</string>
-        <string name="bio_penalty_title">Cognitive Penalty Processing</string>
-        <string name="bio_penalty_rate">WORKLOAD DEPLETION RATE</string>
-    <string name="bio_manual_input">Log Sleep Manually</string>>
-        <string name="bio_override">Override Sensor Metric</string>
-        <!-- Shown for any metric Health Connect returned no reading for: both sleep
-             rows and the HRV score. One resource, so the three cannot drift apart. -->
-        <string name="bio_not_recorded">Not recorded</string>
+    <string name="bio_trend_label">7-Day Sleep Trend</string>
+    <string name="bio_penalty_title">Cognitive Penalty Processing</string>
+    <string name="bio_penalty_rate">WORKLOAD DEPLETION RATE</string>
 
-        <!-- Value formatters. These were built inline in Java before. -->
-        <string name="bio_sleep_hours">%1$s hrs</string>
-        <string name="bio_hrv_value">%1$s ms</string>
-        <string name="bio_duration_hm">%1$dh %2$02dm</string>
+    <!-- Manual Data Entry Dialogs -->
+    <string name="bio_override">Override Sensor Metric</string>
+    <string name="bio_manual_input">Log Sleep Manually</string>
 
+    <string name="bio_no_data_title">No Sleep Data Found</string>
+    <string name="bio_no_data_msg">CapCoach reads your sleep securely through Android Health Connect.\n\nIf you don\'t have a smartwatch, you can use phone-based trackers (like \'Sleep as Android\') to sync your data automatically, or simply log your sleep manually right now.</string>
+    <string name="bio_log_manual_btn">Log Sleep Manually</string>
+    <string name="bio_maybe_later_btn">Maybe later</string>
+
+    <string name="bio_manual_title">Log Manual Sleep</string>
+    <string name="bio_manual_msg">Drag to select how many hours you slept last night. This will be pushed to Health Connect.</string>
+    <string name="bio_save_btn">Save</string>
+    <string name="bio_cancel_btn">Cancel</string>
+
+    <!-- Permissions & Toasts -->
+    <string name="bio_permission_title">Permission Required</string>
+    <string name="bio_permission_msg">CapCoach needs Health Connect permissions to save your manual sleep entry.\nPlease enable \'Write Sleep\' access for CapCoach in your Android Settings.</string>
+    <string name="bio_got_it_btn">Got it</string>
+    <string name="bio_manual_success">Sleep securely updated in Health Connect!</string>
+    <string name="bio_manual_error">Failed to write data: %1$s</string>
+
+    <!-- Shown for any metric Health Connect returned no reading for: both sleep
+         rows and the HRV score. One resource, so the three cannot drift apart. -->
+    <string name="bio_not_recorded">Not recorded</string>
+
+    <!-- Value formatters. These were built inline in Java before. -->
+    <string name="bio_sleep_hours">%1$s hrs</string>
+    <string name="bio_hrv_value">%1$s ms</string>
+    <string name="bio_duration_hm">%1$dh %2$02dm</string>
+    <string name="bio_slider_value">%1$.1f Hours</string>
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST  (port of Prototype/daily-harvest.html)
          ================================================================== -->
