@@ -266,6 +266,7 @@
             <string name="bio_trend_label">7-Day Sleep Trend</string>
         <string name="bio_penalty_title">Cognitive Penalty Processing</string>
         <string name="bio_penalty_rate">WORKLOAD DEPLETION RATE</string>
+    <string name="bio_manual_input">Log Sleep Manually</string>>
         <string name="bio_override">Override Sensor Metric</string>
         <!-- Shown for any metric Health Connect returned no reading for: both sleep
              rows and the HRV score. One resource, so the three cannot drift apart. -->

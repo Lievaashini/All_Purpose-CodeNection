@@ -472,12 +472,24 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ============ Manual override escape hatch ============ -->
+            <!-- ============ Manual Sleep Logger ============ -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/manualSleepButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:minHeight="@dimen/touch_target_min"
+                android:text="@string/bio_manual_input"
+                android:textColor="@color/on_brand"
+                app:backgroundTint="@color/brand_mint"
+                app:cornerRadius="@dimen/radius_md" />
+
+            <!-- ============ Manual override escape hatch (Existing) ============ -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/overrideSensorButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_md"
+                android:layout_marginTop="@dimen/space_sm"
                 android:minHeight="@dimen/touch_target_min"
                 android:text="@string/bio_override"
                 android:textColor="@color/text_muted_dark"
