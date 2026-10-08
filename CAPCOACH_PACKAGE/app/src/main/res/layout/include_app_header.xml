@@ -34,9 +34,15 @@
   The voice button sits AFTER the wordmark on purpose: the left cluster is weighted, so
   a button placed there stays in the top-left corner beside the copy, whereas the same
   button placed after the weighted child would be pushed to the right-hand group and
-  read as a sibling of the theme toggle. Its 40dp + 8dp cost is the only width the
-  wordmark block lost, which still fits "Offline ML Active" at the largest font scale
-  the app supports.
+  read as a sibling of the theme toggle.
+
+  That does mean the brand block's width decides where the microphone lands, so the three
+  subtitles have to stay narrower than the CAPCOACH wordmark - which they do ("Offline ML",
+  "Biometrics", "Settings"). The wordmark row is then the widest child on all three
+  screens, the block measures the same 8 characters everywhere, and the button cannot sit
+  at three different x positions. A subtitle longer than the wordmark would break that:
+  Dashboard's old "Offline ML Active" was the one that did, and it is why that screen binds
+  @string/brand_offline_ml_short rather than @string/brand_offline_ml.
 
   CALLER CONTRACT
   Bind it with ui/shell/AppHeader.bind(...), which fills in the per-screen subtitle
@@ -120,7 +126,7 @@
                 style="@style/Text.MicroLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="Offline ML Active" />
+                tools:text="Offline ML" />
         </LinearLayout>
 
         <!-- Voice button: opens the Dino voice popup from any of the three screens.

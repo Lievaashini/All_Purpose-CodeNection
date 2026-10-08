@@ -196,10 +196,16 @@ public class DashboardFragment extends Fragment {
         bindViews(view);
         calendarManager = new CalendarManager(requireContext());
 
-        // Shared shell: bottom nav selection, then the shared top bar (mascot, theme
-        // toggle, profile picture). AppHeader also starts the header mascot's GIF.
+        // Shared shell: bottom nav selection, then the shared top bar (mascot, voice
+        // button, theme toggle, profile picture). AppHeader also starts the header
+        // mascot's GIF and wires the voice button.
         ScreenNav.bindNav(this, view, ScreenNav.Tab.HOME);
-        AppHeader.bind(this, view, R.string.brand_offline_ml);
+        // The short variant on purpose. The bar's voice button sits after the brand block,
+        // so a subtitle wider than the CAPCOACH wordmark would push the microphone further
+        // right on this screen than on Biometrics or Settings. "Offline ML Active" did
+        // exactly that; "Offline ML" is narrower than the wordmark, so all three screens
+        // give the button the same x.
+        AppHeader.bind(this, view, R.string.brand_offline_ml_short);
 
         buildWeek();
         setupWeekStrip();
