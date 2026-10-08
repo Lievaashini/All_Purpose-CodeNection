@@ -254,7 +254,7 @@
     <string name="bio_health_connect">Health Connect</string>
     <string name="bio_anomaly_tag">SYNC ANOMALY</string>
     <!-- Bound at runtime to the end of the latest sleep session. -->
-    <string name="bio_anomaly_time">%1$s</string>
+    <string name="bio_anomaly_time">- %1$s</string>
 
     <string name="bio_metrics_title">SLEEP DEBT &amp; STRESS METRICS</string>
     <!-- Bound at runtime to the real shortfall against the 8h target. The literal

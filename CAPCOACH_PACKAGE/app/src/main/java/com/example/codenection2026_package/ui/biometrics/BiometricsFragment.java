@@ -874,7 +874,7 @@ public class BiometricsFragment extends Fragment {
         valueText.setGravity(android.view.Gravity.CENTER);
 
         com.google.android.material.slider.Slider slider = new com.google.android.material.slider.Slider(context);
-        slider.setValueFrom(0.0f);
+        slider.setValueFrom(0.5f);
         slider.setValueTo(24.0f);
         slider.setStepSize(0.5f);
         slider.setValue(8.0f);
@@ -899,10 +899,23 @@ public class BiometricsFragment extends Fragment {
      * Converts the slider value into a Health Connect SleepSessionRecord.
      */
     private void writeManualSleepToHealthConnect(double hours) {
+        // 1. THE THREAD FIX: Capture Activity and Context on the Main Thread BEFORE the background worker starts
+        final android.app.Activity activity = getActivity();
+        final Context context = getContext();
+
+        if (activity == null || context == null) {
+            return; // Fragment is already detached; abort.
+        }
+
         new Thread(() -> {
             try {
-                HealthConnectClient client = HealthConnectClient.getOrCreate(requireContext());
-                Instant endTime = Instant.now();
+                // Safely use the pre-captured context
+                HealthConnectClient client = HealthConnectClient.getOrCreate(context);
+
+                // 2. THE HONEST TIMESTAMP FIX: Anchor wake time to 8:00 AM today, unless it's currently earlier.
+                Instant now = Instant.now();
+                Instant morning8AM = LocalDate.now().atTime(8, 0).atZone(ZoneId.systemDefault()).toInstant();
+                Instant endTime = now.isBefore(morning8AM) ? now : morning8AM;
 
                 Instant searchStart = endTime.minus(24, ChronoUnit.HOURS);
                 HealthConnectHelper.deleteSleepDataSync(client, searchStart, endTime);
@@ -923,15 +936,15 @@ public class BiometricsFragment extends Fragment {
 
                 HealthConnectHelper.writeSleepDataSync(client, Collections.singletonList(manualRecord));
 
-                requireActivity().runOnUiThread(() -> {
-                    // THE CRASH FIX: Abort UI updates if the user navigated away while the DB was writing!
+                // 3. Safely use the pre-captured activity to return to the UI thread
+                activity.runOnUiThread(() -> {
                     if (!isAdded() || getView() == null) {
                         return;
                     }
 
-                    Toast.makeText(requireContext(), R.string.bio_manual_success, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.bio_manual_success, Toast.LENGTH_SHORT).show();
 
-                    Snapshot newSnapshot = read(requireContext());
+                    Snapshot newSnapshot = read(context);
                     bindAnomaly(getView(), newSnapshot);
                     bindSleepMetrics(getView(), newSnapshot);
                     bindTrend(getView(), newSnapshot);
@@ -945,18 +958,18 @@ public class BiometricsFragment extends Fragment {
                 });
 
             } catch (SecurityException e) {
-                requireActivity().runOnUiThread(() -> {
-                    if (!isAdded() || getContext() == null) return;
-                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                activity.runOnUiThread(() -> {
+                    if (!isAdded()) return;
+                    new androidx.appcompat.app.AlertDialog.Builder(context)
                             .setTitle(R.string.bio_permission_title)
                             .setMessage(R.string.bio_permission_msg)
                             .setPositiveButton(R.string.bio_got_it_btn, null)
                             .show();
                 });
             } catch (Exception e) {
-                requireActivity().runOnUiThread(() -> {
-                    if (!isAdded() || getContext() == null) return;
-                    Toast.makeText(requireContext(), getString(R.string.bio_manual_error, e.getMessage()), Toast.LENGTH_LONG).show();
+                activity.runOnUiThread(() -> {
+                    if (!isAdded()) return;
+                    Toast.makeText(context, getString(R.string.bio_manual_error, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
             }
         }).start();
