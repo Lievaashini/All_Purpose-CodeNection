@@ -104,6 +104,13 @@ public class CalendarManager {
                     long eventEnd = cursor.getLong(3);
                     boolean isAllDay = cursor.getInt(4) == 1;
 
+                    // FIX: "All-Day Event Bomb" patch.
+                    // Skip all-day events (birthdays, holidays, multi-day banners)
+                    // so they don't import as 24-hour work shifts and break the capacity math.
+                    if (isAllDay) {
+                        continue;
+                    }
+
                     if (title == null || title.trim().isEmpty()) {
                         title = context.getString(R.string.calendar_untitled_event);
                     }
