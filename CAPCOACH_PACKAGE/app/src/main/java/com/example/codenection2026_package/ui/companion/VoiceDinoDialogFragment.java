@@ -312,29 +312,36 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
             return;
         }
 
-        dismiss();
+
 
         switch (command) {
             case ADD_TASK:
                 new AddTaskSheetFragment().show(getParentFragmentManager(), "add_task");
+                dismiss();
                 break;
             case BIOMETRICS:
                 ScreenNav.showBiometrics(this);
+                dismiss();
                 break;
             case SETTINGS:
                 ScreenNav.showSettings(this);
+                dismiss();
                 break;
             case HARD_LIMITS:
                 ScreenNav.showHardLimits(this);
+                dismiss();
                 break;
             case DAILY_HARVEST:
                 ScreenNav.showDailyHarvest(this);
+                dismiss();
                 break;
             case FEAST:
                 ScreenNav.showFeast(this);
+                dismiss();
                 break;
             case DASHBOARD:
                 ScreenNav.showDashboard(this);
+                dismiss();
                 break;
             case BACK:
                 // "Close" / "back" here means this popup, and the dismiss() above was it.

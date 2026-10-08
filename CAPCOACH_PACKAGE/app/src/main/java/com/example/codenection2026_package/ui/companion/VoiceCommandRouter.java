@@ -65,7 +65,7 @@ public final class VoiceCommandRouter {
      * "add task".
      */
     private static final Pattern ADD_VERB_THEN_TASK = Pattern.compile(
-            "\\b(add|create|log)\\b[^.!?]{0,40}?\\b(task|homework|assignment|to-?do"
+            "\\b(add|create|log)\\b[^.!?]{0,80}?\\b(task|homework|assignment|to-?do"
                     + "|reminder|deadline|chore|errand|exam|quiz|test|project|essay|paper"
                     + "|revision|study block|appointment|meeting|class)\\b");
 
@@ -76,7 +76,7 @@ public final class VoiceCommandRouter {
      * only counts when it is followed by a word that is unambiguously a task.
      */
     private static final Pattern NEW_THEN_TASK = Pattern.compile(
-            "\\bnew\\b[^.!?]{0,40}?\\b(task|homework|assignment|to-?do|reminder"
+            "\\bnew\\b[^.!?]{0,80}?\\b(task|homework|assignment|to-?do|reminder"
                     + "|deadline|chore|errand)\\b");
 
     /**
@@ -160,6 +160,9 @@ public final class VoiceCommandRouter {
         if (ADD_VERB_THEN_TASK.matcher(q).find() || NEW_THEN_TASK.matcher(q).find()) {
             return Command.ADD_TASK;
         }
+        if (BACK.matcher(q).find()) {
+            return Command.BACK;
+        }
         if (any(q, BIOMETRICS)) {
             return Command.BIOMETRICS;
         }
@@ -178,9 +181,7 @@ public final class VoiceCommandRouter {
         if (any(q, DASHBOARD)) {
             return Command.DASHBOARD;
         }
-        if (BACK.matcher(q).find()) {
-            return Command.BACK;
-        }
+
         return Command.NONE;
     }
 
@@ -189,7 +190,7 @@ public final class VoiceCommandRouter {
         for (String keyword : keywords) {
             // Compiled per utterance rather than cached: this runs once per recognised
             // command, so a handful of tiny patterns is not worth a static cache.
-            if (Pattern.compile("\\b" + Pattern.quote(keyword)).matcher(q).find()) {
+            if (Pattern.compile("\\b" + Pattern.quote(keyword) + "\\b").matcher(q).find()) {
                 return true;
             }
         }
