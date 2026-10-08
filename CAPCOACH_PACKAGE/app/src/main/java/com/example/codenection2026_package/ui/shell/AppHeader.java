@@ -32,7 +32,7 @@ import java.io.File;
  * <p>Call it once from {@code onViewCreated}:
  * <pre>
  *   ScreenNav.bindNav(this, view, ScreenNav.Tab.HOME);
- *   AppHeader.bind(this, view, R.string.brand_offline_ml);
+ *   AppHeader.bind(this, view, R.string.brand_offline_ml_short);
  * </pre>
  *
  * <p><b>Why the subtitle is passed in rather than set in each layout:</b> {@code <include>}
