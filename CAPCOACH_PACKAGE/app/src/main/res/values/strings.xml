@@ -161,19 +161,34 @@
          names and figures, the sample task names and the machine tags. -->
     <string name="triage_eyebrow">AUTONOMOUS ML TRIAGE</string>
     <string name="triage_metric_load">Cognitive Load</string>
-    <string name="triage_metric_load_value">-55%</string>
     <string name="triage_metric_sleep">Sleep Secured</string>
     <string name="triage_metric_sleep_value">+3.5h</string>
     <string name="triage_plan_label">PROPOSED SCHEDULE MODIFICATIONS</string>
-    <string name="triage_item_protected_title">Cafe Shift (Barista Lead)</string>
-    <string name="triage_item_protected_sub">6:00 PM - 10:00 PM | Unchanged</string>
     <string name="triage_tag_protected">PROTECTED</string>
-    <string name="triage_item_kept_title">Math Quiz Prep (Sets 1-4)</string>
     <string name="triage_tag_kept">KEPT</string>
-    <string name="triage_item_postponed_title">Read Chapter 4 (Graphs)</string>
     <string name="triage_tag_postponed">POSTPONED</string>
-    <string name="triage_item_deferred_title">Dorm Laundry &amp; Ironing</string>
     <string name="triage_tag_deferred">DEFERRED</string>
+
+    <!-- Plan rows. Built from the user's real tasks, so the only fixed part is the
+         shape: the time window the task currently occupies, and what happens to it. -->
+    <string name="triage_row_time">%1$s - %2$s</string>
+    <!-- The model released this one and the planner found it a lighter day. -->
+    <string name="triage_row_move_to">%1$s | Moves to %2$s</string>
+    <!-- Released, but every day inside its deferral window is already too full. -->
+    <string name="triage_row_no_slot">%1$s | No lighter day in range</string>
+    <string name="triage_metric_load_reduction">-%1$d%%</string>
+
+    <!-- The three different reasons the plan can be empty. They are genuinely
+         different news, so they do not share one sentence. -->
+    <string name="triage_empty_no_tasks">Nothing scheduled for this day yet, so there is nothing to rebalance.</string>
+    <string name="triage_empty_under_threshold">This day is below the intervention threshold. Nothing needs moving.</string>
+    <string name="triage_empty_nothing_movable">This day is heavy, but everything on it is either fixed or worth keeping.</string>
+    <string name="triage_nothing_applied">No task had a free day to move to, so nothing changed.</string>
+    <!-- The confirmation after Accept: what actually moved, and the load it took off. -->
+    <plurals name="toast_rebalanced_result">
+        <item quantity="one">%1$d task moved | -%2$d%% load</item>
+        <item quantity="other">%1$d tasks moved | -%2$d%% load</item>
+    </plurals>
 
     <!-- ==================================================================
          SCREEN 4 - ADD TASK  (port of Prototype/add-task.html)

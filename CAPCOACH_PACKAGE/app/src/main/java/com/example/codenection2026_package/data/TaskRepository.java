@@ -125,6 +125,38 @@ public final class TaskRepository {
     }
 
     /**
+     * The same read as {@link #loadByDate}, run on the calling thread.
+     *
+     * <p>For callers that are already on a worker thread and need several days in a row -
+     * the rebalance planner weighing candidate days, for instance. Going through the
+     * callback version there would mean bouncing to the main thread and back once per day
+     * just to end up where it started.
+     *
+     * <p>Must not be called from the main thread: it touches the database directly.
+     *
+     * @return the day's tasks, or an empty list if the read failed
+     */
+    @NonNull
+    public static List<FeedItem> loadByDateBlocking(@NonNull Context context,
+                                                    @NonNull String isoDate) {
+        try {
+            AppDatabase db = AppDatabase.get(context.getApplicationContext());
+            seedCategories(db);
+
+            List<Task> tasks = db.taskDao().findByDate(isoDate);
+            Map<Long, String> names = categoryNames(db.categoryDao());
+
+            List<FeedItem> feed = new ArrayList<>(tasks.size());
+            for (Task task : tasks) {
+                feed.add(new FeedItem(task, names.get(task.getCategory_id())));
+            }
+            return feed;
+        } catch (RuntimeException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
      * Maps category row ids to their names.
      *
      * <p>One query for the whole feed rather than one per row. A HashMap tolerates the

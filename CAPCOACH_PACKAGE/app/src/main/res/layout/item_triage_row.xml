@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One proposal row in the triage sheet.
+
+  Replaces the four hardcoded rows the sheet used to carry. TriageSheetFragment
+  inflates one of these per real task and paints the accent bar and the tag to
+  match the outcome the model picked (protected, kept or moved).
+
+  The accent, tag background and tag colour are all set in code, so the values
+  here are only what the row looks like before it is bound.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/space_sm"
+    android:background="@drawable/bg_surface_low"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <View
+        android:id="@+id/triageRowAccent"
+        android:layout_width="@dimen/task_accent_width"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_accent_slate" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_sm"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingVertical="@dimen/space_sm">
+
+        <TextView
+            android:id="@+id/triageRowTitle"
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/text_primary_dark"
+            android:textStyle="bold"
+            tools:text="Read Chapter 4 (Graphs)" />
+
+        <TextView
+            android:id="@+id/triageRowSub"
+            style="@style/Text.MicroLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="2:00 PM - 3:30 PM" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/triageRowTag"
+        style="@style/Text.MicroLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/space_sm"
+        android:background="@drawable/bg_tag_mint"
+        android:paddingHorizontal="@dimen/space_sm"
+        android:paddingVertical="2dp"
+        android:textStyle="bold"
+        tools:text="KEPT" />
+</LinearLayout>

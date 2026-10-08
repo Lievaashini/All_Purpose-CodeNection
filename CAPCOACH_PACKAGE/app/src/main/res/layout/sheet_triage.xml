@@ -115,12 +115,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/triage_metric_load" />
 
+                <!-- Bound at runtime to the load this plan actually removes. -->
                 <TextView
+                    android:id="@+id/triageMetricLoadValue"
                     style="@style/Text.Metric"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/triage_metric_load_value"
-                    android:textColor="@color/brand_mint" />
+                    android:textColor="@color/brand_mint"
+                    tools:text="-23%" />
 
                 <TextView
                     android:id="@+id/triageMetricLoadSub"
@@ -171,216 +173,30 @@
             android:layout_marginTop="@dimen/space_md"
             android:text="@string/triage_plan_label" />
 
-        <!-- Row 1: protected shift -->
+        <!-- ============ Proposed plan rows ============ -->
+        <!--
+          Filled at runtime by TriageSheetFragment, one row per real task on the
+          selected day. These used to be four hardcoded rows naming tasks the user
+          did not have; the model now decides what goes here.
+        -->
         <LinearLayout
+            android:id="@+id/triagePlanList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <!-- Shown instead of the rows when the day is calm or genuinely empty. -->
+        <TextView
+            android:id="@+id/triageEmptyState"
+            style="@style/Text.MicroLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_sm"
             android:background="@drawable/bg_surface_low"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <View
-                android:layout_width="@dimen/task_accent_width"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_accent_blue" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/space_sm"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingVertical="@dimen/space_sm">
-
-                <TextView
-                    style="@style/Text.Body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/triage_item_protected_title"
-                    android:textColor="@color/text_primary_dark"
-                    android:textStyle="bold" />
-
-                <TextView
-                    style="@style/Text.MicroLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/triage_item_protected_sub" />
-            </LinearLayout>
-
-            <TextView
-                style="@style/Text.MicroLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/space_sm"
-                android:background="@drawable/bg_tag_blue"
-                android:paddingHorizontal="@dimen/space_sm"
-                android:paddingVertical="2dp"
-                android:text="@string/triage_tag_protected"
-                android:textColor="@color/secondary_blue"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Row 2: academic priority kept -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_sm"
-            android:background="@drawable/bg_surface_low"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <View
-                android:layout_width="@dimen/task_accent_width"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_accent_mint" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/space_sm"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingVertical="@dimen/space_sm">
-
-                <TextView
-                    style="@style/Text.Body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/triage_item_kept_title"
-                    android:textColor="@color/text_primary_dark"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/triageItemKeptSub"
-                    style="@style/Text.MicroLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:text="Condensed to 45m focused sprint" />
-            </LinearLayout>
-
-            <TextView
-                style="@style/Text.MicroLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/space_sm"
-                android:background="@drawable/bg_tag_mint"
-                android:paddingHorizontal="@dimen/space_sm"
-                android:paddingVertical="2dp"
-                android:text="@string/triage_tag_kept"
-                android:textColor="@color/brand_mint"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Row 3: postponed item -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_sm"
-            android:background="@drawable/bg_surface_low"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <View
-                android:layout_width="@dimen/task_accent_width"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_accent_amber" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/space_sm"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingVertical="@dimen/space_sm">
-
-                <TextView
-                    style="@style/Text.Body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/triage_item_postponed_title"
-                    android:textColor="@color/text_primary_dark"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/triageItemPostponedSub"
-                    style="@style/Text.MicroLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:text="Moved to Thu 10:00 AM low-fatigue block" />
-            </LinearLayout>
-
-            <TextView
-                style="@style/Text.MicroLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/space_sm"
-                android:background="@drawable/bg_tag_amber"
-                android:paddingHorizontal="@dimen/space_sm"
-                android:paddingVertical="2dp"
-                android:text="@string/triage_tag_postponed"
-                android:textColor="@color/accent_amber"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Row 4: deferred low-yield chore -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_sm"
-            android:background="@drawable/bg_surface_low"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <View
-                android:layout_width="@dimen/task_accent_width"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_accent_slate" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/space_sm"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingVertical="@dimen/space_sm">
-
-                <TextView
-                    style="@style/Text.Body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/triage_item_deferred_title"
-                    android:textColor="@color/text_primary_dark"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/triageItemDeferredSub"
-                    style="@style/Text.MicroLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:text="Auto-deferred to Saturday afternoon" />
-            </LinearLayout>
-
-            <TextView
-                style="@style/Text.MicroLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/space_sm"
-                android:background="@drawable/bg_task_tag"
-                android:paddingHorizontal="@dimen/space_sm"
-                android:paddingVertical="2dp"
-                android:text="@string/triage_tag_deferred"
-                android:textColor="@color/text_muted_dark"
-                android:textStyle="bold" />
-        </LinearLayout>
+            android:padding="@dimen/space_md"
+            android:visibility="gone"
+            tools:text="Today is under control - nothing needs moving."
+            tools:visibility="visible" />
 
         <!-- ============ Actions ============ -->
         <com.google.android.material.button.MaterialButton
