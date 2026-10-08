@@ -31,7 +31,6 @@ import com.example.codenection2026_package.ui.shell.ToneCopy;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 /**
  * The simplified, Dino-focused voice popup opened from the onboarding microphone.
@@ -45,9 +44,10 @@ import java.util.Locale;
  * The same class the companion screen uses is driven here with a local
  * {@link RecognitionListener}, so there is exactly one speech implementation in the app.
  *
- * <p>Recognised commands are routed through {@link ScreenNav}, matching the prototype's
- * own voice-command table; the dialog dismisses first so the target screen is not replaced
- * underneath a live dialog.
+ * <p>Recognised commands are decoded by {@link VoiceCommandRouter} - the same table the full
+ * voice screen uses, so "view my sleep" means the same thing in both places - and then
+ * routed through {@link ScreenNav}. The dialog dismisses first so the target screen is not
+ * replaced underneath a live dialog.
  *
  * <p>NEW FILE - additive. Nothing existing is modified.
  */
@@ -290,44 +290,60 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
     }
 
     // ==================================================================
-    //  Command table - the same one the prototype matched
+    //  Command table - shared with the full voice screen
     // ==================================================================
 
     /**
-     * Routes the transcript through {@link ScreenNav}, matching the ordering of the
-     * prototype's own voice table so the first match wins.
+     * Asks {@link VoiceCommandRouter} which screen the user asked for, then goes there.
+     *
+     * <p>The words themselves live in the router, so this popup and the full
+     * {@link CompanionFragment} voice screen recognise exactly the same commands. Only the
+     * acting half is local, because a dialog navigates differently from a full screen.
      *
      * <p>The dialog dismisses before navigating, otherwise the target screen would be
      * swapped in underneath a dialog that is still showing.
      */
     private void handleTranscript(@NonNull String transcript) {
-        String q = transcript.toLowerCase(Locale.US);
+        VoiceCommandRouter.Command command = VoiceCommandRouter.route(transcript);
 
-        if (q.contains("add task") || q.contains("new task") || q.contains("create task")) {
-            dismiss();
-            new AddTaskSheetFragment().show(getParentFragmentManager(), "add_task");
-        } else if (q.contains("biometric") || q.contains("health")
-                || q.contains("sleep") || q.contains("hrv")) {
-            dismiss();
-            ScreenNav.showBiometrics(this);
-        } else if (q.contains("setting") || q.contains("privacy")) {
-            dismiss();
-            ScreenNav.showSettings(this);
-        } else if (q.contains("daily pop-up") || q.contains("daily pop up")
-                || q.contains("daily harvest")) {
-            dismiss();
-            ScreenNav.showDailyHarvest(this);
-        } else if (q.contains("weekly pop-up") || q.contains("weekly pop up")
-                || q.contains("feast")) {
-            dismiss();
-            ScreenNav.showFeast(this);
-        } else if (q.contains("dashboard") || q.contains("home")
-                || q.contains("schedule") || q.contains("shift") || q.contains("calendar")) {
-            dismiss();
-            ScreenNav.showDashboard(this);
+        // Anything the router does not know stays on screen with the transcript echoed in
+        // the bubble, so the user can see what was heard and try again.
+        if (command == VoiceCommandRouter.Command.NONE) {
+            return;
         }
-        // Anything else stays on screen with the transcript echoed in the bubble, so the
-        // user can see what was heard and try again.
+
+        dismiss();
+
+        switch (command) {
+            case ADD_TASK:
+                new AddTaskSheetFragment().show(getParentFragmentManager(), "add_task");
+                break;
+            case BIOMETRICS:
+                ScreenNav.showBiometrics(this);
+                break;
+            case SETTINGS:
+                ScreenNav.showSettings(this);
+                break;
+            case HARD_LIMITS:
+                ScreenNav.showHardLimits(this);
+                break;
+            case DAILY_HARVEST:
+                ScreenNav.showDailyHarvest(this);
+                break;
+            case FEAST:
+                ScreenNav.showFeast(this);
+                break;
+            case DASHBOARD:
+                ScreenNav.showDashboard(this);
+                break;
+            case BACK:
+                // "Close" / "back" here means this popup, and the dismiss() above was it.
+                // There is no screen behind it to move to, so the user lands back on
+                // onboarding where they started.
+                break;
+            default:
+                break;
+        }
     }
 
     // ==================================================================
