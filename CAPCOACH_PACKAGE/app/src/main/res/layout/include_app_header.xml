@@ -22,15 +22,27 @@
   always at the start of the row and the toggle -> avatar pair is always at the
   end, at the same sizes and the same @dimen/space_sm gap.
 
+  The bar is also the app's voice entry point: Dashboard, Biometrics and Settings all
+  show it, so a microphone here is the one button that reaches the voice popup from any
+  of the three without each screen growing its own copy.
+
   ORDER IS PART OF THE CONTRACT (left to right):
-    [ mascot plate ][ brand block (weighted) ][ theme toggle ][ profile picture ]
-  The brand block is the only thing that stretches, so it absorbs any difference
-  in title length and nothing else moves. Do not insert a child after the toggle.
+    [ mascot plate ][ brand block ][ voice button ][ slack ][ theme toggle ][ profile picture ]
+  The left cluster is the only thing that stretches, so it absorbs any difference in
+  title length and nothing else moves. Do not insert a child after the toggle.
+
+  The voice button sits AFTER the wordmark on purpose: the left cluster is weighted, so
+  a button placed there stays in the top-left corner beside the copy, whereas the same
+  button placed after the weighted child would be pushed to the right-hand group and
+  read as a sibling of the theme toggle. Its 40dp + 8dp cost is the only width the
+  wordmark block lost, which still fits "Offline ML Active" at the largest font scale
+  the app supports.
 
   CALLER CONTRACT
   Bind it with ui/shell/AppHeader.bind(...), which fills in the per-screen subtitle
-  text, starts the animated GIF mascot and wires the theme toggle. A screen that
-  includes this bar without calling it gets no subtitle and a single-frame mascot.
+  text, starts the animated GIF mascot, wires the theme toggle and attaches the voice
+  popup to the microphone. A screen that includes this bar without calling it gets no
+  subtitle, a single-frame mascot and a microphone that does nothing when tapped.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -62,43 +74,79 @@
             android:src="@drawable/dino_happy" />
     </FrameLayout>
 
-    <!-- ==================== Brand block: the only child that stretches ==================== -->
+    <!-- ==================== Left cluster: brand block, then the voice button ====================
+         This is the bar's only stretching child, so everything inside it stays pinned to
+         the left gutter and the leftover width collects after the voice button. -->
     <LinearLayout
+        android:id="@+id/headerLeftCluster"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/space_sm"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
+        <!-- Brand block: the wordmark over the screen name. -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <TextView
-                style="@style/Text.Body"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/brand_name"
-                android:textColor="@color/text_primary_dark"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <View
-                android:layout_width="6dp"
-                android:layout_height="6dp"
-                android:layout_marginStart="@dimen/space_xxs"
-                android:background="@drawable/dot_mint" />
+                <TextView
+                    style="@style/Text.Body"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/brand_name"
+                    android:textColor="@color/text_primary_dark"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:layout_marginStart="@dimen/space_xxs"
+                    android:background="@drawable/dot_mint" />
+            </LinearLayout>
+
+            <!-- Names the screen, so one bar still tells the three apart.
+                 Written by AppHeader.bind. -->
+            <TextView
+                android:id="@+id/headerSubtitle"
+                style="@style/Text.MicroLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Offline ML Active" />
         </LinearLayout>
 
-        <!-- Names the screen, so one bar still tells the three apart.
-             Written by AppHeader.bind. -->
-        <TextView
-            android:id="@+id/headerSubtitle"
-            style="@style/Text.MicroLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="Offline ML Active" />
+        <!-- Voice button: opens the Dino voice popup from any of the three screens.
+             Same 40dp plate and same 19dp glyph as the theme toggle, so the bar has two
+             buttons that were measured once rather than one of each size. Tinted mint
+             because it opens a feature, where the toggle is amber to read as a setting.
+             The click listener is attached by AppHeader.bind; the button itself is inert. -->
+        <FrameLayout
+            android:id="@+id/headerVoiceButton"
+            android:layout_width="@dimen/icon_button_size"
+            android:layout_height="@dimen/icon_button_size"
+            android:layout_marginStart="@dimen/space_sm"
+            android:background="@drawable/bg_surface_low"
+            android:clickable="true"
+            android:contentDescription="@string/cd_mic_button"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/headerVoiceIcon"
+                android:layout_width="@dimen/header_toggle_icon"
+                android:layout_height="@dimen/header_toggle_icon"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_mic"
+                app:tint="@color/brand_mint" />
+        </FrameLayout>
     </LinearLayout>
 
     <!-- ==================== Right: theme toggle, then profile picture ====================
