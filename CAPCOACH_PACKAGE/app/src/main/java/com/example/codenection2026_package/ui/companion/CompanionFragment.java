@@ -34,7 +34,6 @@ import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.shell.ToneCopy;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 /**
  * SCREEN 9 - COMPANION / VOICE. Port of Prototype/companion.html.
@@ -44,7 +43,8 @@ import java.util.Locale;
  * api/VoiceManager.java, which wraps SpeechRecognizer and sets EXTRA_PREFER_OFFLINE for
  * the app's offline-first pitch. This fragment therefore does NOT create its own
  * recognizer - it hands VoiceManager a RecognitionListener and forwards the transcript
- * into ScreenNav, exactly as the prototype forwarded it to window.location.
+ * into {@link VoiceCommandRouter}, exactly as the prototype forwarded it to
+ * window.location.
  *
  * <p>The prototype's theme button toggles a local CSS class. The shared ThemeController
  * is used instead, so the night/bright choice stays consistent with every other screen.
@@ -254,40 +254,47 @@ public class CompanionFragment extends Fragment {
     }
 
     // ==================================================================
-    //  Command table - the same one the prototype matched
+    //  Command table - shared with the onboarding voice popup
     // ==================================================================
 
     /**
-     * The prototype's regex table, kept in the same order so the first match wins. Each
-     * branch is a contains check on the lowercased transcript, which is what the
-     * prototype's word-boundary regexes amount to for real utterances.
+     * Asks {@link VoiceCommandRouter} which screen the user asked for, then goes there.
+     *
+     * <p>The words themselves live in the router, so this screen and the onboarding
+     * {@link VoiceDinoDialogFragment} recognise exactly the same commands. Only the acting
+     * half is local, because a dialog navigates differently from a full screen.
      */
     private void handleTranscript(@NonNull String transcript) {
-        String q = transcript.toLowerCase(Locale.US);
-
-        if (q.contains("home") || q.contains("dashboard") || q.contains("main page")) {
-            ScreenNav.showDashboard(this);
-        } else if (q.contains("add task") || q.contains("new task") || q.contains("create task")) {
-            new AddTaskSheetFragment().show(getChildFragmentManager(), "add_task");
-        } else if (q.contains("schedule") || q.contains("reschedule")
-                || q.contains("shift") || q.contains("calendar")) {
-            // The schedule lives on the dashboard.
-            ScreenNav.showDashboard(this);
-        } else if (q.contains("biometric") || q.contains("health")
-                || q.contains("sleep") || q.contains("hrv")) {
-            ScreenNav.showBiometrics(this);
-        } else if (q.contains("setting") || q.contains("privacy")) {
-            ScreenNav.showSettings(this);
-        } else if (q.contains("daily pop-up") || q.contains("daily pop up")
-                || q.contains("daily harvest")) {
-            ScreenNav.showDailyHarvest(this);
-        } else if (q.contains("weekly pop-up") || q.contains("weekly pop up")
-                || q.contains("feast")) {
-            ScreenNav.showFeast(this);
-        } else if (q.contains("back") || q.contains("close")) {
-            ScreenNav.back(this);
+        switch (VoiceCommandRouter.route(transcript)) {
+            case ADD_TASK:
+                new AddTaskSheetFragment().show(getChildFragmentManager(), "add_task");
+                break;
+            case BIOMETRICS:
+                ScreenNav.showBiometrics(this);
+                break;
+            case SETTINGS:
+                ScreenNav.showSettings(this);
+                break;
+            case HARD_LIMITS:
+                ScreenNav.showHardLimits(this);
+                break;
+            case DAILY_HARVEST:
+                ScreenNav.showDailyHarvest(this);
+                break;
+            case FEAST:
+                ScreenNav.showFeast(this);
+                break;
+            case DASHBOARD:
+                ScreenNav.showDashboard(this);
+                break;
+            case BACK:
+                ScreenNav.back(this);
+                break;
+            default:
+                // NONE: the transcript is already echoed in the bubble, so the user can see
+                // what was heard and stay put rather than being sent somewhere random.
+                break;
         }
-        // Anything else is echoed back into the bubble for the user to see.
     }
 
     // ==================================================================
