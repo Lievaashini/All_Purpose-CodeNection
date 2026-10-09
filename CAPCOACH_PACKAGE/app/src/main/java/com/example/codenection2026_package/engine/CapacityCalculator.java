@@ -132,6 +132,12 @@ public class CapacityCalculator {
                 - ((MAX_SLEEP_PENALTY - 1.0) * sleepRatio);
     }
 
+    /**
+     * Calculates the duration of an unfinished task.
+     *
+     * Completed tasks are excluded because this represents
+     * the user's remaining workload.
+     */
     public double calculateTaskHours(Task task) {
         if (task == null || task.isCompleted()) {
             return 0.0;
@@ -155,6 +161,38 @@ public class CapacityCalculator {
         return minutes / 60.0;
     }
 
+    /**
+     * Calculates the planned duration of a task.
+     *
+     * Completed tasks are included because this represents
+     * the total workload originally planned for the day.
+     */
+    public double calculatePlannedTaskHours(Task task) {
+        if (task == null) {
+            return 0.0;
+        }
+
+        if (task.getStartTime() == null
+                || task.getEndTime() == null) {
+            return 0.0;
+        }
+
+        LocalTime start = LocalTime.parse(task.getStartTime());
+        LocalTime end = LocalTime.parse(task.getEndTime());
+
+        long minutes = Duration.between(start, end).toMinutes();
+
+        // Handle tasks that cross midnight.
+        if (minutes < 0) {
+            minutes += 1440;
+        }
+
+        return minutes / 60.0;
+    }
+
+    /**
+     * Calculates total remaining workload hours.
+     */
     public double calculateTotalTaskHours(List<Task> tasks) {
         if (tasks == null || tasks.isEmpty()) {
             return 0.0;
@@ -164,6 +202,26 @@ public class CapacityCalculator {
 
         for (Task task : tasks) {
             totalHours += calculateTaskHours(task);
+        }
+
+        return totalHours;
+    }
+
+    /**
+     * Calculates total planned workload hours.
+     *
+     * Completed tasks are included because this represents
+     * the workload originally planned for the day.
+     */
+    public double calculateTotalPlannedTaskHours(List<Task> tasks) {
+        if (tasks == null || tasks.isEmpty()) {
+            return 0.0;
+        }
+
+        double totalHours = 0.0;
+
+        for (Task task : tasks) {
+            totalHours += calculatePlannedTaskHours(task);
         }
 
         return totalHours;

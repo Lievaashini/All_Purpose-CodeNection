@@ -349,9 +349,10 @@ public class DashboardFragment extends Fragment {
     /**
      * Re-measures the whole week and repaints everything that shows a load.
      *
-     * <p>Called whenever tasks may have changed: on entry, after any reload of the feed,
-     * and after a checkbox tick, since a finished task no longer counts. The measurement
-     * runs off the main thread, so the card shows the previous figures until it lands.
+     * <p>Called on entry and after any reload of the feed, which every add, edit, sync and
+     * rebalance ends in. A checkbox tick does not need it: the load is planned workload, so
+     * a finished task still counts. The measurement runs off the main thread, so the card
+     * shows the previous figures until it lands.
      */
     private void refreshLoads() {
         RebalancePlanner.measureWeek(requireContext(), weekDates, result -> {
@@ -894,10 +895,6 @@ public class DashboardFragment extends Fragment {
             TaskRepository.update(requireContext(), task, success -> {
                 if (!Boolean.TRUE.equals(success)) {
                     android.util.Log.e("CapCoachAPI", "Failed to save checkmark state to DB.");
-                } else if (isAdded()) {
-                    // A finished task stops counting as load, so the card should drop
-                    // as soon as it is ticked.
-                    refreshLoads();
                 }
             });
         }

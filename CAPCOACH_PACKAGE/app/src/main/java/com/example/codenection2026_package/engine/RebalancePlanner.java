@@ -258,8 +258,8 @@ public final class RebalancePlanner {
      * fixed demo week; sharing the planner's measurement means the card and the Rebalance
      * sheet can never disagree about how heavy a day is.
      *
-     * <p>Completed tasks do not count, the same as in the plan, so ticking a task off lowers
-     * the day's load. Only today carries the sleep penalty.
+     * <p>Completed tasks count (planned workload), the same as in the plan, so ticking a task
+     * off does not change the day's load. Only today carries the sleep penalty.
      *
      * @param isoDates days to measure, "yyyy-MM-dd"; a null entry measures as 0
      * @param callback receives the loads on the main thread
@@ -332,8 +332,10 @@ public final class RebalancePlanner {
         for (TaskRepository.FeedItem item : feed) {
             Task task = item.getTask();
 
-            // A finished task is history, not load to redistribute.
+            // A finished task cannot be moved, but it still belongs to the day: it stays in the
+            // projected load, otherwise the plan would claim credit for work already done.
             if (task.isCompleted()) {
+                staying.add(item);
                 continue;
             }
 
@@ -497,6 +499,9 @@ public final class RebalancePlanner {
      * The day's load as a 0-100+ figure, measured the way {@link CapacityCalculator}
      * defines it: hours booked against the user's own ceilings, then weighted, then
      * adjusted for how badly they slept.
+     *
+     * <p>Uses planned hours, so completed tasks are included. This is the one measurement
+     * behind both the dashboard and the Rebalance trigger.
      */
     private static double measureCapacity(@NonNull Context context,
                                           @NonNull List<TaskRepository.FeedItem> feed,
@@ -512,7 +517,9 @@ public final class RebalancePlanner {
                 // would have the app telling a lonely student to cancel their one coffee.
                 continue;
             }
-            double hours = calculator.calculateTaskHours(item.getTask());
+            // Planned hours: a finished task still counts, because the load is how much the day
+            // asks of the user, and finishing a task does not make the day have been lighter.
+            double hours = calculator.calculatePlannedTaskHours(item.getTask());
             if (hours > 0) {
                 Double running = hoursByCategory.get(category);
                 hoursByCategory.put(category, running == null ? hours : running + hours);
