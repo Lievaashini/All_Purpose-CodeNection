@@ -344,9 +344,7 @@ public class VoiceDinoDialogFragment extends BottomSheetDialogFragment {
                 dismiss();
                 break;
             case BACK:
-                // "Close" / "back" here means this popup, and the dismiss() above was it.
-                // There is no screen behind it to move to, so the user lands back on
-                // onboarding where they started.
+                dismiss();
                 break;
             default:
                 break;
