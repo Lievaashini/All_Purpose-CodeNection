@@ -23,6 +23,7 @@ import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.data.CategoryRepository;
 import com.example.codenection2026_package.data.TaskRepository;
+import com.example.codenection2026_package.engine.RebalancePlanner;
 import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.model.ToneType;
@@ -1137,10 +1138,88 @@ public class DashboardFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
         }
     }
+    /**
+     * Opens the triage sheet on the day the user is actually looking at.
+     *
+     * <p>Two hops before the sheet can be shown: load that day's tasks, then let
+     * {@link RebalancePlanner} measure them and run the model. Both are asynchronous, so
+     * each step re-checks that the screen is still there - the sheet is opened from a tap,
+     * and a tap can be followed immediately by a back press.
+     *
+     * <p>The sheet used to open instantly on a fixed demo proposal. It now waits for a real
+     * one, which is the whole point: the rows name the user's own tasks.
+     */
     private void openTriage() {
-        TriageSheetFragment sheet = new TriageSheetFragment();
-        sheet.setOnRebalanceAccepted(this::showRebalanceToast);
-        sheet.show(getChildFragmentManager(), "triage");
+        final String isoDate = weekDates[selectedDay];
+        if (isoDate == null) {
+            return;
+        }
+
+        TaskRepository.loadByDate(requireContext(), isoDate, feed -> {
+            if (!isAdded() || feed == null) {
+                return;
+            }
+            RebalancePlanner.plan(requireContext(), isoDate, feed, plan -> {
+                if (!isAdded()) {
+                    return;
+                }
+                TriageSheetFragment sheet = new TriageSheetFragment();
+                sheet.setPlan(plan);
+                sheet.setOnRebalanceAccepted(() -> applyPlan(plan));
+                sheet.show(getChildFragmentManager(), TriageSheetFragment.TAG);
+            });
+        });
+    }
+
+    /**
+     * Carries out an accepted plan: every task the planner found a day for is re-filed
+     * under that day.
+     *
+     * <p>Only the date changes. The time of day stays, which is why the planner refuses
+     * days where that slot is already taken. Tasks it found no day for are left exactly
+     * where they are, and nothing here touches Google Calendar - calendar-linked tasks are
+     * never proposed for a move in the first place.
+     *
+     * <p>The writes are independent, so the screen refreshes once, after the last one
+     * reports back, rather than flickering once per task.
+     */
+    private void applyPlan(@Nullable RebalancePlanner.Plan plan) {
+        if (plan == null) {
+            return;
+        }
+
+        final List<Task> moving = new ArrayList<>();
+        for (RebalancePlanner.Proposal proposal : plan.getProposals()) {
+            if (proposal.getOutcome() == RebalancePlanner.Outcome.MOVED
+                    && proposal.getTargetDate() != null) {
+                Task task = proposal.getTask();
+                task.setDate(proposal.getTargetDate());
+                moving.add(task);
+            }
+        }
+
+        if (moving.isEmpty()) {
+            Toast.makeText(requireContext(), R.string.triage_nothing_applied,
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final int reduction = plan.getLoadReductionPercent();
+        final int[] pending = {moving.size()};
+        final int[] saved = {0};
+
+        for (Task task : moving) {
+            TaskRepository.update(requireContext(), task, success -> {
+                if (Boolean.TRUE.equals(success)) {
+                    saved[0]++;
+                }
+                pending[0]--;
+                if (pending[0] == 0 && isAdded()) {
+                    reloadTasks();
+                    showRebalanceToast(saved[0], reduction);
+                }
+            });
+        }
     }
 
     private void openAddTask() {
@@ -1191,13 +1270,22 @@ public class DashboardFragment extends Fragment {
     // Rebalance toast (prototype showToast / dismissToast)
     // ==================================================================
 
-    /** Fades the confirmation in, then hides it again after 4.2s. */
-    public void showRebalanceToast() {
+    /**
+     * Fades the confirmation in, then hides it again after 4.2s.
+     *
+     * <p>The second line reports what the rebalance actually did. It used to read a fixed
+     * "-55% load | +3.5h rest" regardless of the day, which stopped being acceptable the
+     * moment Accept started changing real data.
+     *
+     * @param moved how many tasks were re-filed successfully
+     * @param reductionPercent load taken off the day, from the accepted plan
+     */
+    private void showRebalanceToast(int moved, int reductionPercent) {
         if (rebalanceToast == null) {
             return;
         }
-        // Both lines are tone-dependent, so they are written on the way in rather than
-        // sitting in the layout.
+        // The title is tone-dependent, so it is written on the way in rather than sitting
+        // in the layout. The second line is a measurement, so it is plain.
         ToneType tone = tone();
         TextView title = rebalanceToast.findViewById(R.id.toastTitle);
         if (title != null) {
@@ -1205,7 +1293,8 @@ public class DashboardFragment extends Fragment {
         }
         TextView sub = rebalanceToast.findViewById(R.id.toastSub);
         if (sub != null) {
-            sub.setText(CoachVoice.Line.TOAST_REBALANCED_SUB.pick(tone));
+            sub.setText(getResources().getQuantityString(
+                    R.plurals.toast_rebalanced_result, moved, moved, reductionPercent));
         }
         rebalanceToast.removeCallbacks(hideToast);
         rebalanceToast.setAlpha(0f);
