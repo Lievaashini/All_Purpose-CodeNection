@@ -194,6 +194,7 @@
     <string name="triage_empty_no_tasks">Nothing scheduled for this day yet, so there is nothing to rebalance.</string>
     <string name="triage_empty_under_threshold">This day is below the intervention threshold. Nothing needs moving.</string>
     <string name="triage_empty_nothing_movable">This day is heavy, but everything on it is either fixed or worth keeping.</string>
+    <string name="triage_plan_failed">Couldn\'t measure this day right now. Please try again.</string>
     <string name="triage_nothing_applied">No task had a free day to move to, so nothing changed.</string>
     <!-- The confirmation after Accept: what actually moved, and the load it took off. -->
     <plurals name="toast_rebalanced_result">

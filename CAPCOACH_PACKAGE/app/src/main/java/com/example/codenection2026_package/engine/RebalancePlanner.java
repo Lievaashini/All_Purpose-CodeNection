@@ -3,6 +3,7 @@ package com.example.codenection2026_package.engine;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,8 +67,8 @@ public final class RebalancePlanner {
         /**
          * The day this task should move to, as "yyyy-MM-dd", or null when it stays put.
          *
-         * <p>Always null today: choosing the day is the next step, and this field is the
-         * seam it slots into so the sheet does not have to change shape again.
+         * <p>Also null for a MOVED task when no day in its deferral window has room. The sheet
+         * shows those as "No lighter day in range", and Accept leaves them where they are.
          */
         @Nullable
         private final String targetDate;
@@ -186,6 +187,8 @@ public final class RebalancePlanner {
     /** Passed where no sleep figure applies, which leaves capacity unpenalised. */
     private static final int NO_SLEEP_READING = 0;
 
+    private static final String TAG = "RebalancePlanner";
+
     /** The date format every task row and DAO query in the app already uses. */
     private static final DateTimeFormatter ISO = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -201,7 +204,8 @@ public final class RebalancePlanner {
      * @param isoDate the day being rebalanced, "yyyy-MM-dd" - the point the search for a
      *                target day counts forward from
      * @param feed one day's tasks, as the dashboard already loaded them
-     * @param callback receives the finished plan on the main thread
+     * @param callback receives the finished plan on the main thread, or null if measuring
+     *                 the day failed
      */
     public static void plan(@NonNull Context context,
                             @NonNull String isoDate,
@@ -219,9 +223,10 @@ public final class RebalancePlanner {
             try {
                 plan = build(appContext, isoDate, snapshot);
             } catch (RuntimeException e) {
-                // A plan is advisory. If measuring fails, propose nothing rather than
-                // taking the dashboard down with it.
-                plan = new Plan(0.0, 0.0, new ArrayList<>());
+                // Reported as null rather than an empty plan: an empty plan reads as "nothing
+                // scheduled", which would tell the user a failed measurement was a free day.
+                Log.w(TAG, "Rebalance plan failed for " + isoDate, e);
+                plan = null;
             }
             final Plan result = plan;
             MAIN.post(() -> callback.onResult(result));

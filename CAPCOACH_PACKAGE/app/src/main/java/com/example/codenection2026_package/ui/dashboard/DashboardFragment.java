@@ -33,7 +33,6 @@ import com.example.codenection2026_package.ui.edittask.EditTaskSheetFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.shell.AppHeader;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
-import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.widget.LoadChartView;
 
 import java.text.SimpleDateFormat;
@@ -356,7 +355,9 @@ public class DashboardFragment extends Fragment {
      */
     private void refreshLoads() {
         RebalancePlanner.measureWeek(requireContext(), weekDates, result -> {
-            if (!isAdded() || result == null) {
+            // isAdded() alone is not enough: a fragment on the back stack is still added but
+            // has no view, and every render below paints into the view.
+            if (!isAdded() || getView() == null || result == null) {
                 return;
             }
             float[] loads = result.getLoads();
@@ -851,10 +852,8 @@ public class DashboardFragment extends Fragment {
     private void toggleDone(@NonNull View row) {
         boolean nowDone = !doneRows.contains(row);
 
-        // 1. Get the actual Task object from the view's data
-        // (Assuming we store the Task object in the row's tag earlier, or we can fetch it)
-        // Since the current inflateTaskRow doesn't store the Task object itself, let's just
-        // update the visual state first.
+        // 1. Update the row's look straight away; the change is saved to Room in step 2,
+        // using the Task that inflateTaskRow stored in the row's tag.
 
         if (nowDone) {
             doneRows.add(row);
@@ -1028,10 +1027,6 @@ public class DashboardFragment extends Fragment {
      * Pulls the user's native Google Calendar events and maps them directly
      * into Lieva's Room database via TaskRepository, with de-duplication.
      */
-    /**
-     * Pulls the user's native Google Calendar events and maps them directly
-     * into Lieva's Room database via TaskRepository, with de-duplication.
-     */
     private void syncCalendar() {
         Toast.makeText(requireContext(),
                 getString(CoachVoice.Line.DASH_SYNC_STARTING.pick(tone())),
@@ -1196,7 +1191,13 @@ public class DashboardFragment extends Fragment {
                 return;
             }
             RebalancePlanner.plan(requireContext(), isoDate, feed, plan -> {
-                if (!isAdded()) {
+                if (!isAdded() || getView() == null) {
+                    return;
+                }
+                if (plan == null) {
+                    // A failed measurement must not be shown as "nothing scheduled".
+                    Toast.makeText(requireContext(), R.string.triage_plan_failed,
+                            Toast.LENGTH_SHORT).show();
                     return;
                 }
                 TriageSheetFragment sheet = new TriageSheetFragment();
