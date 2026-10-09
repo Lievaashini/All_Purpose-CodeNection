@@ -22,8 +22,8 @@ import com.bumptech.glide.Glide;
 import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.api.CalendarManager;
 import com.example.codenection2026_package.data.CategoryRepository;
+import com.example.codenection2026_package.engine.CapacityCalculator;
 import com.example.codenection2026_package.data.TaskRepository;
-import com.example.codenection2026_package.engine.RebalancePlanner;
 import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.model.ToneType;
@@ -32,7 +32,6 @@ import com.example.codenection2026_package.ui.companion.DinoReactionBubble;
 import com.example.codenection2026_package.ui.edittask.EditTaskSheetFragment;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.shell.AppHeader;
-import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.widget.LoadChartView;
 
@@ -93,10 +92,15 @@ public class DashboardFragment extends Fragment {
     };
 
     /**
-     * The prototype's seven charted loads, in week order from Monday. Demo data:
-     * nothing computes these yet.
+     * Planned workload percentages for Monday ... Sunday.
+     *
+     * <p>The values are calculated from Room tasks and the user's onboarding
+     * commitment inputs. There is no hardcoded weekly chart data.
      */
-    private static final float[] WEEK_LOADS = {65f, 50f, 40f, 75f, 88f, 25f, 20f};
+    private final float[] weekLoads = new float[7];
+
+    private final CapacityCalculator capacityCalculator =
+            new CapacityCalculator();
 
     private static final int CRASH_CEILING_PERCENT = 90;
     private static final long TOAST_VISIBLE_MS = 4200L;
@@ -197,20 +201,15 @@ public class DashboardFragment extends Fragment {
         bindViews(view);
         calendarManager = new CalendarManager(requireContext());
 
-        // Shared shell: bottom nav selection, then the shared top bar (mascot, voice
-        // button, theme toggle, profile picture). AppHeader also starts the header
-        // mascot's GIF and wires the voice button.
+        // Shared shell: bottom nav selection, then the shared top bar (mascot, theme
+        // toggle, profile picture). AppHeader also starts the header mascot's GIF.
         ScreenNav.bindNav(this, view, ScreenNav.Tab.HOME);
-        // The short variant on purpose. The bar's voice button sits after the brand block,
-        // so a subtitle wider than the CAPCOACH wordmark would push the microphone further
-        // right on this screen than on Biometrics or Settings. "Offline ML Active" did
-        // exactly that; "Offline ML" is narrower than the wordmark, so all three screens
-        // give the button the same x.
         AppHeader.bind(this, view, R.string.brand_offline_ml_short);
 
         buildWeek();
         setupWeekStrip();
         setupLoadChart();
+        loadPlannedWeekLoads();
         renderCapLabel();
         renderWeekLabel();
         renderCapacityCard();
@@ -324,21 +323,28 @@ public class DashboardFragment extends Fragment {
             cursor.add(Calendar.DAY_OF_YEAR, 1);
         }
 
-        heavyIndex = heaviestLoadIndex();
+        // Start with zero values while the seven Room queries load asynchronously.
+        for (int i = 0; i < weekLoads.length; i++) {
+            weekLoads[i] = 0f;
+        }
+
+        heavyIndex = 0;
 
         // Land on today, which is also what the capacity card starts on.
         selectedDay = todayIndex;
-        selectedLoad = (int) WEEK_LOADS[selectedDay];
+        selectedLoad = 0;
     }
 
-    /** @return the index of the largest demo load, so the amber bar is never a guess */
-    private static int heaviestLoadIndex() {
+    /** @return the index of the largest planned workload */
+    private int heaviestLoadIndex() {
         int heaviest = 0;
-        for (int i = 1; i < WEEK_LOADS.length; i++) {
-            if (WEEK_LOADS[i] > WEEK_LOADS[heaviest]) {
+
+        for (int i = 1; i < weekLoads.length; i++) {
+            if (weekLoads[i] > weekLoads[heaviest]) {
                 heaviest = i;
             }
         }
+
         return heaviest;
     }
 
@@ -386,11 +392,107 @@ public class DashboardFragment extends Fragment {
         return getResources().getStringArray(R.array.day_letters);
     }
 
+    /**
+     * Loads the planned workload percentage for each day in the current week.
+     *
+     * <p>Planned hours are calculated by CapacityCalculator, so completed tasks
+     * remain part of the planned workload. The baseline comes from the user's
+     * onboarding commitment inputs rather than a hardcoded 8-hour value.
+     */
+    private void loadPlannedWeekLoads() {
+        final Context context = requireContext();
+
+        /*
+         * Onboarding stores these as weekly commitment hours.
+         * Convert the total weekly commitment into a daily baseline.
+         */
+        double weeklyBaseline =
+                OnboardingPrefs.getStudyHours(context)
+                        + OnboardingPrefs.getWorkHours(context)
+                        + OnboardingPrefs.getCocurricularHours(context);
+
+        final double dailyBaseline = weeklyBaseline / 7.0;
+
+        /*
+         * Avoid division by zero if the user has entered zero for every
+         * commitment field.
+         */
+        if (dailyBaseline <= 0.0) {
+            for (int i = 0; i < weekLoads.length; i++) {
+                weekLoads[i] = 0f;
+            }
+
+            heavyIndex = heaviestLoadIndex();
+            selectedLoad = 0;
+            renderChart();
+            renderDays();
+            renderCapacityCard();
+            return;
+        }
+
+        final int[] daysLoaded = {0};
+
+        for (int i = 0; i < weekDates.length; i++) {
+            final int dayIndex = i;
+
+            TaskRepository.loadByDate(
+                    context,
+                    weekDates[i],
+                    feed -> {
+                        if (!isAdded()) {
+                            return;
+                        }
+
+                        List<Task> tasks = new ArrayList<>();
+
+                        if (feed != null) {
+                            for (TaskRepository.FeedItem item : feed) {
+                                if (item != null && item.getTask() != null) {
+                                    tasks.add(item.getTask());
+                                }
+                            }
+                        }
+
+                        /*
+                         * IMPORTANT:
+                         * This is the new CapacityCalculator method from the
+                         * planned-workload PR. It includes completed tasks.
+                         */
+                        double plannedHours =
+                                capacityCalculator.calculateTotalPlannedTaskHours(tasks);
+
+                        double load =
+                                (plannedHours / dailyBaseline) * 100.0;
+
+                        /*
+                         * Keep the chart within its 0-100 display range.
+                         * The actual capacity/overload logic remains in
+                         * CapacityCalculator and is not being replaced here.
+                         */
+                        weekLoads[dayIndex] =
+                                (float) Math.max(0.0, load);
+
+                        daysLoaded[0]++;
+
+                        if (daysLoaded[0] == weekDates.length) {
+                            heavyIndex = heaviestLoadIndex();
+                            selectedLoad =
+                                    Math.round(weekLoads[selectedDay]);
+
+                            renderChart();
+                            renderDays();
+                            renderCapacityCard();
+                        }
+                    }
+            );
+        }
+    }
+
     private void renderChart() {
         if (loadChart == null) {
             return;
         }
-        loadChart.setLoads(WEEK_LOADS.clone(), dayLetters(), selectedDay, heavyIndex);
+        loadChart.setLoads(weekLoads.clone(), dayLetters(), selectedDay, heavyIndex);
     }
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */
@@ -401,7 +503,7 @@ public class DashboardFragment extends Fragment {
         boolean dayChanged = index != selectedDay;
 
         selectedDay = index;
-        selectedLoad = (int) WEEK_LOADS[index];
+        selectedLoad = Math.round(weekLoads[index]);
         renderChart();
         renderWeekLabel();
         renderDays();
@@ -596,6 +698,8 @@ public class DashboardFragment extends Fragment {
                 return;
             }
             renderTaskFeed(tasks);
+            // Refresh the capacity card and weekly chart after the task feed is refreshed.
+            loadPlannedWeekLoads();
         });
     }
 
@@ -859,7 +963,10 @@ public class DashboardFragment extends Fragment {
             TaskRepository.update(requireContext(), task, success -> {
                 if (!Boolean.TRUE.equals(success)) {
                     android.util.Log.e("CapCoachAPI", "Failed to save checkmark state to DB.");
+                    return;
                 }
+                // Completed tasks remain part of planned workload; refresh after saving.
+                loadPlannedWeekLoads();
             });
         }
     }
@@ -1018,7 +1125,7 @@ public class DashboardFragment extends Fragment {
 
                 // GUARDRAIL: If it returns NULL, the read failed. Abort to prevent wiping data.
                 if (nativeEvents == null) {
-                    Toast.makeText(requireContext(), "Sync failed. Could not read calendar.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.dash_error_calendar_read), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -1138,88 +1245,10 @@ public class DashboardFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
         }
     }
-    /**
-     * Opens the triage sheet on the day the user is actually looking at.
-     *
-     * <p>Two hops before the sheet can be shown: load that day's tasks, then let
-     * {@link RebalancePlanner} measure them and run the model. Both are asynchronous, so
-     * each step re-checks that the screen is still there - the sheet is opened from a tap,
-     * and a tap can be followed immediately by a back press.
-     *
-     * <p>The sheet used to open instantly on a fixed demo proposal. It now waits for a real
-     * one, which is the whole point: the rows name the user's own tasks.
-     */
     private void openTriage() {
-        final String isoDate = weekDates[selectedDay];
-        if (isoDate == null) {
-            return;
-        }
-
-        TaskRepository.loadByDate(requireContext(), isoDate, feed -> {
-            if (!isAdded() || feed == null) {
-                return;
-            }
-            RebalancePlanner.plan(requireContext(), isoDate, feed, plan -> {
-                if (!isAdded()) {
-                    return;
-                }
-                TriageSheetFragment sheet = new TriageSheetFragment();
-                sheet.setPlan(plan);
-                sheet.setOnRebalanceAccepted(() -> applyPlan(plan));
-                sheet.show(getChildFragmentManager(), TriageSheetFragment.TAG);
-            });
-        });
-    }
-
-    /**
-     * Carries out an accepted plan: every task the planner found a day for is re-filed
-     * under that day.
-     *
-     * <p>Only the date changes. The time of day stays, which is why the planner refuses
-     * days where that slot is already taken. Tasks it found no day for are left exactly
-     * where they are, and nothing here touches Google Calendar - calendar-linked tasks are
-     * never proposed for a move in the first place.
-     *
-     * <p>The writes are independent, so the screen refreshes once, after the last one
-     * reports back, rather than flickering once per task.
-     */
-    private void applyPlan(@Nullable RebalancePlanner.Plan plan) {
-        if (plan == null) {
-            return;
-        }
-
-        final List<Task> moving = new ArrayList<>();
-        for (RebalancePlanner.Proposal proposal : plan.getProposals()) {
-            if (proposal.getOutcome() == RebalancePlanner.Outcome.MOVED
-                    && proposal.getTargetDate() != null) {
-                Task task = proposal.getTask();
-                task.setDate(proposal.getTargetDate());
-                moving.add(task);
-            }
-        }
-
-        if (moving.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.triage_nothing_applied,
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        final int reduction = plan.getLoadReductionPercent();
-        final int[] pending = {moving.size()};
-        final int[] saved = {0};
-
-        for (Task task : moving) {
-            TaskRepository.update(requireContext(), task, success -> {
-                if (Boolean.TRUE.equals(success)) {
-                    saved[0]++;
-                }
-                pending[0]--;
-                if (pending[0] == 0 && isAdded()) {
-                    reloadTasks();
-                    showRebalanceToast(saved[0], reduction);
-                }
-            });
-        }
+        TriageSheetFragment sheet = new TriageSheetFragment();
+        sheet.setOnRebalanceAccepted(this::showRebalanceToast);
+        sheet.show(getChildFragmentManager(), "triage");
     }
 
     private void openAddTask() {
@@ -1270,22 +1299,13 @@ public class DashboardFragment extends Fragment {
     // Rebalance toast (prototype showToast / dismissToast)
     // ==================================================================
 
-    /**
-     * Fades the confirmation in, then hides it again after 4.2s.
-     *
-     * <p>The second line reports what the rebalance actually did. It used to read a fixed
-     * "-55% load | +3.5h rest" regardless of the day, which stopped being acceptable the
-     * moment Accept started changing real data.
-     *
-     * @param moved how many tasks were re-filed successfully
-     * @param reductionPercent load taken off the day, from the accepted plan
-     */
-    private void showRebalanceToast(int moved, int reductionPercent) {
+    /** Fades the confirmation in, then hides it again after 4.2s. */
+    public void showRebalanceToast() {
         if (rebalanceToast == null) {
             return;
         }
-        // The title is tone-dependent, so it is written on the way in rather than sitting
-        // in the layout. The second line is a measurement, so it is plain.
+        // Both lines are tone-dependent, so they are written on the way in rather than
+        // sitting in the layout.
         ToneType tone = tone();
         TextView title = rebalanceToast.findViewById(R.id.toastTitle);
         if (title != null) {
@@ -1293,8 +1313,7 @@ public class DashboardFragment extends Fragment {
         }
         TextView sub = rebalanceToast.findViewById(R.id.toastSub);
         if (sub != null) {
-            sub.setText(getResources().getQuantityString(
-                    R.plurals.toast_rebalanced_result, moved, moved, reductionPercent));
+            sub.setText(CoachVoice.Line.TOAST_REBALANCED_SUB.pick(tone));
         }
         rebalanceToast.removeCallbacks(hideToast);
         rebalanceToast.setAlpha(0f);
