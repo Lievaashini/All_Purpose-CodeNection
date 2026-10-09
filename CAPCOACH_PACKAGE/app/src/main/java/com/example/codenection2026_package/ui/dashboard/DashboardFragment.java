@@ -1049,7 +1049,7 @@ public class DashboardFragment extends Fragment {
 
                 // GUARDRAIL: If it returns NULL, the read failed. Abort to prevent wiping data.
                 if (nativeEvents == null) {
-                    Toast.makeText(requireContext(), "Sync failed. Could not read calendar.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), R.string.dash_error_calendar_read, Toast.LENGTH_SHORT).show();
                     return;
                 }
 

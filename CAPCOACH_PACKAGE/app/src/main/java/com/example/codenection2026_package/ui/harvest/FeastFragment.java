@@ -58,7 +58,7 @@ public class FeastFragment extends Fragment {
 
     /** Sunday is day 7 of the streak, per the prototype pill. */
     private static final int FEAST_DAY = 7;
-    /** Half volume: the clip is mastered loud, and it repeats quickly during "feed all". */
+    /** Kept quiet: the clip is mastered loud, and it repeats quickly during "feed all". */
     private static final float MUNCH_VOLUME = 0.2f;
 
     /** The week's actual harvest total, loaded live from completed tasks. */
@@ -158,14 +158,17 @@ public class FeastFragment extends Fragment {
         this.weekKey = "feast_" + startDate; // Save the week key for later
 
         com.example.codenection2026_package.data.TaskRepository.getWeeklyAppleCount(requireContext(), startDate, endDate, count -> {
-            if (!isAdded()) return;
+            if (!viewAlive()) return;
 
             // EXPLOIT FIX: Read how many apples were already eaten this week
             android.content.SharedPreferences prefs = requireContext().getSharedPreferences("GamificationPrefs", android.content.Context.MODE_PRIVATE);
             int previouslyEaten = prefs.getInt(weekKey, 0);
 
             this.totalApples = count;
-            this.eatenApples = previouslyEaten;
+            // Unticking a task after eating its apple can leave more eaten than earned. The
+            // stored figure is kept (re-ticking must not hand out a second apple), but the
+            // screen never shows more eaten than the week's total.
+            this.eatenApples = Math.min(previouslyEaten, count);
 
             // Prevent negative numbers if a user unchecks a task after eating it
             this.remainingApples = Math.max(0, count - previouslyEaten);
@@ -197,6 +200,17 @@ public class FeastFragment extends Fragment {
         munchLoaded = false;
         munchPending = false;
         super.onDestroyView();
+    }
+
+    /**
+     * True while the screen can still be drawn into.
+     *
+     * <p>The feeding animation runs for several seconds through delayed posts and animator
+     * callbacks, none of which stop when the user leaves. Each one checks this first: on its
+     * own isAdded() is not enough, because a fragment can stay added after its view is gone.
+     */
+    private boolean viewAlive() {
+        return isAdded() && getView() != null;
     }
 
     // ==================================================================
@@ -394,6 +408,9 @@ public class FeastFragment extends Fragment {
             }
 
             dinoStage.postDelayed(() -> {
+                if (!viewAlive()) {
+                    return;
+                }
                 createFloatingXp("+400 XP MAX");
                 closeMouth();
                 chew(() -> {
@@ -402,7 +419,12 @@ public class FeastFragment extends Fragment {
                 });
             }, (applesToEat * 90L) + 450L);
         } else {
+            // No stage to animate on: the apples are already counted as eaten and saved, so
+            // finish the feed without the animation rather than leaving the screen mid-way.
+            closeMouth();
+            updateCounters();
             isEating = false;
+            triggerFullFeastCelebration();
         }
     }
 
@@ -462,7 +484,7 @@ public class FeastFragment extends Fragment {
         final int[] frames = {0};
         final Runnable[] step = new Runnable[1];
         step[0] = () -> {
-            if (feastDino == null) {
+            if (feastDino == null || !viewAlive()) {
                 return;
             }
             boolean squash = frames[0] % 2 == 0;
@@ -479,7 +501,13 @@ public class FeastFragment extends Fragment {
                                     .scaleX(1f).scaleY(1f)
                                     .setInterpolator(new OvershootInterpolator())
                                     .setDuration(220)
-                                    .withEndAction(onEnd)
+                                    .withEndAction(() -> {
+                                        // The end action says things and shows toasts,
+                                        // both of which need the screen still open.
+                                        if (onEnd != null && viewAlive()) {
+                                            onEnd.run();
+                                        }
+                                    })
                                     .start();
                         }
                     })
@@ -493,6 +521,11 @@ public class FeastFragment extends Fragment {
      * removes itself and fires the callback.
      */
     private void spawnFlyingApple(@Nullable Runnable onArrive) {
+        // "Feed all" schedules these up to a few seconds ahead. If the user has left by then,
+        // requireContext() below would throw, so a late apple is simply dropped.
+        if (!viewAlive()) {
+            return;
+        }
         if (dinoStage == null) {
             if (onArrive != null) {
                 onArrive.run();
@@ -524,7 +557,7 @@ public class FeastFragment extends Fragment {
             @Override
             public void onAnimationEnd(Animator animation) {
                 stage.removeView(apple);
-                if (onArrive != null) {
+                if (onArrive != null && viewAlive()) {
                     onArrive.run();
                 }
             }

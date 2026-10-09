@@ -267,7 +267,7 @@ public final class RebalancePlanner {
      * off does not change the day's load. Only today carries the sleep penalty.
      *
      * @param isoDates days to measure, "yyyy-MM-dd"; a null entry measures as 0
-     * @param callback receives the loads on the main thread
+     * @param callback receives the loads on the main thread, or null if measuring failed
      */
     public static void measureWeek(@NonNull Context context,
                                    @NonNull String[] isoDates,
@@ -277,10 +277,10 @@ public final class RebalancePlanner {
         final String[] dates = isoDates.clone();
 
         IO.execute(() -> {
-            float[] loads = new float[dates.length];
-            int lastNight = NO_SLEEP_READING;
+            WeekLoads measured;
             try {
-                lastNight = lastNightSleepMinutes(appContext);
+                float[] loads = new float[dates.length];
+                int lastNight = lastNightSleepMinutes(appContext);
                 String today = LocalDate.now().format(ISO);
                 for (int i = 0; i < dates.length; i++) {
                     if (dates[i] == null) {
@@ -290,10 +290,14 @@ public final class RebalancePlanner {
                     loads[i] = (float) measureCapacity(appContext,
                             TaskRepository.loadByDateBlocking(appContext, dates[i]), sleep);
                 }
+                measured = new WeekLoads(loads, lastNight);
             } catch (RuntimeException e) {
-                // Whatever was measured before the failure stands; the rest read as empty.
+                // Null rather than a half-measured week: partial zeros would draw the week
+                // lighter than it is. The dashboard keeps its last good figures instead.
+                Log.w(TAG, "Measuring the week failed", e);
+                measured = null;
             }
-            final WeekLoads result = new WeekLoads(loads, lastNight);
+            final WeekLoads result = measured;
             MAIN.post(() -> callback.onResult(result));
         });
     }
