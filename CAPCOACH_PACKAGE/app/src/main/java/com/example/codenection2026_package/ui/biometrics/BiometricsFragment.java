@@ -925,13 +925,13 @@ public class BiometricsFragment extends Fragment {
             try {
                 HealthConnectClient client = HealthConnectClient.getOrCreate(context);
 
-                // THE FIX (Bug 1): The Reviewer's exact timestamp anchor.
-                // Prevents destructive overlaps by anchoring the delete window safely in the past.
-                Instant now = Instant.now();
-                Instant today8AM = LocalDate.now().atTime(8, 0).atZone(ZoneId.systemDefault()).toInstant();
-                Instant endTime = now.isBefore(today8AM) ? today8AM.minus(24, ChronoUnit.HOURS) : today8AM;
-
+                // THE FIX: Pure Instant.now().
+                // This perfectly aligns the Write window, the Delete window, and the Read window
+                // to the exact same rolling 24-hour block. It natively supports shift workers
+                // and makes duplicate data stacking mathematically impossible.
+                Instant endTime = Instant.now();
                 Instant searchStart = endTime.minus(24, ChronoUnit.HOURS);
+
                 HealthConnectHelper.deleteSleepDataSync(client, searchStart, endTime);
 
                 Instant startTime = endTime.minus((long) (hours * 60), ChronoUnit.MINUTES);
@@ -942,7 +942,7 @@ public class BiometricsFragment extends Fragment {
                         currentOffset,
                         endTime,
                         currentOffset,
-                        context.getString(R.string.bio_manual_record_title), // THE FIX: Metadata string extracted
+                        context.getString(R.string.bio_manual_record_title),
                         null,
                         Collections.emptyList(),
                         androidx.health.connect.client.records.metadata.Metadata.EMPTY

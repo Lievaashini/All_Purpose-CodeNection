@@ -156,6 +156,13 @@
     <string name="cd_add_task">Add a new task or shift</string>
     <string name="cd_mark_task_done">Mark task done</string>
 
+
+    <!-- DASHBOARD & CALENDAR SYNC ERRORS-->
+    <string name="dash_error_completed_edit">Completed tasks cannot be edited.</string>
+    <string name="dash_error_calendar_permission">Calendar permission denied. Cannot sync.</string>
+    <string name="dash_error_calendar_read">Sync failed. Could not read calendar.</string>
+    <string name="edittask_locked_calendar">LOCKED: Synced from Google Calendar</string>
+
     <!-- Triage sheet (opened by the dashboard's Rebalance button).
          Its prose is tone-dependent; what remains here is the eyebrow, the metric
          names and figures, the sample task names and the machine tags. -->
