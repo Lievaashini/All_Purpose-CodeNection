@@ -80,6 +80,31 @@ public class HealthConnectReader {
         }
     }
 
+    /** The nightly sleep the debt score is measured against. */
+    public static final double TARGET_SLEEP_HOURS = 8.0;
+
+    /**
+     * Today's Recovery Debt Score straight from Health Connect: last night's sleep against
+     * {@link #TARGET_SLEEP_HOURS}, worsened by low HRV.
+     *
+     * <p>The same calculation the Biometrics screen draws, packaged so the triage model can
+     * receive the identical number. Blocking - call it off the main thread.
+     *
+     * @return 0-100, or the neutral 50 when there is no sleep reading or it cannot be read
+     */
+    public static int currentRecoveryDebtScore(Context context) {
+        try {
+            List<SleepSessionRecord> lastNight = getSleepSessionsLast24Hours(context);
+            boolean hasSleep = calculateTotalSleepHours(lastNight) > 0;
+            double debtHours = getSleepDebtHours(lastNight, TARGET_SLEEP_HOURS);
+            double hrvMs = getAverageHrvLast24Hours(context);
+            return calculateRecoveryDebtScore(debtHours, hrvMs, hasSleep);
+        } catch (RuntimeException e) {
+            // Permission revoked or no provider installed: treat it like missing data.
+            return calculateRecoveryDebtScore(0, 0, false);
+        }
+    }
+
     /**
      * Converts raw sleep deficit and HRV into a 0-100 Recovery Debt Score.
      * @param hasData Pass false if the Health Connect list was empty.

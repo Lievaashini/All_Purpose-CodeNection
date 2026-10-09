@@ -69,13 +69,11 @@ import java.util.Set;
  * main thread; until the first answer arrives the feed shows its "no tasks yet" empty
  * state, which is also what a genuinely free day looks like.
  *
- * <p>The capacity card and the weekly load chart still run on the prototype's demo
- * percentages - the biometrics model that will supply them is not wired yet.
+ * <p>The capacity card and the weekly load chart are measured by
+ * {@link RebalancePlanner#measureWeek}, the same calculation the Rebalance sheet uses, so
+ * the two can never disagree about how heavy a day is.
  */
 public class DashboardFragment extends Fragment {
-
-    /** Sleep figure shown in the telemetry line. The Room layer will supply the real one. */
-    private static final String DEMO_SLEEP_HOURS = "7.8h";
 
     /**
      * Labels for {@link CategoryRepository#BASELINE}, in that exact order.
@@ -91,12 +89,6 @@ public class DashboardFragment extends Fragment {
             R.string.cat_social,
             R.string.cat_cocurricular
     };
-
-    /**
-     * The prototype's seven charted loads, in week order from Monday. Demo data:
-     * nothing computes these yet.
-     */
-    private static final float[] WEEK_LOADS = {65f, 50f, 40f, 75f, 88f, 25f, 20f};
 
     private static final int CRASH_CEILING_PERCENT = 90;
     private static final long TOAST_VISIBLE_MS = 4200L;
@@ -133,8 +125,17 @@ public class DashboardFragment extends Fragment {
     /** 0 = Mon ... 6 = Sun. Today's own cell. */
     private int todayIndex;
 
-    /** The cell drawn amber: the heaviest load of the week in the demo data. */
-    private int heavyIndex = 4;
+    /**
+     * Each day's measured load, Monday first. Zero until the first measurement lands, which
+     * is also the honest reading for a week with nothing booked.
+     */
+    private final float[] weekLoads = new float[7];
+
+    /** Last night's sleep in minutes, from the same measurement; 0 when there is no reading. */
+    private int lastNightSleepMinutes;
+
+    /** The cell drawn amber: the week's heaviest day, or -1 while every day is empty. */
+    private int heavyIndex = -1;
 
     /** 0 = Mon ... 6 = Sun. The cell the user is looking at; starts on today. */
     private int selectedDay;
@@ -328,18 +329,46 @@ public class DashboardFragment extends Fragment {
 
         // Land on today, which is also what the capacity card starts on.
         selectedDay = todayIndex;
-        selectedLoad = (int) WEEK_LOADS[selectedDay];
+        selectedLoad = Math.round(weekLoads[selectedDay]);
     }
 
-    /** @return the index of the largest demo load, so the amber bar is never a guess */
-    private static int heaviestLoadIndex() {
-        int heaviest = 0;
-        for (int i = 1; i < WEEK_LOADS.length; i++) {
-            if (WEEK_LOADS[i] > WEEK_LOADS[heaviest]) {
+    /**
+     * @return the index of the heaviest measured day, or -1 when nothing is booked - an
+     *         amber bar on an empty Monday would mark a day as heaviest for no reason
+     */
+    private int heaviestLoadIndex() {
+        int heaviest = -1;
+        for (int i = 0; i < weekLoads.length; i++) {
+            if (weekLoads[i] > 0f && (heaviest < 0 || weekLoads[i] > weekLoads[heaviest])) {
                 heaviest = i;
             }
         }
         return heaviest;
+    }
+
+    /**
+     * Re-measures the whole week and repaints everything that shows a load.
+     *
+     * <p>Called whenever tasks may have changed: on entry, after any reload of the feed,
+     * and after a checkbox tick, since a finished task no longer counts. The measurement
+     * runs off the main thread, so the card shows the previous figures until it lands.
+     */
+    private void refreshLoads() {
+        RebalancePlanner.measureWeek(requireContext(), weekDates, result -> {
+            if (!isAdded() || result == null) {
+                return;
+            }
+            float[] loads = result.getLoads();
+            System.arraycopy(loads, 0, weekLoads, 0, Math.min(loads.length, weekLoads.length));
+            lastNightSleepMinutes = result.getLastNightSleepMinutes();
+
+            heavyIndex = heaviestLoadIndex();
+            selectedLoad = Math.round(weekLoads[selectedDay]);
+
+            renderChart();
+            renderDays();
+            renderCapacityCard();
+        });
     }
 
     /**
@@ -390,7 +419,7 @@ public class DashboardFragment extends Fragment {
         if (loadChart == null) {
             return;
         }
-        loadChart.setLoads(WEEK_LOADS.clone(), dayLetters(), selectedDay, heavyIndex);
+        loadChart.setLoads(weekLoads.clone(), dayLetters(), selectedDay, heavyIndex);
     }
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */
@@ -401,7 +430,7 @@ public class DashboardFragment extends Fragment {
         boolean dayChanged = index != selectedDay;
 
         selectedDay = index;
-        selectedLoad = (int) WEEK_LOADS[index];
+        selectedLoad = Math.round(weekLoads[index]);
         renderChart();
         renderWeekLabel();
         renderDays();
@@ -553,9 +582,12 @@ public class DashboardFragment extends Fragment {
             headline.setText(headlineLine.pick(tone));
         }
         if (telemetry != null) {
+            String sleep = lastNightSleepMinutes > 0
+                    ? getString(R.string.dash_sleep_hours, lastNightSleepMinutes / 60f)
+                    : getString(R.string.dash_sleep_unknown);
             telemetry.setText(getString(
                     R.string.dash_telemetry,
-                    DEMO_SLEEP_HOURS,
+                    sleep,
                     OnboardingPrefs.getWorkHours(context) + "/20h"));
         }
 
@@ -591,6 +623,9 @@ public class DashboardFragment extends Fragment {
         if (tasksList == null || weekDates[selectedDay] == null) {
             return;
         }
+        // Every path that changes tasks ends in a reload, so the loads are re-measured here
+        // rather than at each of those call sites.
+        refreshLoads();
         TaskRepository.loadByDate(requireContext(), weekDates[selectedDay], tasks -> {
             if (!isAdded() || tasksList == null) {
                 return;
@@ -859,6 +894,10 @@ public class DashboardFragment extends Fragment {
             TaskRepository.update(requireContext(), task, success -> {
                 if (!Boolean.TRUE.equals(success)) {
                     android.util.Log.e("CapCoachAPI", "Failed to save checkmark state to DB.");
+                } else if (isAdded()) {
+                    // A finished task stops counting as load, so the card should drop
+                    // as soon as it is ticked.
+                    refreshLoads();
                 }
             });
         }

@@ -134,6 +134,10 @@
          ================================================================== -->
     <string name="dash_load_percent">%1$d%% LOAD</string>
     <string name="dash_telemetry">Sleep %1$s | Work %2$s</string>
+    <!-- Last night's sleep from Health Connect, filled into dash_telemetry. -->
+    <string name="dash_sleep_hours">%1$.1fh</string>
+    <!-- Shown in its place when Health Connect has no reading for last night. -->
+    <string name="dash_sleep_unknown">--</string>
     <string name="dash_month">October 2025</string>
     <string name="dash_week_number">Week %1$d</string>
     <string name="dash_today">TODAY</string>

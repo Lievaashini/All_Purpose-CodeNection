@@ -228,6 +228,85 @@ public final class RebalancePlanner {
         });
     }
 
+    /** Seven days of measured load, Monday first, and the sleep reading behind today's. */
+    public static final class WeekLoads {
+
+        private final float[] loads;
+        private final int lastNightSleepMinutes;
+
+        WeekLoads(@NonNull float[] loads, int lastNightSleepMinutes) {
+            this.loads = loads;
+            this.lastNightSleepMinutes = lastNightSleepMinutes;
+        }
+
+        /** One load per requested date, in the order requested; 0 for an empty day. */
+        @NonNull
+        public float[] getLoads() {
+            return loads.clone();
+        }
+
+        /** Last night's sleep in minutes, or 0 when Health Connect has no reading. */
+        public int getLastNightSleepMinutes() {
+            return lastNightSleepMinutes;
+        }
+    }
+
+    /**
+     * Measures every day in {@code isoDates} the same way {@link #plan} measures one.
+     *
+     * <p>This is what the dashboard's capacity card and weekly chart draw. They used to show a
+     * fixed demo week; sharing the planner's measurement means the card and the Rebalance
+     * sheet can never disagree about how heavy a day is.
+     *
+     * <p>Completed tasks do not count, the same as in the plan, so ticking a task off lowers
+     * the day's load. Only today carries the sleep penalty.
+     *
+     * @param isoDates days to measure, "yyyy-MM-dd"; a null entry measures as 0
+     * @param callback receives the loads on the main thread
+     */
+    public static void measureWeek(@NonNull Context context,
+                                   @NonNull String[] isoDates,
+                                   @NonNull TaskRepository.Callback<WeekLoads> callback) {
+
+        final Context appContext = context.getApplicationContext();
+        final String[] dates = isoDates.clone();
+
+        IO.execute(() -> {
+            float[] loads = new float[dates.length];
+            int lastNight = NO_SLEEP_READING;
+            try {
+                lastNight = lastNightSleepMinutes(appContext);
+                String today = LocalDate.now().format(ISO);
+                for (int i = 0; i < dates.length; i++) {
+                    if (dates[i] == null) {
+                        continue;
+                    }
+                    int sleep = dates[i].equals(today) ? lastNight : NO_SLEEP_READING;
+                    loads[i] = (float) measureCapacity(appContext,
+                            TaskRepository.loadByDateBlocking(appContext, dates[i]), sleep);
+                }
+            } catch (RuntimeException e) {
+                // Whatever was measured before the failure stands; the rest read as empty.
+            }
+            final WeekLoads result = new WeekLoads(loads, lastNight);
+            MAIN.post(() -> callback.onResult(result));
+        });
+    }
+
+    /**
+     * The sleep figure that applies to {@code isoDate}: last night's for today, none for any
+     * other day.
+     *
+     * <p>Last night's sleep is a fact about today. Carrying it to Thursday would let one bad
+     * night inflate a day it has nothing to do with, and carrying it to last Monday would
+     * rewrite history.
+     */
+    private static int sleepMinutesFor(@NonNull Context context, @NonNull String isoDate) {
+        return isoDate.equals(LocalDate.now().format(ISO))
+                ? lastNightSleepMinutes(context)
+                : NO_SLEEP_READING;
+    }
+
     @NonNull
     private static Plan build(@NonNull Context context,
                               @NonNull String isoDate,
@@ -236,9 +315,14 @@ public final class RebalancePlanner {
         // Read once: this is the only Health Connect call on the path, and both the
         // current and the projected figure have to be penalised identically or the
         // difference between them would be measuring sleep rather than the plan.
-        int sleepMinutes = lastNightSleepMinutes(context);
+        int sleepMinutes = sleepMinutesFor(context, isoDate);
 
         double capacity = measureCapacity(context, feed, sleepMinutes);
+
+        // How depleted the user is right now, from sleep and HRV. Unlike the sleep penalty on
+        // capacity, this is not tied to the day being rebalanced: it describes the person, and
+        // their current state is the best estimate of how much they can carry this week.
+        int recoveryDebt = HealthConnectReader.currentRecoveryDebtScore(context);
 
         CapacityTrigger trigger = new CapacityTrigger();
         List<Proposal> proposals = new ArrayList<>(feed.size());
@@ -263,7 +347,8 @@ public final class RebalancePlanner {
                 continue;
             }
 
-            int action = trigger.predictTaskAction(capacity, task, item.getCategoryName());
+            int action = trigger.predictTaskAction(
+                    capacity, recoveryDebt, task, item.getCategoryName());
 
             if (action == LoadShedder.MOVE) {
                 leaving.add(item);
