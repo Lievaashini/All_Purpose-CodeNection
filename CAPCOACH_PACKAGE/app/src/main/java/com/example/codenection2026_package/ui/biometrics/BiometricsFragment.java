@@ -155,7 +155,8 @@ public class BiometricsFragment extends Fragment {
         // Wire the manual sleep button
         View manualSleepButton = view.findViewById(R.id.manualSleepButton);
         if (manualSleepButton != null) {
-            manualSleepButton.setOnClickListener(v -> showManualSleepSliderDialog());
+            // THE FIX: Route to the permission checker first
+            manualSleepButton.setOnClickListener(v -> checkPermissionsAndShowSlider());
         }
 
         startPenaltyAnimation();
@@ -848,13 +849,26 @@ public class BiometricsFragment extends Fragment {
                 .setPositiveButton(R.string.bio_log_manual_btn, (dialog, which) -> {
                     requireContext().getSharedPreferences("BioPrefs", Context.MODE_PRIVATE)
                             .edit().putBoolean("hide_clock_dialog", true).apply();
-                    showManualSleepSliderDialog();
+                    checkPermissionsAndShowSlider();
                 })
-                .setNegativeButton(R.string.bio_maybe_later_btn, (dialog, which) -> {
-                    requireContext().getSharedPreferences("BioPrefs", Context.MODE_PRIVATE)
-                            .edit().putBoolean("hide_clock_dialog", true).apply();
-                })
+                // THE FIX: 'null' listener ensures "Maybe later" doesn't trigger the 'seen' flag
+                .setNegativeButton(R.string.bio_maybe_later_btn, null)
                 .show();
+    }
+
+    /**
+     * THE FIX: Intercepts the user before the slider opens to ensure they have write access.
+     */
+    private void checkPermissionsAndShowSlider() {
+        if (ContextCompat.checkSelfPermission(requireContext(), "android.permission.health.WRITE_SLEEP") == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            showManualSleepSliderDialog();
+        } else {
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.bio_permission_title)
+                    .setMessage(R.string.bio_permission_msg)
+                    .setPositiveButton(R.string.bio_got_it_btn, null)
+                    .show();
+        }
     }
 
     /**
@@ -886,7 +900,8 @@ public class BiometricsFragment extends Fragment {
 
         new androidx.appcompat.app.AlertDialog.Builder(context)
                 .setTitle(R.string.bio_manual_title)
-                .setMessage(R.string.bio_manual_msg)
+                // THE FIX: Hardcoded warning moved to strings.xml
+                .setMessage(R.string.bio_manual_msg_warning)
                 .setView(layout)
                 .setPositiveButton(R.string.bio_save_btn, (dialog, which) -> {
                     writeManualSleepToHealthConnect(slider.getValue());
@@ -899,23 +914,22 @@ public class BiometricsFragment extends Fragment {
      * Converts the slider value into a Health Connect SleepSessionRecord.
      */
     private void writeManualSleepToHealthConnect(double hours) {
-        // 1. THE THREAD FIX: Capture Activity and Context on the Main Thread BEFORE the background worker starts
         final android.app.Activity activity = getActivity();
         final Context context = getContext();
 
         if (activity == null || context == null) {
-            return; // Fragment is already detached; abort.
+            return;
         }
 
         new Thread(() -> {
             try {
-                // Safely use the pre-captured context
                 HealthConnectClient client = HealthConnectClient.getOrCreate(context);
 
-                // 2. THE HONEST TIMESTAMP FIX: Anchor wake time to 8:00 AM today, unless it's currently earlier.
+                // THE FIX (Bug 1): The Reviewer's exact timestamp anchor.
+                // Prevents destructive overlaps by anchoring the delete window safely in the past.
                 Instant now = Instant.now();
-                Instant morning8AM = LocalDate.now().atTime(8, 0).atZone(ZoneId.systemDefault()).toInstant();
-                Instant endTime = now.isBefore(morning8AM) ? now : morning8AM;
+                Instant today8AM = LocalDate.now().atTime(8, 0).atZone(ZoneId.systemDefault()).toInstant();
+                Instant endTime = now.isBefore(today8AM) ? today8AM.minus(24, ChronoUnit.HOURS) : today8AM;
 
                 Instant searchStart = endTime.minus(24, ChronoUnit.HOURS);
                 HealthConnectHelper.deleteSleepDataSync(client, searchStart, endTime);
@@ -928,7 +942,7 @@ public class BiometricsFragment extends Fragment {
                         currentOffset,
                         endTime,
                         currentOffset,
-                        "Manual Entry via CapCoach",
+                        context.getString(R.string.bio_manual_record_title), // THE FIX: Metadata string extracted
                         null,
                         Collections.emptyList(),
                         androidx.health.connect.client.records.metadata.Metadata.EMPTY
@@ -936,7 +950,6 @@ public class BiometricsFragment extends Fragment {
 
                 HealthConnectHelper.writeSleepDataSync(client, Collections.singletonList(manualRecord));
 
-                // 3. Safely use the pre-captured activity to return to the UI thread
                 activity.runOnUiThread(() -> {
                     if (!isAdded() || getView() == null) {
                         return;
@@ -957,15 +970,6 @@ public class BiometricsFragment extends Fragment {
                     }
                 });
 
-            } catch (SecurityException e) {
-                activity.runOnUiThread(() -> {
-                    if (!isAdded()) return;
-                    new androidx.appcompat.app.AlertDialog.Builder(context)
-                            .setTitle(R.string.bio_permission_title)
-                            .setMessage(R.string.bio_permission_msg)
-                            .setPositiveButton(R.string.bio_got_it_btn, null)
-                            .show();
-                });
             } catch (Exception e) {
                 activity.runOnUiThread(() -> {
                     if (!isAdded()) return;

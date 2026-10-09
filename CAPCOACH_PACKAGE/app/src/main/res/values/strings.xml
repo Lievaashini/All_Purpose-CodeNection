@@ -278,9 +278,13 @@
     <string name="bio_maybe_later_btn">Maybe later</string>
 
     <string name="bio_manual_title">Log Manual Sleep</string>
-    <string name="bio_manual_msg">Drag to select how many hours you slept last night. This will be pushed to Health Connect.</string>
+    <!-- Combined the instruction and the destructive overwrite warning into one clean string -->
+    <string name="bio_manual_msg_warning">Drag to select how many hours you slept last night. This will be pushed to Health Connect.\n\nWarning: Saving will overwrite any manual sleep you logged for this period.</string>
     <string name="bio_save_btn">Save</string>
     <string name="bio_cancel_btn">Cancel</string>
+
+    <!-- Health Connect Database Metadata -->
+    <string name="bio_manual_record_title">Manual Entry via CapCoach</string>
 
     <!-- Permissions & Toasts -->
     <string name="bio_permission_title">Permission Required</string>

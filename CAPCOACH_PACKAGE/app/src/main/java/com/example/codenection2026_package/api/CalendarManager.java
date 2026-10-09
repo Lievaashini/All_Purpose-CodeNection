@@ -108,6 +108,7 @@ public class CalendarManager {
                     // Skip all-day events (birthdays, holidays, multi-day banners)
                     // so they don't import as 24-hour work shifts and break the capacity math.
                     if (isAllDay) {
+                        Log.d(TAG, "Dropped all-day event: " + title);
                         continue;
                     }
 
