@@ -56,6 +56,54 @@ public class CapacityTriggerTest {
         assertEquals(LoadShedder.KEEP, trigger.predictTaskAction(95, 95, readingTask(), "Social"));
     }
 
+    // ---- Boundaries ----------------------------------------------------------------------
+
+    /** The threshold is "at least 90", so exactly 90 must let the model run. */
+    @Test
+    public void exactlyNinetyPercent_runsTheModel() {
+        assertEquals(LoadShedder.MOVE, trigger.predictTaskAction(90.0, 95, readingTask(), "Academic"));
+    }
+
+    @Test
+    public void justBelowNinetyPercent_doesNotRunTheModel() {
+        assertEquals(LoadShedder.KEEP, trigger.predictTaskAction(89.9, 95, readingTask(), "Academic"));
+    }
+
+    @Test
+    public void zeroDeferralWindow_isKept_evenWhenExhaustedAndOverloaded() {
+        Task task = readingTask();
+        task.setDeferralHours(0);
+        assertEquals(LoadShedder.KEEP, trigger.predictTaskAction(100, 100, task, "Academic"));
+    }
+
+    @Test
+    public void completedTask_isKept() {
+        Task task = readingTask();
+        task.setCompleted(true);
+        assertEquals(LoadShedder.KEEP, trigger.predictTaskAction(100, 100, task, "Academic"));
+    }
+
+    @Test
+    public void missingTask_isKeptRatherThanCrashing() {
+        assertEquals(LoadShedder.KEEP, trigger.predictTaskAction(100, 100, null, "Academic"));
+    }
+
+    /** No category is treated as ordinary load, not as protected social time. */
+    @Test
+    public void missingCategory_isTreatedAsOrdinaryLoad() {
+        assertEquals(trigger.predictTaskAction(95, 95, readingTask(), "Academic"),
+                trigger.predictTaskAction(95, 95, readingTask(), null));
+    }
+
+    /** Unreadable times fall back to a one-hour duration instead of throwing. */
+    @Test
+    public void unreadableTimes_doNotCrash() {
+        Task task = readingTask();
+        task.setStartTime("not a time");
+        task.setEndTime("");
+        assertEquals(LoadShedder.MOVE, trigger.predictTaskAction(95, 95, task, "Academic"));
+    }
+
     @Test
     public void outOfRangeDebt_isClampedRatherThanRejected() {
         assertEquals(trigger.predictTaskAction(95, 100, readingTask(), "Academic"),

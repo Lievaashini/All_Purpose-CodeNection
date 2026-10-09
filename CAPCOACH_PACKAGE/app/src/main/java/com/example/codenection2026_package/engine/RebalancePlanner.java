@@ -110,16 +110,40 @@ public final class RebalancePlanner {
         private final double capacity;
         private final double projectedCapacity;
         private final List<Proposal> proposals;
+        private final int recoveryDebtScore;
+        private final boolean hasSleepReading;
 
-        Plan(double capacity, double projectedCapacity, @NonNull List<Proposal> proposals) {
+        Plan(double capacity,
+             double projectedCapacity,
+             @NonNull List<Proposal> proposals,
+             int recoveryDebtScore,
+             boolean hasSleepReading) {
             this.capacity = capacity;
             this.projectedCapacity = projectedCapacity;
+            this.recoveryDebtScore = recoveryDebtScore;
+            this.hasSleepReading = hasSleepReading;
             this.proposals = proposals;
         }
 
         /** The day's measured load as it stands, 0-100+. */
         public double getCapacity() {
             return capacity;
+        }
+
+        /**
+         * The recovery debt the model was given for this plan, 0-100. It is what decided how
+         * many tasks were released, so the sheet shows it rather than a made-up figure.
+         */
+        public int getRecoveryDebtScore() {
+            return recoveryDebtScore;
+        }
+
+        /**
+         * False when there was no sleep reading, in which case the debt score is the neutral
+         * default rather than a measurement.
+         */
+        public boolean hasSleepReading() {
+            return hasSleepReading;
         }
 
         /** What the load would be once everything marked MOVED is off the day. */
@@ -383,7 +407,8 @@ public final class RebalancePlanner {
         }
 
         double projected = measureCapacity(context, staying, sleepMinutes);
-        return new Plan(capacity, projected, proposals);
+        boolean hasSleepReading = lastNightSleepMinutes(context) > 0;
+        return new Plan(capacity, projected, proposals, recoveryDebt, hasSleepReading);
     }
 
     // ==================================================================

@@ -172,8 +172,16 @@
          names and figures, the sample task names and the machine tags. -->
     <string name="triage_eyebrow">AUTONOMOUS ML TRIAGE</string>
     <string name="triage_metric_load">Cognitive Load</string>
-    <string name="triage_metric_sleep">Sleep Secured</string>
-    <string name="triage_metric_sleep_value">+3.5h</string>
+    <!-- The recovery debt the triage model was given: sleep and HRV, 0-100. It replaces a
+         fixed "+3.5h Sleep Secured" that no part of the app ever measured. -->
+    <string name="triage_metric_debt">Recovery Debt</string>
+    <string name="triage_metric_debt_value">%1$d/100</string>
+    <!-- One line under the score, saying what that level means for the plan. The bands are
+         the ones the model was trained on (ml/generate_synthetic_dataset.py). -->
+    <string name="triage_debt_no_data">No sleep data, so a neutral score</string>
+    <string name="triage_debt_low">Rested: most tasks stay</string>
+    <string name="triage_debt_moderate">A bit tired: only easy tasks move</string>
+    <string name="triage_debt_high">Exhausted: moving more tasks</string>
     <string name="triage_plan_label">PROPOSED SCHEDULE MODIFICATIONS</string>
     <string name="triage_tag_protected">PROTECTED</string>
     <string name="triage_tag_kept">KEPT</string>

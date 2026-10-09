@@ -347,11 +347,42 @@ public class TriageSheetFragment extends BottomSheetDialogFragment {
      */
     private void bindMetrics(@NonNull View view) {
         TextView loadValue = view.findViewById(R.id.triageMetricLoadValue);
-        if (loadValue == null) {
+        if (loadValue != null) {
+            int reduction = plan == null ? 0 : plan.getLoadReductionPercent();
+            loadValue.setText(getString(R.string.triage_metric_load_reduction, reduction));
+        }
+
+        TextView debtValue = view.findViewById(R.id.triageMetricDebtValue);
+        TextView debtSub = view.findViewById(R.id.triageMetricSleepSub);
+        if (plan == null) {
             return;
         }
-        int reduction = plan == null ? 0 : plan.getLoadReductionPercent();
-        loadValue.setText(getString(R.string.triage_metric_load_reduction, reduction));
+        int debt = plan.getRecoveryDebtScore();
+        if (debtValue != null) {
+            debtValue.setText(getString(R.string.triage_metric_debt_value, debt));
+        }
+        if (debtSub != null) {
+            debtSub.setText(debtMeaning(debt, plan.hasSleepReading()));
+        }
+    }
+
+    /**
+     * What a recovery debt level means for the plan, using the bands the model was trained
+     * on: up to 60 it keeps everything, 61-80 it sheds only clearly deferrable work, above
+     * 80 it sheds aggressively.
+     */
+    @StringRes
+    private static int debtMeaning(int debt, boolean hasSleepReading) {
+        if (!hasSleepReading) {
+            return R.string.triage_debt_no_data;
+        }
+        if (debt > 80) {
+            return R.string.triage_debt_high;
+        }
+        if (debt > 60) {
+            return R.string.triage_debt_moderate;
+        }
+        return R.string.triage_debt_low;
     }
 
     /**
@@ -368,7 +399,6 @@ public class TriageSheetFragment extends BottomSheetDialogFragment {
 
         set(view, R.id.triageTitle, CoachVoice.Line.TRIAGE_TITLE, tone);
         set(view, R.id.triageMetricLoadSub, CoachVoice.Line.TRIAGE_LOAD_SUB, tone);
-        set(view, R.id.triageMetricSleepSub, CoachVoice.Line.TRIAGE_SLEEP_SUB, tone);
         set(view, R.id.triageAccept, CoachVoice.Line.TRIAGE_ACCEPT, tone);
         set(view, R.id.triageDismiss, CoachVoice.Line.TRIAGE_DISMISS, tone);
     }

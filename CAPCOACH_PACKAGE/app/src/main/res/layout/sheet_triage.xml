@@ -146,14 +146,16 @@
                     style="@style/Text.MicroLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/triage_metric_sleep" />
+                    android:text="@string/triage_metric_debt" />
 
+                <!-- Bound at runtime to the recovery debt the model was given. -->
                 <TextView
+                    android:id="@+id/triageMetricDebtValue"
                     style="@style/Text.Metric"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/triage_metric_sleep_value"
-                    android:textColor="@color/secondary_blue" />
+                    android:textColor="@color/secondary_blue"
+                    tools:text="72/100" />
 
                 <TextView
                     android:id="@+id/triageMetricSleepSub"
