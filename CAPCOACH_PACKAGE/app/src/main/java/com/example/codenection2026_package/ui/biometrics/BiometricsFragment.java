@@ -152,9 +152,26 @@ public class BiometricsFragment extends Fragment {
         // co-curricular ceilings are actually editable, rather than the dashboard.
         overrideButton.setOnClickListener(v -> ScreenNav.showHardLimits(this));
 
+        // Wire the manual sleep button
+        View manualSleepButton = view.findViewById(R.id.manualSleepButton);
+        if (manualSleepButton != null) {
+            // THE FIX: Route to the permission checker first
+            manualSleepButton.setOnClickListener(v -> checkPermissionsAndShowSlider());
+        }
+
         startPenaltyAnimation();
         eventDotPulse = startDotPulse(eventDot);
         penaltyDotPulse = startDotPulse(penaltyDot);
+
+        // If Health Connect is empty, check if we've already educated the user.
+        if (snapshot.lastNightMinutes == 0) {
+            android.content.SharedPreferences prefs = requireContext().getSharedPreferences("BioPrefs", Context.MODE_PRIVATE);
+            boolean hasSeenDialog = prefs.getBoolean("hide_clock_dialog", false);
+
+            if (!hasSeenDialog) {
+                view.postDelayed(this::showNoWearableFallbackDialog, 500);
+            }
+        }
     }
 
     // ==================================================================
@@ -816,5 +833,149 @@ public class BiometricsFragment extends Fragment {
         if (animator != null) {
             animator.cancel();
         }
+    }
+
+    /**
+     * Educates users on missing data and routes them directly to the manual slider.
+     */
+    private void showNoWearableFallbackDialog() {
+        if (!isAdded() || getContext() == null) {
+            return;
+        }
+
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle(R.string.bio_no_data_title)
+                .setMessage(R.string.bio_no_data_msg)
+                .setPositiveButton(R.string.bio_log_manual_btn, (dialog, which) -> {
+                    requireContext().getSharedPreferences("BioPrefs", Context.MODE_PRIVATE)
+                            .edit().putBoolean("hide_clock_dialog", true).apply();
+                    checkPermissionsAndShowSlider();
+                })
+                // THE FIX: 'null' listener ensures "Maybe later" doesn't trigger the 'seen' flag
+                .setNegativeButton(R.string.bio_maybe_later_btn, null)
+                .show();
+    }
+
+    /**
+     * THE FIX: Intercepts the user before the slider opens to ensure they have write access.
+     */
+    private void checkPermissionsAndShowSlider() {
+        if (ContextCompat.checkSelfPermission(requireContext(), "android.permission.health.WRITE_SLEEP") == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            showManualSleepSliderDialog();
+        } else {
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.bio_permission_title)
+                    .setMessage(R.string.bio_permission_msg)
+                    .setPositiveButton(R.string.bio_got_it_btn, null)
+                    .show();
+        }
+    }
+
+    /**
+     * Shows a Material Slider dialog for frictionless manual sleep logging.
+     */
+    private void showManualSleepSliderDialog() {
+        Context context = requireContext();
+
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(60, 40, 60, 0);
+
+        TextView valueText = new TextView(context);
+        valueText.setText(getString(R.string.bio_slider_value, 8.0f));
+        valueText.setTextSize(18f);
+        valueText.setTextColor(ContextCompat.getColor(context, R.color.text_primary_dark));
+        valueText.setGravity(android.view.Gravity.CENTER);
+
+        com.google.android.material.slider.Slider slider = new com.google.android.material.slider.Slider(context);
+        slider.setValueFrom(0.5f);
+        slider.setValueTo(24.0f);
+        slider.setStepSize(0.5f);
+        slider.setValue(8.0f);
+
+        slider.addOnChangeListener((s, val, fromUser) -> valueText.setText(getString(R.string.bio_slider_value, val)));
+
+        layout.addView(valueText);
+        layout.addView(slider);
+
+        new androidx.appcompat.app.AlertDialog.Builder(context)
+                .setTitle(R.string.bio_manual_title)
+                // THE FIX: Hardcoded warning moved to strings.xml
+                .setMessage(R.string.bio_manual_msg_warning)
+                .setView(layout)
+                .setPositiveButton(R.string.bio_save_btn, (dialog, which) -> {
+                    writeManualSleepToHealthConnect(slider.getValue());
+                })
+                .setNegativeButton(R.string.bio_cancel_btn, null)
+                .show();
+    }
+
+    /**
+     * Converts the slider value into a Health Connect SleepSessionRecord.
+     */
+    private void writeManualSleepToHealthConnect(double hours) {
+        final android.app.Activity activity = getActivity();
+        final Context context = getContext();
+
+        if (activity == null || context == null) {
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                HealthConnectClient client = HealthConnectClient.getOrCreate(context);
+
+                // THE FIX: Pure Instant.now().
+                // This perfectly aligns the Write window, the Delete window, and the Read window
+                // to the exact same rolling 24-hour block. It natively supports shift workers
+                // and makes duplicate data stacking mathematically impossible.
+                Instant endTime = Instant.now();
+                Instant searchStart = endTime.minus(24, ChronoUnit.HOURS);
+
+                HealthConnectHelper.deleteSleepDataSync(client, searchStart, endTime);
+
+                Instant startTime = endTime.minus((long) (hours * 60), ChronoUnit.MINUTES);
+                ZoneOffset currentOffset = ZoneId.systemDefault().getRules().getOffset(endTime);
+
+                SleepSessionRecord manualRecord = new SleepSessionRecord(
+                        startTime,
+                        currentOffset,
+                        endTime,
+                        currentOffset,
+                        context.getString(R.string.bio_manual_record_title),
+                        null,
+                        Collections.emptyList(),
+                        androidx.health.connect.client.records.metadata.Metadata.EMPTY
+                );
+
+                HealthConnectHelper.writeSleepDataSync(client, Collections.singletonList(manualRecord));
+
+                activity.runOnUiThread(() -> {
+                    if (!isAdded() || getView() == null) {
+                        return;
+                    }
+
+                    Toast.makeText(context, R.string.bio_manual_success, Toast.LENGTH_SHORT).show();
+
+                    Snapshot newSnapshot = read(context);
+                    bindAnomaly(getView(), newSnapshot);
+                    bindSleepMetrics(getView(), newSnapshot);
+                    bindTrend(getView(), newSnapshot);
+                    bindDeficitAndPenalty(getView(), newSnapshot);
+
+                    if (penaltyTrack != null && penaltyTrack.getWidth() > 0) {
+                        cancelAnimator(penaltyAnimator);
+                        penaltyAnimator = null;
+                        runPenaltyAnimation(penaltyTrack.getWidth());
+                    }
+                });
+
+            } catch (Exception e) {
+                activity.runOnUiThread(() -> {
+                    if (!isAdded()) return;
+                    Toast.makeText(context, getString(R.string.bio_manual_error, e.getMessage()), Toast.LENGTH_LONG).show();
+                });
+            }
+        }).start();
     }
 }

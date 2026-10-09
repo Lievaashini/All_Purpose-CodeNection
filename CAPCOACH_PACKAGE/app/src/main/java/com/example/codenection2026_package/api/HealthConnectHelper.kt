@@ -41,4 +41,15 @@ object HealthConnectHelper {
             client.insertRecords(records)
         }
     }
+
+    // DELETE (NEW: Safely purges only CapCoach's previous manual entries)
+    @JvmStatic
+    fun deleteSleepDataSync(client: HealthConnectClient, start: Instant, end: Instant) {
+        runBlocking {
+            client.deleteRecords(
+                recordType = SleepSessionRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(start, end)
+            )
+        }
+    }
 }
