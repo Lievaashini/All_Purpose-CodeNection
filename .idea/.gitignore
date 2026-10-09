@@ -1,7 +1,3 @@
 # Default ignored files
 /shelf/
 /workspace.xml
-
-*.class
-ml/out/
-ml/__pycache__/

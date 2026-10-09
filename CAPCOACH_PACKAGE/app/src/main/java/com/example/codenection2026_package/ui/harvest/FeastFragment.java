@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,10 +54,12 @@ import java.util.Random;
  */
 public class FeastFragment extends Fragment {
 
+    private static final String TAG = "FeastFragment";
+
     /** Sunday is day 7 of the streak, per the prototype pill. */
     private static final int FEAST_DAY = 7;
-    /** Munch sits quieter than the task-done chime on the Dashboard. */
-    private static final float MUNCH_VOLUME = 0.6f;
+    /** Half volume: the clip is mastered loud, and it repeats quickly during "feed all". */
+    private static final float MUNCH_VOLUME = 0.5f;
 
     /** The week's actual harvest total, loaded live from completed tasks. */
     private int totalApples = 0;
@@ -85,6 +88,8 @@ public class FeastFragment extends Fragment {
     private SoundPool soundPool;
     private int munchSoundId;
     private boolean munchLoaded = false;
+    /** A bite that happened before the clip finished decoding; played once it has. */
+    private boolean munchPending = false;
 
     private String weekKey = "";
 
@@ -183,10 +188,14 @@ public class FeastFragment extends Fragment {
     @Override
     public void onDestroyView() {
         if (soundPool != null) {
+            // Detached first so a late load callback cannot reach a fragment whose view is
+            // already gone.
+            soundPool.setOnLoadCompleteListener(null);
             soundPool.release();
             soundPool = null;
         }
         munchLoaded = false;
+        munchPending = false;
         super.onDestroyView();
     }
 
@@ -200,6 +209,10 @@ public class FeastFragment extends Fragment {
      * a little without turning into noise.
      */
     private void loadMunchSound() {
+        if (soundPool != null) {
+            // Called once per view today; this makes that an enforced rule, not a hope.
+            return;
+        }
         AudioAttributes attributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -208,14 +221,29 @@ public class FeastFragment extends Fragment {
                 .setMaxStreams(3)
                 .setAudioAttributes(attributes)
                 .build();
-        soundPool.setOnLoadCompleteListener((pool, sampleId, status) ->
-                munchLoaded = status == 0);
+        soundPool.setOnLoadCompleteListener((pool, sampleId, status) -> {
+            munchLoaded = status == 0;
+            if (!munchLoaded) {
+                // Without this a decode failure is invisible: the app just never munches.
+                Log.w(TAG, "munch.mp3 failed to load, status " + status);
+                return;
+            }
+            if (munchPending) {
+                munchPending = false;
+                playMunch();
+            }
+        });
         munchSoundId = soundPool.load(requireContext(), R.raw.munch, 1);
     }
 
     /** Small pitch wobble so repeated bites don't sound identical. */
     private void playMunch() {
-        if (soundPool == null || !munchLoaded) {
+        if (soundPool == null) {
+            return;
+        }
+        if (!munchLoaded) {
+            // The clip is still decoding. Remember the bite rather than dropping it.
+            munchPending = true;
             return;
         }
         float rate = 0.92f + random.nextFloat() * 0.16f;
