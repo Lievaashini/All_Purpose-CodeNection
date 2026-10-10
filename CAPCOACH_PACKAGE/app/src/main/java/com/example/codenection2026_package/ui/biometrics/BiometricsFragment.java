@@ -76,7 +76,8 @@ public class BiometricsFragment extends Fragment {
      * The guideline the debt and the deficit are judged against. The screen's own anomaly
      * copy names it ("Target: 8h 00m"), and it is the scale both sleep bars are drawn on.
      */
-    private static final double TARGET_SLEEP_HOURS = 8.0;
+    // Shared with the triage model's debt score, so the screen and the model cannot drift.
+    private static final double TARGET_SLEEP_HOURS = HealthConnectReader.TARGET_SLEEP_HOURS;
 
     /** A full sleep bar is the target: 480 minutes. */
     private static final int SCALE_MINUTES = (int) (TARGET_SLEEP_HOURS * 60);
