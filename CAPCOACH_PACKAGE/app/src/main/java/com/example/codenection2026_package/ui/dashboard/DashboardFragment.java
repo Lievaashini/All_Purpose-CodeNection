@@ -421,7 +421,13 @@ public class DashboardFragment extends Fragment {
         if (loadChart == null) {
             return;
         }
-        loadChart.setLoads(weekLoads.clone(), dayLetters(), selectedDay, heavyIndex);
+        // THE FIX: Clone the array and clamp every bar to 100 for the visual chart only
+        float[] displayLoads = weekLoads.clone();
+        for (int i = 0; i < displayLoads.length; i++) {
+            displayLoads[i] = Math.min(100f, displayLoads[i]);
+        }
+
+        loadChart.setLoads(displayLoads, dayLetters(), selectedDay, heavyIndex);
     }
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */
@@ -541,19 +547,21 @@ public class DashboardFragment extends Fragment {
      */
     private void renderCapacityCard() {
         Context context = requireContext();
-        int value = selectedLoad;
+        // FIX: Clamp the text display value to 100 so the UI looks clean,
+        // but the engine still evaluates the true 'selectedLoad' (e.g. 554%).
+        int displayValue = Math.min(100, selectedLoad);
 
         CoachVoice.Line stateLine;
         CoachVoice.Line headlineLine;
         int colorRes;
         int dinoRes;
 
-        if (value <= 55) {
+        if (displayValue <= 55) {
             stateLine = CoachVoice.Line.DASH_STATE_OPTIMAL;
             headlineLine = CoachVoice.Line.DASH_HEADLINE_BALANCED;
             colorRes = R.color.status_green;
             dinoRes = R.drawable.dino_happy;
-        } else if (value <= 75) {
+        } else if (displayValue <= 75) {
             stateLine = CoachVoice.Line.DASH_STATE_ELEVATED;
             headlineLine = CoachVoice.Line.DASH_HEADLINE_ELEVATED;
             colorRes = R.color.status_amber;
@@ -577,7 +585,8 @@ public class DashboardFragment extends Fragment {
             stateDot.setBackgroundResource(dotFor(colorRes));
         }
         if (loadPercent != null) {
-            loadPercent.setText(getString(R.string.dash_load_percent, value));
+            // THE FIX: Use the clamped displayValue here!
+            loadPercent.setText(getString(R.string.dash_load_percent, displayValue));
             loadPercent.setTextColor(color);
         }
         if (headline != null) {
