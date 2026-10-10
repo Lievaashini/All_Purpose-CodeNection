@@ -543,16 +543,14 @@ public final class RebalancePlanner {
 
         CapacityCalculator calculator = new CapacityCalculator();
 
+        // 1. First, total up the hours the user actually booked for today
         Map<String, Double> hoursByCategory = new HashMap<>();
         for (TaskRepository.FeedItem item : feed) {
             String category = item.getCategoryName();
             if (category == null || isRecovery(category)) {
-                // Social time is the model's protective buffer, not load. Counting it here
-                // would have the app telling a lonely student to cancel their one coffee.
+                // Social time is the model's protective buffer, not load.
                 continue;
             }
-            // Planned hours: a finished task still counts, because the load is how much the day
-            // asks of the user, and finishing a task does not make the day have been lighter.
             double hours = calculator.calculatePlannedTaskHours(item.getTask());
             if (hours > 0) {
                 Double running = hoursByCategory.get(category);
@@ -560,11 +558,24 @@ public final class RebalancePlanner {
             }
         }
 
+        // 2. Next, calculate the load percentage across ALL tracked categories
         Map<String, Double> loads = new HashMap<>();
-        for (Map.Entry<String, Double> entry : hoursByCategory.entrySet()) {
-            double baseline = dailyBaselineHours(context, entry.getKey());
-            loads.put(entry.getKey(),
-                    calculator.calculateCategoryLoad(entry.getValue(), baseline, NEUTRAL_MOOD));
+
+        // FIX: Explicitly check all 4 tracked categories so empty schedules
+        // dilute the daily average properly, preventing false overloads.
+        String[] trackedCategories = {
+                CategoryRepository.ACADEMIC,
+                CategoryRepository.WORK,
+                CategoryRepository.ERRAND,
+                CategoryRepository.CO_CURRICULAR
+        };
+
+        // We loop through the trackedCategories array, NOT hoursByCategory
+        for (String cat : trackedCategories) {
+            // If the category has no tasks today, default to 0.0 hours
+            double hours = hoursByCategory.containsKey(cat) ? hoursByCategory.get(cat) : 0.0;
+            double baseline = dailyBaselineHours(context, cat);
+            loads.put(cat, calculator.calculateCategoryLoad(hours, baseline, NEUTRAL_MOOD));
         }
 
         double capacity = calculator.calculateOverallCapacity(loads);
