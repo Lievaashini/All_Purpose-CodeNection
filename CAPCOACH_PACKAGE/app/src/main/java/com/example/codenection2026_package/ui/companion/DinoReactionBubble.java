@@ -346,9 +346,9 @@ public final class DinoReactionBubble {
     @NonNull
     private Reaction reactionFor(int capacityPercent) {
 
-        // FIX: Clamp the text output to 100 for the UI,
-        // while preserving the true capacityPercent to evaluate the Overload state!
-        int displayPercent = Math.min(100, capacityPercent);
+        // THE UX FIX: Let the bubble print the true >100% number
+        // so it perfectly matches the dashboard text!
+        int displayPercent = capacityPercent;
 
         // Sleep occasionally displaces the capacity line rather than always winning - see
         // SLEEP_LINE_CHANCE for why an unconditional sleep line would break the feature.

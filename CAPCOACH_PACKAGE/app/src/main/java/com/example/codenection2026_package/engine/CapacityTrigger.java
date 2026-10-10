@@ -58,9 +58,11 @@ public class CapacityTrigger {
         int debt = clampToMlRange(recoveryDebtScore);
 
         int daysUntilDue =
-                TaskFeatureExtractor.calculateDaysUntilDue(
-                        task.getDate()
-                );
+        // FIX: Use the deferral window (slack) instead of the scheduled date,
+        // so the ML model knows this task isn't an immediate emergency.
+           task.getDeferralHours() / 24
+                ;
+
 
         int durationMinutes =
                 TaskFeatureExtractor.calculateDurationMinutes(
