@@ -402,6 +402,13 @@
     <string name="settings_theme_mode">Theme Mode</string>
         <string name="settings_theme_night">Night</string>
     <string name="settings_theme_bright">Bright</string>
+
+    <!-- Report a Bug. The button opens the project's public GitHub issue tracker; the
+         failure line is only shown on a device with no browser to handle the link. -->
+    <string name="settings_support">SUPPORT</string>
+    <string name="settings_report_bug">Report a Bug</string>
+    <string name="settings_report_bug_failed">No app available to open the issue page.</string>
+
     <string name="settings_institutional">INSTITUTIONAL DATA CONTROLS</string>
         <string name="settings_share_sub">UNIVERSITY B2B ANALYTICS LINK</string>
     <string name="settings_link_status">Academic Link Status</string>

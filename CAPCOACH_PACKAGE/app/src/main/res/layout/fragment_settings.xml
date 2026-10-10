@@ -394,6 +394,39 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- ============ Support ============
+                 One action: hand the user off to the project's public issue tracker. There
+                 is no in-app form because there is no backend to receive one, and the issue
+                 page is already where reports are tracked. SettingsFragment.bindReportBug()
+                 attaches the listener and the URL lives there, so the address is in exactly
+                 one place. -->
+            <TextView
+                style="@style/Text.MicroLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg"
+                android:text="@string/settings_support"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Card.Base"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/reportBugButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/space_md"
+                    android:minHeight="@dimen/touch_target_min"
+                    android:text="@string/settings_report_bug"
+                    app:icon="@drawable/ic_bug_report"
+                    app:iconGravity="textStart"
+                    app:iconTint="@color/brand_mint" />
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- ============ Institutional data controls ============ -->
             <TextView
                 style="@style/Text.MicroLabel"
