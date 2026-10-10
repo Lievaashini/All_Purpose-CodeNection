@@ -417,6 +417,102 @@ public class DashboardFragment extends Fragment {
         return getResources().getStringArray(R.array.day_letters);
     }
 
+    /**
+     * Loads the planned workload percentage for each day in the current week.
+     *
+     * <p>Planned hours are calculated by CapacityCalculator, so completed tasks
+     * remain part of the planned workload. The baseline comes from the user's
+     * onboarding commitment inputs rather than a hardcoded 8-hour value.
+     */
+    private void loadPlannedWeekLoads() {
+        final Context context = requireContext();
+
+        /*
+         * Onboarding stores these as weekly commitment hours.
+         * Convert the total weekly commitment into a daily baseline.
+         */
+        double weeklyBaseline =
+                OnboardingPrefs.getStudyHours(context)
+                        + OnboardingPrefs.getWorkHours(context)
+                        + OnboardingPrefs.getCocurricularHours(context);
+
+        final double dailyBaseline = weeklyBaseline / 7.0;
+
+        /*
+         * Avoid division by zero if the user has entered zero for every
+         * commitment field.
+         */
+        if (dailyBaseline <= 0.0) {
+            for (int i = 0; i < weekLoads.length; i++) {
+                weekLoads[i] = 0f;
+            }
+
+            heavyIndex = heaviestLoadIndex();
+            selectedLoad = 0;
+            renderChart();
+            renderDays();
+            renderCapacityCard();
+            return;
+        }
+
+        final int[] daysLoaded = {0};
+
+        for (int i = 0; i < weekDates.length; i++) {
+            final int dayIndex = i;
+
+            TaskRepository.loadByDate(
+                    context,
+                    weekDates[i],
+                    feed -> {
+                        if (!isAdded()) {
+                            return;
+                        }
+
+                        List<Task> tasks = new ArrayList<>();
+
+                        if (feed != null) {
+                            for (TaskRepository.FeedItem item : feed) {
+                                if (item != null && item.getTask() != null) {
+                                    tasks.add(item.getTask());
+                                }
+                            }
+                        }
+
+                        /*
+                         * IMPORTANT:
+                         * This is the new CapacityCalculator method from the
+                         * planned-workload PR. It includes completed tasks.
+                         */
+                        double plannedHours =
+                                capacityCalculator.calculateTotalPlannedTaskHours(tasks);
+
+                        double load =
+                                (plannedHours / dailyBaseline) * 100.0;
+
+                        /*
+                         * Keep the chart within its 0-100 display range.
+                         * The actual capacity/overload logic remains in
+                         * CapacityCalculator and is not being replaced here.
+                         */
+                        weekLoads[dayIndex] =
+                                (float) Math.max(0.0, load);
+
+                        daysLoaded[0]++;
+
+                        if (daysLoaded[0] == weekDates.length) {
+                            heavyIndex = heaviestLoadIndex();
+                            selectedLoad =
+                                    Math.round(weekLoads[selectedDay]);
+
+                            renderChart();
+                            renderDays();
+                            renderCapacityCard();
+                        }
+                    }
+            );
+        }
+    }
+
     private void renderChart() {
         if (loadChart == null) {
             return;
@@ -633,6 +729,8 @@ public class DashboardFragment extends Fragment {
                 return;
             }
             renderTaskFeed(tasks);
+            // Refresh the capacity card and weekly chart after the task feed is refreshed.
+            loadPlannedWeekLoads();
         });
     }
 
@@ -894,7 +992,10 @@ public class DashboardFragment extends Fragment {
             TaskRepository.update(requireContext(), task, success -> {
                 if (!Boolean.TRUE.equals(success)) {
                     android.util.Log.e("CapCoachAPI", "Failed to save checkmark state to DB.");
+                    return;
                 }
+                // Completed tasks remain part of planned workload; refresh after saving.
+                loadPlannedWeekLoads();
             });
         }
     }
