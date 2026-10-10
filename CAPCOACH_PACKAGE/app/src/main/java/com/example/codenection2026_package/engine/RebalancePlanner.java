@@ -3,6 +3,7 @@ package com.example.codenection2026_package.engine;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,8 +67,8 @@ public final class RebalancePlanner {
         /**
          * The day this task should move to, as "yyyy-MM-dd", or null when it stays put.
          *
-         * <p>Always null today: choosing the day is the next step, and this field is the
-         * seam it slots into so the sheet does not have to change shape again.
+         * <p>Also null for a MOVED task when no day in its deferral window has room. The sheet
+         * shows those as "No lighter day in range", and Accept leaves them where they are.
          */
         @Nullable
         private final String targetDate;
@@ -109,16 +110,40 @@ public final class RebalancePlanner {
         private final double capacity;
         private final double projectedCapacity;
         private final List<Proposal> proposals;
+        private final int recoveryDebtScore;
+        private final boolean hasSleepReading;
 
-        Plan(double capacity, double projectedCapacity, @NonNull List<Proposal> proposals) {
+        Plan(double capacity,
+             double projectedCapacity,
+             @NonNull List<Proposal> proposals,
+             int recoveryDebtScore,
+             boolean hasSleepReading) {
             this.capacity = capacity;
             this.projectedCapacity = projectedCapacity;
+            this.recoveryDebtScore = recoveryDebtScore;
+            this.hasSleepReading = hasSleepReading;
             this.proposals = proposals;
         }
 
         /** The day's measured load as it stands, 0-100+. */
         public double getCapacity() {
             return capacity;
+        }
+
+        /**
+         * The recovery debt the model was given for this plan, 0-100. It is what decided how
+         * many tasks were released, so the sheet shows it rather than a made-up figure.
+         */
+        public int getRecoveryDebtScore() {
+            return recoveryDebtScore;
+        }
+
+        /**
+         * False when there was no sleep reading, in which case the debt score is the neutral
+         * default rather than a measurement.
+         */
+        public boolean hasSleepReading() {
+            return hasSleepReading;
         }
 
         /** What the load would be once everything marked MOVED is off the day. */
@@ -186,6 +211,8 @@ public final class RebalancePlanner {
     /** Passed where no sleep figure applies, which leaves capacity unpenalised. */
     private static final int NO_SLEEP_READING = 0;
 
+    private static final String TAG = "RebalancePlanner";
+
     /** The date format every task row and DAO query in the app already uses. */
     private static final DateTimeFormatter ISO = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -201,7 +228,8 @@ public final class RebalancePlanner {
      * @param isoDate the day being rebalanced, "yyyy-MM-dd" - the point the search for a
      *                target day counts forward from
      * @param feed one day's tasks, as the dashboard already loaded them
-     * @param callback receives the finished plan on the main thread
+     * @param callback receives the finished plan on the main thread, or null if measuring
+     *                 the day failed
      */
     public static void plan(@NonNull Context context,
                             @NonNull String isoDate,
@@ -219,13 +247,97 @@ public final class RebalancePlanner {
             try {
                 plan = build(appContext, isoDate, snapshot);
             } catch (RuntimeException e) {
-                // A plan is advisory. If measuring fails, propose nothing rather than
-                // taking the dashboard down with it.
-                plan = new Plan(0.0, 0.0, new ArrayList<>());
+                // Reported as null rather than an empty plan: an empty plan reads as "nothing
+                // scheduled", which would tell the user a failed measurement was a free day.
+                Log.w(TAG, "Rebalance plan failed for " + isoDate, e);
+                plan = null;
             }
             final Plan result = plan;
             MAIN.post(() -> callback.onResult(result));
         });
+    }
+
+    /** Seven days of measured load, Monday first, and the sleep reading behind today's. */
+    public static final class WeekLoads {
+
+        private final float[] loads;
+        private final int lastNightSleepMinutes;
+
+        WeekLoads(@NonNull float[] loads, int lastNightSleepMinutes) {
+            this.loads = loads;
+            this.lastNightSleepMinutes = lastNightSleepMinutes;
+        }
+
+        /** One load per requested date, in the order requested; 0 for an empty day. */
+        @NonNull
+        public float[] getLoads() {
+            return loads.clone();
+        }
+
+        /** Last night's sleep in minutes, or 0 when Health Connect has no reading. */
+        public int getLastNightSleepMinutes() {
+            return lastNightSleepMinutes;
+        }
+    }
+
+    /**
+     * Measures every day in {@code isoDates} the same way {@link #plan} measures one.
+     *
+     * <p>This is what the dashboard's capacity card and weekly chart draw. They used to show a
+     * fixed demo week; sharing the planner's measurement means the card and the Rebalance
+     * sheet can never disagree about how heavy a day is.
+     *
+     * <p>Completed tasks count (planned workload), the same as in the plan, so ticking a task
+     * off does not change the day's load. Only today carries the sleep penalty.
+     *
+     * @param isoDates days to measure, "yyyy-MM-dd"; a null entry measures as 0
+     * @param callback receives the loads on the main thread, or null if measuring failed
+     */
+    public static void measureWeek(@NonNull Context context,
+                                   @NonNull String[] isoDates,
+                                   @NonNull TaskRepository.Callback<WeekLoads> callback) {
+
+        final Context appContext = context.getApplicationContext();
+        final String[] dates = isoDates.clone();
+
+        IO.execute(() -> {
+            WeekLoads measured;
+            try {
+                float[] loads = new float[dates.length];
+                int lastNight = lastNightSleepMinutes(appContext);
+                String today = LocalDate.now().format(ISO);
+                for (int i = 0; i < dates.length; i++) {
+                    if (dates[i] == null) {
+                        continue;
+                    }
+                    int sleep = dates[i].equals(today) ? lastNight : NO_SLEEP_READING;
+                    loads[i] = (float) measureCapacity(appContext,
+                            TaskRepository.loadByDateBlocking(appContext, dates[i]), sleep);
+                }
+                measured = new WeekLoads(loads, lastNight);
+            } catch (RuntimeException e) {
+                // Null rather than a half-measured week: partial zeros would draw the week
+                // lighter than it is. The dashboard keeps its last good figures instead.
+                Log.w(TAG, "Measuring the week failed", e);
+                measured = null;
+            }
+            final WeekLoads result = measured;
+            MAIN.post(() -> callback.onResult(result));
+        });
+    }
+
+    /**
+     * The sleep figure that applies to {@code isoDate}: last night's for today, none for any
+     * other day.
+     *
+     * <p>Last night's sleep is a fact about today. Carrying it to Thursday would let one bad
+     * night inflate a day it has nothing to do with, and carrying it to last Monday would
+     * rewrite history.
+     */
+    private static int sleepMinutesFor(@NonNull Context context, @NonNull String isoDate) {
+        return isoDate.equals(LocalDate.now().format(ISO))
+                ? lastNightSleepMinutes(context)
+                : NO_SLEEP_READING;
     }
 
     @NonNull
@@ -236,9 +348,14 @@ public final class RebalancePlanner {
         // Read once: this is the only Health Connect call on the path, and both the
         // current and the projected figure have to be penalised identically or the
         // difference between them would be measuring sleep rather than the plan.
-        int sleepMinutes = lastNightSleepMinutes(context);
+        int sleepMinutes = sleepMinutesFor(context, isoDate);
 
         double capacity = measureCapacity(context, feed, sleepMinutes);
+
+        // How depleted the user is right now, from sleep and HRV. Unlike the sleep penalty on
+        // capacity, this is not tied to the day being rebalanced: it describes the person, and
+        // their current state is the best estimate of how much they can carry this week.
+        int recoveryDebt = HealthConnectReader.currentRecoveryDebtScore(context);
 
         CapacityTrigger trigger = new CapacityTrigger();
         List<Proposal> proposals = new ArrayList<>(feed.size());
@@ -248,8 +365,10 @@ public final class RebalancePlanner {
         for (TaskRepository.FeedItem item : feed) {
             Task task = item.getTask();
 
-            // A finished task is history, not load to redistribute.
+            // A finished task cannot be moved, but it still belongs to the day: it stays in the
+            // projected load, otherwise the plan would claim credit for work already done.
             if (task.isCompleted()) {
+                staying.add(item);
                 continue;
             }
 
@@ -263,7 +382,8 @@ public final class RebalancePlanner {
                 continue;
             }
 
-            int action = trigger.predictTaskAction(capacity, task, item.getCategoryName());
+            int action = trigger.predictTaskAction(
+                    capacity, recoveryDebt, task, item.getCategoryName());
 
             if (action == LoadShedder.MOVE) {
                 leaving.add(item);
@@ -287,7 +407,8 @@ public final class RebalancePlanner {
         }
 
         double projected = measureCapacity(context, staying, sleepMinutes);
-        return new Plan(capacity, projected, proposals);
+        boolean hasSleepReading = lastNightSleepMinutes(context) > 0;
+        return new Plan(capacity, projected, proposals, recoveryDebt, hasSleepReading);
     }
 
     // ==================================================================
@@ -412,6 +533,9 @@ public final class RebalancePlanner {
      * The day's load as a 0-100+ figure, measured the way {@link CapacityCalculator}
      * defines it: hours booked against the user's own ceilings, then weighted, then
      * adjusted for how badly they slept.
+     *
+     * <p>Uses planned hours, so completed tasks are included. This is the one measurement
+     * behind both the dashboard and the Rebalance trigger.
      */
     private static double measureCapacity(@NonNull Context context,
                                           @NonNull List<TaskRepository.FeedItem> feed,
@@ -419,26 +543,39 @@ public final class RebalancePlanner {
 
         CapacityCalculator calculator = new CapacityCalculator();
 
+        // 1. First, total up the hours the user actually booked for today
         Map<String, Double> hoursByCategory = new HashMap<>();
         for (TaskRepository.FeedItem item : feed) {
             String category = item.getCategoryName();
             if (category == null || isRecovery(category)) {
-                // Social time is the model's protective buffer, not load. Counting it here
-                // would have the app telling a lonely student to cancel their one coffee.
+                // Social time is the model's protective buffer, not load.
                 continue;
             }
-            double hours = calculator.calculateTaskHours(item.getTask());
+            double hours = calculator.calculatePlannedTaskHours(item.getTask());
             if (hours > 0) {
                 Double running = hoursByCategory.get(category);
                 hoursByCategory.put(category, running == null ? hours : running + hours);
             }
         }
 
+        // 2. Next, calculate the load percentage across ALL tracked categories
         Map<String, Double> loads = new HashMap<>();
-        for (Map.Entry<String, Double> entry : hoursByCategory.entrySet()) {
-            double baseline = dailyBaselineHours(context, entry.getKey());
-            loads.put(entry.getKey(),
-                    calculator.calculateCategoryLoad(entry.getValue(), baseline, NEUTRAL_MOOD));
+
+        // FIX: Explicitly check all 4 tracked categories so empty schedules
+        // dilute the daily average properly, preventing false overloads.
+        String[] trackedCategories = {
+                CategoryRepository.ACADEMIC,
+                CategoryRepository.WORK,
+                CategoryRepository.ERRAND,
+                CategoryRepository.CO_CURRICULAR
+        };
+
+        // We loop through the trackedCategories array, NOT hoursByCategory
+        for (String cat : trackedCategories) {
+            // If the category has no tasks today, default to 0.0 hours
+            double hours = hoursByCategory.containsKey(cat) ? hoursByCategory.get(cat) : 0.0;
+            double baseline = dailyBaselineHours(context, cat);
+            loads.put(cat, calculator.calculateCategoryLoad(hours, baseline, NEUTRAL_MOOD));
         }
 
         double capacity = calculator.calculateOverallCapacity(loads);

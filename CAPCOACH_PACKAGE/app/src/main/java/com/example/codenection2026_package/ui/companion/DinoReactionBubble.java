@@ -345,6 +345,11 @@ public final class DinoReactionBubble {
      */
     @NonNull
     private Reaction reactionFor(int capacityPercent) {
+
+        // FIX: Clamp the text output to 100 for the UI,
+        // while preserving the true capacityPercent to evaluate the Overload state!
+        int displayPercent = Math.min(100, capacityPercent);
+
         // Sleep occasionally displaces the capacity line rather than always winning - see
         // SLEEP_LINE_CHANCE for why an unconditional sleep line would break the feature.
         if (sleepHours >= GOOD_SLEEP_HOURS && random.nextDouble() < SLEEP_LINE_CHANCE) {
@@ -353,24 +358,20 @@ public final class DinoReactionBubble {
                     (int) Math.round(sleepHours));
         }
 
-        // The banding is the engine's, not this class's. Adding or moving a threshold is a
-        // change in CapacityCalculator.getCapacityState and is picked up here for free.
         switch (capacityCalculator.getCapacityState(capacityPercent)) {
             case THRIVING:
                 return new Reaction(CoachVoice.Line.DINO_REACT_THRIVING,
-                        R.drawable.dino_happy, capacityPercent);
+                        R.drawable.dino_happy, displayPercent);
             case STACKED:
                 return new Reaction(CoachVoice.Line.DINO_REACT_STACKED,
-                        R.drawable.dino_overload, capacityPercent);
+                        R.drawable.dino_overload, displayPercent);
             case OVERLOAD:
-                // dino_dead was shipped but never referenced anywhere until this feature;
-                // collapsing Dino is exactly the right face for "Bro. BRO. Sleep exists."
                 return new Reaction(CoachVoice.Line.DINO_REACT_OVERLOAD,
-                        R.drawable.dino_dead, capacityPercent);
+                        R.drawable.dino_dead, displayPercent);
             case NORMAL:
             default:
                 return new Reaction(CoachVoice.Line.DINO_REACT_NORMAL,
-                        R.drawable.dino_steady, capacityPercent);
+                        R.drawable.dino_steady, displayPercent);
         }
     }
 

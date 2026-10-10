@@ -25,10 +25,19 @@ public class CapacityTrigger {
      * Runs the ML triage decision for a task once the
      * 90% capacity threshold has been reached.
      *
+     * <p>The two numbers do different jobs and must not be swapped. {@code capacity} is the
+     * workload, and only decides WHETHER the model runs. {@code recoveryDebtScore} is how
+     * depleted the body is (sleep and HRV), and is what the model was trained on - it decides
+     * how aggressively to shed. Feeding the workload in as the debt, as this used to, pinned
+     * the model's input at 90-100 every time it ran, so sleep and HRV never changed a decision.
+     *
+     * @param capacity          the day's workload, 0-100+
+     * @param recoveryDebtScore 0-100 from HealthConnectReader, 50 when there is no data
      * @return LoadShedder.KEEP or LoadShedder.MOVE
      */
     public int predictTaskAction(
             double capacity,
+            int recoveryDebtScore,
             Task task,
             String categoryName
     ) {
@@ -46,7 +55,7 @@ public class CapacityTrigger {
             return LoadShedder.KEEP;
         }
 
-        int recoveryDebtScore = clampToMlRange(capacity);
+        int debt = clampToMlRange(recoveryDebtScore);
 
         int daysUntilDue =
                 TaskFeatureExtractor.calculateDaysUntilDue(
@@ -74,7 +83,7 @@ public class CapacityTrigger {
                 ) ? 1 : 0;
 
         return LoadShedder.predictTaskAction(
-                recoveryDebtScore,
+                debt,
                 daysUntilDue,
                 taskPriorityWeight,
                 isFixedTime,
@@ -86,15 +95,7 @@ public class CapacityTrigger {
     /**
      * Keeps the ML recovery-debt input within its documented 0-100 range.
      */
-    private int clampToMlRange(double capacity) {
-        if (capacity <= 0.0) {
-            return 0;
-        }
-
-        if (capacity >= 100.0) {
-            return 100;
-        }
-
-        return (int) Math.round(capacity);
+    private int clampToMlRange(int score) {
+        return Math.max(0, Math.min(100, score));
     }
 }
