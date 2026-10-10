@@ -1,6 +1,6 @@
 <resources>
     <!-- Kept from this project's scaffold - do not rename to CapCoach. -->
-    <string name="app_name">CODENECTION2026_PACKAGE</string>
+    <string name="app_name">CapCoach</string>
 
     <!-- ==================== Onboarding (Screen 1) ==================== -->
     <string name="onboarding_phase_badge">PHASE 01 / SETUP</string>
