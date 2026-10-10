@@ -116,12 +116,17 @@ public class HealthConnectReader {
 
         double score = sleepDeficitHours > 0 ? (sleepDeficitHours * 15.0) : 0;
 
-        // NEW HRV INTEGRATION: Apply a sympathetic stress penalty.
-        // For young adults, an RMSSD below 40ms indicates poor recovery.
+        // HRV stress penalty. An RMSSD below 40 ms is this app's heuristic for poor recovery
+        // in young adults, not a clinical threshold. An HRV of 0 means no reading (no
+        // wearable), so it is skipped and the score rests on sleep alone.
+        //
+        // Additive, not multiplicative: a multiplier scaled the sleep debt, so a user who
+        // slept the full 8h (debt 0) scored 0 however stressed they were - 0 x anything is 0.
+        // Adding (40 - HRV) points keeps stress visible after a full night. On its own it
+        // tops out near 40, below the model's first shedding band (above 60), so stress alone
+        // raises the score without moving tasks; combined with short sleep it can.
         if (hrvMs > 0 && hrvMs < 40.0) {
-            // The lower the HRV, the higher the penalty multiplier (up to 30% worse)
-            double stressMultiplier = 1.0 + ((40.0 - hrvMs) / 100.0);
-            score *= stressMultiplier;
+            score += 40.0 - hrvMs;
         }
 
         if (score > 100) return 100;
