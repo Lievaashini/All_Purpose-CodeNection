@@ -204,7 +204,7 @@ public class DashboardFragment extends Fragment {
         // Shared shell: bottom nav selection, then the shared top bar (mascot, theme
         // toggle, profile picture). AppHeader also starts the header mascot's GIF.
         ScreenNav.bindNav(this, view, ScreenNav.Tab.HOME);
-        AppHeader.bind(this, view, R.string.brand_offline_ml);
+        AppHeader.bind(this, view, R.string.brand_offline_ml_short);
 
         buildWeek();
         setupWeekStrip();
@@ -470,7 +470,7 @@ public class DashboardFragment extends Fragment {
                          * CapacityCalculator and is not being replaced here.
                          */
                         weekLoads[dayIndex] =
-                                (float) Math.max(0.0, Math.min(100.0, load));
+                                (float) Math.max(0.0, load);
 
                         daysLoaded[0]++;
 
@@ -698,6 +698,8 @@ public class DashboardFragment extends Fragment {
                 return;
             }
             renderTaskFeed(tasks);
+            // Refresh the capacity card and weekly chart after the task feed is refreshed.
+            loadPlannedWeekLoads();
         });
     }
 
@@ -961,7 +963,10 @@ public class DashboardFragment extends Fragment {
             TaskRepository.update(requireContext(), task, success -> {
                 if (!Boolean.TRUE.equals(success)) {
                     android.util.Log.e("CapCoachAPI", "Failed to save checkmark state to DB.");
+                    return;
                 }
+                // Completed tasks remain part of planned workload; refresh after saving.
+                loadPlannedWeekLoads();
             });
         }
     }
@@ -1120,7 +1125,7 @@ public class DashboardFragment extends Fragment {
 
                 // GUARDRAIL: If it returns NULL, the read failed. Abort to prevent wiping data.
                 if (nativeEvents == null) {
-                    Toast.makeText(requireContext(), "Sync failed. Could not read calendar.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.dash_error_calendar_read), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
