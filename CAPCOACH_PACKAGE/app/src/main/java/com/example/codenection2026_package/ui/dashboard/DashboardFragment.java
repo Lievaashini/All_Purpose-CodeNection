@@ -831,7 +831,7 @@ public class DashboardFragment extends Fragment {
                 //Prevents completed task from edits
                 if (clickedTask.isCompleted()) {
                     //TO BE REPLACED WITH LINES IN STRINGS.XML
-                    Toast.makeText(requireContext(), getString(R.string.dash_error_completed_edit), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Completed tasks cannot be edited.", Toast.LENGTH_SHORT).show();
                     return true;
                 }
 
@@ -1111,7 +1111,7 @@ public class DashboardFragment extends Fragment {
         // THE GUARDRAIL: Check for permission explicitly.
         // This prevents the data-loss bug WITHOUT blocking empty calendars.
         if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_CALENDAR) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(requireContext(), getString(R.string.dash_error_calendar_permission), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Calendar permission denied. Cannot sync.", Toast.LENGTH_SHORT).show();
             return;
         }
 
