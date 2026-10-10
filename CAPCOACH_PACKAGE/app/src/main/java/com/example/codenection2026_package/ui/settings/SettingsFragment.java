@@ -1,6 +1,8 @@
 package com.example.codenection2026_package.ui.settings;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -53,6 +56,10 @@ public class SettingsFragment extends Fragment {
     private static final String PREFS_NAME = "capcoach_settings";
     private static final String KEY_TELEMETRY_SHARE = "telemetry_share";
 
+    /** Where "Report a Bug" sends the user: the project's public issue tracker. */
+    private static final String BUG_REPORT_URL =
+            "https://github.com/Lievaashini/All_Purpose-CodeNection/issues";
+
     private View themeNightButton;
     private View themeBrightButton;
     private TextView themeNightLabel;
@@ -63,6 +70,8 @@ public class SettingsFragment extends Fragment {
     private TextView linkStatusText;
 
     private MaterialSwitch telemetrySwitch;
+
+    private MaterialButton reportBugButton;
 
     private ImageView avatarPreviewPhoto;
     private ImageView avatarPreviewGlyph;
@@ -120,6 +129,7 @@ public class SettingsFragment extends Fragment {
         linkStatusDot = view.findViewById(R.id.linkStatusDot);
         linkStatusText = view.findViewById(R.id.linkStatusText);
         telemetrySwitch = view.findViewById(R.id.telemetrySwitch);
+        reportBugButton = view.findViewById(R.id.reportBugButton);
 
         avatarPreviewPhoto = view.findViewById(R.id.avatarPreviewPhoto);
         avatarPreviewGlyph = view.findViewById(R.id.avatarPreviewGlyph);
@@ -139,6 +149,7 @@ public class SettingsFragment extends Fragment {
         });
         refreshThemeSegment();
         bindTelemetrySwitch();
+        bindReportBug();
         bindProfile();
         toneSelector = new ToneSelector(this, view);
         // Changing the tone here has to repaint this screen's own copy straight away - this
@@ -271,6 +282,40 @@ public class SettingsFragment extends Fragment {
     }
 
     // ==================================================================
+    // Report a bug
+    // ==================================================================
+
+    /**
+     * Wires the Support button to the project's public issue tracker.
+     *
+     * <p>A plain {@code ACTION_VIEW} rather than an in-app WebView: the report is filed with
+     * the browser (or GitHub app) the user is already signed into, so they can attach
+     * screenshots and get notified of replies - neither of which an embedded page would give
+     * them.
+     *
+     * <p>There is deliberately no {@code resolveActivity()} guard. From API 30 package
+     * visibility hides browsers from that query, so the guard would report "no browser" on
+     * devices that plainly have one; letting {@code startActivity} throw and catching it is
+     * the check that actually works.
+     */
+    private void bindReportBug() {
+        if (reportBugButton == null) {
+            return;
+        }
+        reportBugButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(BUG_REPORT_URL));
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                // Rare, but a device with no browser at all would otherwise just ignore the
+                // tap: better to say the page could not be opened than to do nothing.
+                Toast.makeText(requireContext(), R.string.settings_report_bug_failed,
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ==================================================================
     // Profile - photo and display name
     // ==================================================================
 
@@ -396,6 +441,7 @@ public class SettingsFragment extends Fragment {
         linkStatusDot = null;
         linkStatusText = null;
         telemetrySwitch = null;
+        reportBugButton = null;
         avatarPreviewPhoto = null;
         avatarPreviewGlyph = null;
         changePhotoButton = null;
