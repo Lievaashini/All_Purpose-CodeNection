@@ -41,10 +41,11 @@ import java.util.Locale;
  * {@link RebalancePlanner.Plan} the dashboard hands over, so the sheet shows what the model
  * actually decided about the day being looked at.
  *
- * <p>Accepting dismisses the sheet and fires {@link OnRebalanceAccepted}. Nothing is
- * rescheduled yet: the sheet is still a preview, because the day a task would move to is
- * the next piece of work. {@link RebalancePlanner.Proposal#getTargetDate()} is where it
- * will arrive.
+ * <p>Accepting dismisses the sheet and fires {@link OnRebalanceAccepted}. The dashboard's
+ * handler (DashboardFragment#applyPlan) then saves the new date of every task that has a
+ * {@link RebalancePlanner.Proposal#getTargetDate()}, and shows its confirmation only once
+ * those saves report back. Tasks without a destination are left where they are. The Accept
+ * button is hidden whenever no task has a destination, so it never promises a change.
  *
  * <p>Every line of prose is resolved through {@link CoachVoice} where the app is talking,
  * and through plain resources where it is reporting measurements.
@@ -150,7 +151,14 @@ public class TriageSheetFragment extends BottomSheetDialogFragment {
         }
         list.removeAllViews();
 
-        if (plan == null || plan.getProposals().isEmpty()) {
+        if (plan == null) {
+            // The dashboard does not open the sheet on a failed plan, but if anything ever
+            // does, a failure must not read as "nothing scheduled".
+            showEmptyState(list, empty, R.string.triage_plan_failed);
+            return;
+        }
+
+        if (plan.getProposals().isEmpty()) {
             showEmptyState(list, empty, R.string.triage_empty_no_tasks);
             return;
         }
@@ -352,6 +360,15 @@ public class TriageSheetFragment extends BottomSheetDialogFragment {
             loadValue.setText(getString(R.string.triage_metric_load_reduction, reduction));
         }
 
+        // Under the reduction: the day's load before and after, which is what the reduction
+        // is measured from. It replaces a fixed "Crash risk to 0%" no calculation backed.
+        TextView loadSub = view.findViewById(R.id.triageMetricLoadSub);
+        if (loadSub != null && plan != null) {
+            loadSub.setText(getString(R.string.triage_load_before_after,
+                    (int) Math.round(plan.getCapacity()),
+                    (int) Math.round(plan.getProjectedCapacity())));
+        }
+
         TextView debtValue = view.findViewById(R.id.triageMetricDebtValue);
         TextView debtSub = view.findViewById(R.id.triageMetricSleepSub);
         if (plan == null) {
@@ -398,7 +415,6 @@ public class TriageSheetFragment extends BottomSheetDialogFragment {
         ToneType tone = OnboardingPrefs.getTone(requireContext());
 
         set(view, R.id.triageTitle, CoachVoice.Line.TRIAGE_TITLE, tone);
-        set(view, R.id.triageMetricLoadSub, CoachVoice.Line.TRIAGE_LOAD_SUB, tone);
         set(view, R.id.triageAccept, CoachVoice.Line.TRIAGE_ACCEPT, tone);
         set(view, R.id.triageDismiss, CoachVoice.Line.TRIAGE_DISMISS, tone);
     }

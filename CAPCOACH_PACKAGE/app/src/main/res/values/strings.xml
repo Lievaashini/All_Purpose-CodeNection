@@ -186,7 +186,6 @@
     <string name="triage_tag_protected">PROTECTED</string>
     <string name="triage_tag_kept">KEPT</string>
     <string name="triage_tag_postponed">POSTPONED</string>
-    <string name="triage_tag_deferred">DEFERRED</string>
 
     <!-- Plan rows. Built from the user's real tasks, so the only fixed part is the
          shape: the time window the task currently occupies, and what happens to it. -->
@@ -196,6 +195,8 @@
     <!-- Released, but every day inside its deferral window is already too full. -->
     <string name="triage_row_no_slot">%1$s | No lighter day in range</string>
     <string name="triage_metric_load_reduction">-%1$d%%</string>
+    <!-- The day's load now and after the plan; the reduction above is the gap between them. -->
+    <string name="triage_load_before_after">Day load %1$d%% → %2$d%%</string>
 
     <!-- The three different reasons the plan can be empty. They are genuinely
          different news, so they do not share one sentence. -->

@@ -3,13 +3,12 @@
   Triage bottom sheet (port of the #triageModal block in dashboard.html).
 
   Shown by DashboardFragment's Rebalance button as a BottomSheetDialogFragment.
-  It is a read-only preview of what the on-device model proposes: the two impact
-  metrics, then four modification rows, one per outcome the optimiser can pick
-  (protected, kept, postponed, deferred).
+  It shows what the on-device model proposes for the selected day: two measured
+  metrics (load taken off the day, recovery debt), then one row per real task,
+  tagged with one of the planner's three outcomes (protected, kept, postponed).
 
-  Accepting it dismisses the sheet and fires the host fragment's
-  OnRebalanceAccepted callback, which is what makes the dashboard show its
-  "Schedule Rebalanced" toast.
+  Accepting it fires the host fragment's OnRebalanceAccepted callback, which saves
+  each moved task's new date and only then shows the "Schedule Rebalanced" toast.
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
