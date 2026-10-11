@@ -295,24 +295,40 @@
       SCREEN 5 - BIOMETRICS (port of Prototype/biometrics.html)
       ================================================================== -->
     <string name="bio_health_connect">Health Connect</string>
-    <string name="bio_anomaly_tag">SYNC ANOMALY</string>
+    <string name="bio_anomaly_tag">LOW SLEEP</string>
     <!-- Bound at runtime to the end of the latest sleep session. -->
-    <string name="bio_anomaly_time">- %1$s</string>
+    <string name="bio_anomaly_time">%1$s</string>
 
-    <string name="bio_metrics_title">SLEEP DEBT &amp; STRESS METRICS</string>
+    <string name="bio_metrics_title">SLEEP &amp; RECOVERY</string>
     <!-- Bound at runtime to the real shortfall against the 8h target. The literal
          percent has to be escaped because this string carries a format argument. -->
-    <string name="bio_deficit_badge">-%1$d%% Deficit</string>
-    <string name="bio_deficit_none">No Deficit</string>
-    <string name="bio_baseline_label">Baseline Average</string>
-    <string name="bio_lastnight_label">Last Night (Recorded)</string>
-    <string name="bio_hrv_label">HRV SCORE</string>
-    <string name="bio_trend_label">7-Day Sleep Trend</string>
-    <string name="bio_penalty_title">Cognitive Penalty Processing</string>
-    <string name="bio_penalty_rate">WORKLOAD DEPLETION RATE</string>
+    <!-- How far last night fell short of the target, e.g. "6h short of your 8h goal". -->
+    <string name="bio_deficit_badge">%1$s short of your %2$s goal</string>
+    <string name="bio_deficit_none">Met your %1$s goal</string>
+    <string name="bio_baseline_label">Your usual sleep</string>
+    <string name="bio_lastnight_label">Last night</string>
+    <string name="bio_hrv_label">HRV</string>
+    <!-- HRV value when there is no reading: HRV needs a wearable, so say why it is empty. -->
+    <string name="bio_hrv_no_watch">Needs a smartwatch</string>
+    <!-- The dialog behind the info icon next to "HRV". -->
+    <string name="bio_hrv_info_title">HRV</string>
+    <string name="bio_hrv_info_msg">(Recovery signal) HRV is the small change in timing between heartbeats. Higher usually means well rested; lower can signal stress.</string>
+    <string name="cd_hrv_info">What is HRV?</string>
+    <string name="bio_trend_label">Sleep this week</string>
+    <string name="bio_penalty_title">How today is affected</string>
+    <!-- The recovery debt the triage model uses (0-100), shown under the same name the
+         Rebalance sheet uses so the two screens never disagree about what it is. -->
+    <string name="bio_penalty_rate">RECOVERY DEBT</string>
+    <string name="bio_debt_value">%1$d/100 · %2$s</string>
+    <!-- One word for the debt level, using the bands the model was trained on. -->
+    <string name="bio_debt_band_no_data">No sleep data</string>
+    <string name="bio_debt_band_low">Rested</string>
+    <string name="bio_debt_band_moderate">A bit tired</string>
+    <string name="bio_debt_band_high">Very tired</string>
 
     <!-- Manual Data Entry Dialogs -->
-    <string name="bio_override">Override Sensor Metric</string>
+    <!-- Opens Hard Limits (the weekly study, work and co-curricular hours). -->
+    <string name="bio_override">Edit Weekly Limits</string>
     <string name="bio_manual_input">Log Sleep Manually</string>
 
     <string name="bio_no_data_title">No Sleep Data Found</string>
@@ -344,6 +360,8 @@
     <string name="bio_sleep_hours">%1$s hrs</string>
     <string name="bio_hrv_value">%1$s ms</string>
     <string name="bio_duration_hm">%1$dh %2$02dm</string>
+    <!-- A whole number of hours, so "8h" rather than "8h 00m" in running text. -->
+    <string name="bio_duration_h">%1$dh</string>
     <string name="bio_slider_value">%1$.1f Hours</string>
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST  (port of Prototype/daily-harvest.html)

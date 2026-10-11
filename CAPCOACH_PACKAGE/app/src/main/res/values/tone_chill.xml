@@ -142,14 +142,14 @@
          SCREEN 5 - BIOMETRICS
          ================================================================== -->
 
-    <string name="bio_event_pill_chill">Something in Your Biometrics</string>
-    <string name="bio_anomaly_title_chill">Health Connect: &lt; 5 Hours Sleep Noted</string>
-    <string name="bio_anomaly_body_chill">Last night\'s sleep: %1$s, against a target of %2$s. Recovery came up short.</string>
+    <string name="bio_event_pill_chill">Sleep Check</string>
+    <string name="bio_anomaly_title_chill">Only %1$s of sleep last night</string>
+    <string name="bio_anomaly_body_chill">Your body probably didn\'t get the rest it needed.</string>
     <string name="bio_hrv_state_chill">Running Tense</string>
     <string name="bio_hrv_state_sub_chill">Nervous system is working hard</string>
     <string name="bio_trend_state_chill">A Real Dip</string>
-    <string name="bio_penalty_sub_chill">Easing today\'s capacity to match your sleep...</string>
-    <string name="bio_penalty_footnote_chill">Working out what to shed, on-device...</string>
+    <string name="bio_penalty_sub_chill">Less sleep means today will feel heavier.</string>
+    <string name="bio_penalty_footnote_chill">CapCoach will offer to move tasks when your day overflows, or tap Rebalance on Home whenever you like.</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST

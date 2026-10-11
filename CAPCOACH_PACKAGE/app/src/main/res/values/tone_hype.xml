@@ -160,14 +160,14 @@
          SCREEN 5 - BIOMETRICS
          ================================================================== -->
 
-    <string name="bio_event_pill_hype">Biometric Event Detected</string>
-    <string name="bio_anomaly_title_hype">Health Connect Alert: &lt; 5 Hours Sleep Detected</string>
-    <string name="bio_anomaly_body_hype">Last night\'s recorded sleep: %1$s (Target: %2$s). Severe restorative deficit.</string>
+    <string name="bio_event_pill_hype">Sleep Alert</string>
+    <string name="bio_anomaly_title_hype">You only slept %1$s last night!</string>
+    <string name="bio_anomaly_body_hype">Your body may not have had enough time to recover.</string>
     <string name="bio_hrv_state_hype">Sympathetic Stress</string>
     <string name="bio_hrv_state_sub_hype">Elevated nervous load</string>
     <string name="bio_trend_state_hype">Critical Dip</string>
-    <string name="bio_penalty_sub_hype">Applying Biometric Penalty to Today\'s Cognitive Capacity...</string>
-    <string name="bio_penalty_footnote_hype">Calculating Cognitive Load Shedding recommendations via on-device TFLite...</string>
+    <string name="bio_penalty_sub_hype">Short sleep makes today\'s tasks feel heavier.</string>
+    <string name="bio_penalty_footnote_hype">I\'ll suggest moving tasks when your day overflows, or tap Rebalance on Home anytime!</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST

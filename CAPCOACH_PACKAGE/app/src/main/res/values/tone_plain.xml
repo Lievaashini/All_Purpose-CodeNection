@@ -143,14 +143,14 @@
          SCREEN 5 - BIOMETRICS
          ================================================================== -->
 
-    <string name="bio_event_pill_plain">Biometric event detected</string>
-    <string name="bio_anomaly_title_plain">Health Connect: &lt; 5h sleep</string>
-    <string name="bio_anomaly_body_plain">Last night: %1$s sleep. Target %2$s. Restorative deficit.</string>
+    <string name="bio_event_pill_plain">Sleep alert</string>
+    <string name="bio_anomaly_title_plain">You slept %1$s last night</string>
+    <string name="bio_anomaly_body_plain">Your body may not have recovered fully.</string>
     <string name="bio_hrv_state_plain">Sympathetic stress</string>
     <string name="bio_hrv_state_sub_plain">Nervous load elevated</string>
     <string name="bio_trend_state_plain">Critical dip</string>
-    <string name="bio_penalty_sub_plain">Applying biometric penalty to today\'s capacity...</string>
-    <string name="bio_penalty_footnote_plain">Computing load-shedding recommendations on-device (TFLite)...</string>
+    <string name="bio_penalty_sub_plain">Short sleep makes today\'s tasks heavier.</string>
+    <string name="bio_penalty_footnote_plain">CapCoach suggests moving tasks when your day overflows. You can also tap Rebalance on Home.</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST

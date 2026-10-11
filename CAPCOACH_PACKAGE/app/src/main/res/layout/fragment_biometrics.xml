@@ -180,8 +180,7 @@
                             style="@style/Text.Title"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/bio_anomaly_title_hype" />
+                            android:layout_marginTop="2dp" />
 
                         <TextView
                             android:id="@+id/bioAnomalyBody"
@@ -283,11 +282,35 @@
                                 android:layout_marginStart="@dimen/space_sm"
                                 android:orientation="vertical">
 
-                                <TextView
-                                    style="@style/Text.MicroLabel"
+                                <!-- "HRV" with an info icon; tapping either opens the HRV
+                                     explanation dialog (BiometricsFragment#wireHrvInfo). -->
+                                <LinearLayout
+                                    android:id="@+id/hrvInfoRow"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/bio_hrv_label" />
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:clickable="true"
+                                    android:contentDescription="@string/cd_hrv_info"
+                                    android:focusable="true"
+                                    android:gravity="center_vertical"
+                                    android:minHeight="@dimen/touch_target_min"
+                                    android:orientation="horizontal">
+
+                                    <TextView
+                                        style="@style/Text.MicroLabel"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:importantForAccessibility="no"
+                                        android:text="@string/bio_hrv_label" />
+
+                                    <ImageView
+                                        android:layout_width="16dp"
+                                        android:layout_height="16dp"
+                                        android:layout_marginStart="@dimen/space_xxs"
+                                        android:importantForAccessibility="no"
+                                        android:src="@drawable/ic_info"
+                                        app:tint="@color/text_muted_dark" />
+                                </LinearLayout>
 
                                 <TextView
                                     android:id="@+id/hrvValue"
