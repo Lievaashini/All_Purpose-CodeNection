@@ -175,6 +175,8 @@ public class DashboardFragment extends Fragment {
 
     private final Runnable hideToast = this::dismissRebalanceToast;
 
+    private boolean demoInjected = false;
+
     // API INJECTION
     private CalendarManager calendarManager;
 
@@ -287,7 +289,10 @@ public class DashboardFragment extends Fragment {
         // THE HIDDEN TRIGGER
         if (capLabel != null) {
             capLabel.setOnLongClickListener(v -> {
-                injectDemoModeData();
+                if (!demoInjected) {
+                    injectDemoModeData();
+                    demoInjected = true;
+                }
                 return true; // Consume the long click so it doesn't trigger anything else
             });
         }
@@ -436,7 +441,7 @@ public class DashboardFragment extends Fragment {
             displayLoads[i] = Math.min(100f, displayLoads[i]);
         }
 
-        loadChart.setLoads(weekLoads, dayLetters(), selectedDay, heavyIndex);
+        loadChart.setLoads(displayLoads, dayLetters(), selectedDay, heavyIndex);
     }
 
     /** Day taps: repaint every pill, retitle the schedule, refresh the capacity card. */

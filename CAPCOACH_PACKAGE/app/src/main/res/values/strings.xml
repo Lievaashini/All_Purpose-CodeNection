@@ -1,5 +1,4 @@
 <resources>
-    <!-- Kept from this project's scaffold - do not rename to CapCoach. -->
     <string name="app_name">CapCoach</string>
 
     <!-- ==================== Onboarding (Screen 1) ==================== -->
@@ -234,7 +233,6 @@
     <string name="addtask_category_label">CATEGORY</string>
 
     <!-- Dynamic subtitle for Add Task sheet modes -->
-    <string name="addtask_dynamic_subtitle">%1$s Mode: %2$s</string>
     <string name="addtask_mode_name_flexible">Flexible</string>
     <string name="addtask_mode_name_fixed">Fixed</string>
 

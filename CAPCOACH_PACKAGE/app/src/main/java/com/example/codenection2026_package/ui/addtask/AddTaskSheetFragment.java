@@ -867,11 +867,12 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             tint(glyph, R.color.on_brand);
         }
 
-        // UI FIX: Dynamically construct the subtitle using the chosen Category
+        // THE FIX: Restoring CoachVoice and injecting the selected category
         if (modalSubtitle != null) {
-            String modeName = flexible ? getString(R.string.addtask_mode_name_flexible) : getString(R.string.addtask_mode_name_fixed);
-            modalSubtitle.setText(getString(R.string.addtask_dynamic_subtitle, category, modeName));
-
+            CoachVoice.Line line = flexible
+                    ? CoachVoice.Line.ADDTASK_SUBTITLE_FLEXIBLE_CATEGORY
+                    : CoachVoice.Line.ADDTASK_SUBTITLE_WORK;
+            modalSubtitle.setText(getString(line.pick(tone()), category));
             modalSubtitle.setTextColor(color(flexible
                     ? R.color.brand_mint
                     : R.color.secondary_blue));

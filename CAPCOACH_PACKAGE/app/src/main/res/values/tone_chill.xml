@@ -120,7 +120,7 @@
          SCREEN 4 - ADD ACTIVITY
          ================================================================== -->
 
-    <string name="addtask_subtitle_work_chill">Fixed Work Hours</string>
+    <string name="addtask_subtitle_work_chill">Fixed %1$s Hours</string>
     <string name="addtask_subtitle_flexible_category_chill">%1$s Stays Flexible</string>
     <string name="addtask_mode_work_desc_chill">Fixed hours. We won\'t push these.</string>
     <string name="addtask_mode_work_badge_chill">Held under the 20h cap</string>
