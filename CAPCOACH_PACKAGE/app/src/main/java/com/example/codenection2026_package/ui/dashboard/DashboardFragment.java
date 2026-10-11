@@ -287,7 +287,7 @@ public class DashboardFragment extends Fragment {
         // THE HIDDEN TRIGGER
         if (capLabel != null) {
             capLabel.setOnLongClickListener(v -> {
-                injectGodModeDemoData();
+                injectDemoModeData();
                 return true; // Consume the long click so it doesn't trigger anything else
             });
         }
@@ -1395,24 +1395,24 @@ public class DashboardFragment extends Fragment {
     }
 
     /**
-     * GOD MODE: Hidden Demo Injector.
+     * DEMO MODE: Hidden Demo Injector.
      * Instantly populates the selected day with a mathematically curated workload
      * to guarantee a flawless ML Triage demonstration without manual typing.
      */
-    private void injectGodModeDemoData() {
+    private void injectDemoModeData() {
         if (weekDates[selectedDay] == null) return;
-        Toast.makeText(requireContext(), "GOD MODE: Injecting Demo Burnout...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), getString(R.string.dash_demo_mode_inject), Toast.LENGTH_SHORT).show();
 
         String today = weekDates[selectedDay];
 
-        // 1. Inflexible Shift (8 Hours) - The ML MUST protect this (Rail 1).
-        Task shift = new Task("INFLEXIBLE", "Warehouse Evening Shift", null, today, "12:00", "20:00");
+        // 1. Inflexible Shift (3 Hours) - Reduced from 7h to dial the initial load to ~106%
+        Task shift = new Task("INFLEXIBLE", "Warehouse Evening Shift", null, today, "16:00", "19:00");
         shift.setPriority(Task.PRIORITY_MED);
         shift.setDeferralHours(0);
         TaskRepository.save(requireContext(), shift, CategoryRepository.WORK, id1 -> {});
 
-        // 2. High Priority Academic (3 Hours) - The ML MUST protect this (Rail 3).
-        Task project = new Task("FLEXIBLE", "OS Final Project", null, today, "20:30", "23:30");
+        // 2. High Priority Academic (2 Hours) - The ML MUST protect this (Rail 3).
+        Task project = new Task("FLEXIBLE", "OS Final Project", null, today, "20:30", "22:30");
         project.setPriority(Task.PRIORITY_HIGH);
         project.setDeferralHours(48);
         TaskRepository.save(requireContext(), project, CategoryRepository.ACADEMIC, id2 -> {});
@@ -1425,7 +1425,7 @@ public class DashboardFragment extends Fragment {
         // Save the last one and reload the UI
         TaskRepository.save(requireContext(), reading, CategoryRepository.ACADEMIC, id3 -> {
             reloadTasks();
-            Toast.makeText(requireContext(), "Demo Data Ready! Now log 2h sleep.", Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), getString(R.string.dash_demo_mode_ready), Toast.LENGTH_LONG).show();
         });
     }
 }

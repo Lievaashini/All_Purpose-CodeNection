@@ -843,11 +843,16 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         show(badgeFlexibleGuard, flexible);
         show(badgeInflexibleGuard, !flexible);
 
-        // The flexible card wears the category the user picked, not a hardcoded
-        // "Academic": a Social task has to say so on its own card.
+        // THE UI FIX: Update BOTH card badges to match the currently selected category,
+        // rather than leaving the inactive one hardcoded to Work/Academic.
         TextView flexibleTag = root == null ? null : root.findViewById(R.id.tagFlexible);
-        if (flexibleTag != null && flexible) {
+        if (flexibleTag != null) {
             flexibleTag.setText(category);
+        }
+
+        TextView inflexibleTag = root == null ? null : root.findViewById(R.id.tagInflexible);
+        if (inflexibleTag != null) {
+            inflexibleTag.setText(category);
         }
 
         // Header badge: a school glyph for sheddable work, a work glyph for shifts.
@@ -858,14 +863,15 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         }
         ImageView glyph = root == null ? null : root.findViewById(R.id.modalBadgeGlyph);
         if (glyph != null) {
-            glyph.setImageResource(flexible ? R.drawable.ic_school : R.drawable.ic_work);
+            glyph.setImageResource(flexible ? R.drawable.ic_swap_horiz : R.drawable.ic_lock);
             tint(glyph, R.color.on_brand);
         }
+
+        // UI FIX: Dynamically construct the subtitle using the chosen Category
         if (modalSubtitle != null) {
-            modalSubtitle.setText(flexible
-                    ? getString(CoachVoice.Line.ADDTASK_SUBTITLE_FLEXIBLE_CATEGORY.pick(tone()),
-                            category)
-                    : getString(CoachVoice.Line.ADDTASK_SUBTITLE_WORK.pick(tone())));
+            String modeName = flexible ? getString(R.string.addtask_mode_name_flexible) : getString(R.string.addtask_mode_name_fixed);
+            modalSubtitle.setText(getString(R.string.addtask_dynamic_subtitle, category, modeName));
+
             modalSubtitle.setTextColor(color(flexible
                     ? R.color.brand_mint
                     : R.color.secondary_blue));
