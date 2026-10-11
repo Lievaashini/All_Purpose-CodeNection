@@ -554,7 +554,8 @@ public class FeastFragment extends Fragment {
         int size = Math.round(24 * density);
 
         final View apple = new View(requireContext());
-        apple.setBackgroundResource(R.drawable.bg_apple);
+        // The supplied pixel-art apple, replacing the flat red pill this used to be.
+        apple.setBackgroundResource(R.drawable.apple_pixel);
         android.widget.FrameLayout.LayoutParams params =
                 new android.widget.FrameLayout.LayoutParams(size, size);
         params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
