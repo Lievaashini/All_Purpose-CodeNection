@@ -1,5 +1,6 @@
 package com.example.codenection2026_package.ui.shell;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.view.View;
@@ -47,7 +48,27 @@ public final class ScreenNav {
     private ScreenNav() {
     }
 
+    /**
+     * Goes to the dashboard - or, when the screen being left is the daily harvest that the
+     * app opened by itself on a Monday, to the weekly feast still owed that day.
+     *
+     * <p>The two pop-ups are a queue, not two separate screens: the user collects the apples
+     * first and only then feeds them to the Dino, so the feast never jumps in front of the
+     * harvest. The dashboard is reached on the next navigation, from the feast's Done button.
+     *
+     * <p>The check is deliberately limited to {@link DailyHarvestFragment}: every other
+     * caller of this method means the dashboard, exactly as before, so no screen can be
+     * redirected by a pop-up that happens to be pending behind it.
+     */
     public static void showDashboard(@NonNull Fragment from) {
+        if (from instanceof DailyHarvestFragment) {
+            Context context = from.getContext();
+            Fragment queued = context == null ? null : PopupGate.claimWeeklyPopup(context);
+            if (queued != null) {
+                replace(from, queued, "feast");
+                return;
+            }
+        }
         replace(from, new DashboardFragment(), "dashboard");
     }
 

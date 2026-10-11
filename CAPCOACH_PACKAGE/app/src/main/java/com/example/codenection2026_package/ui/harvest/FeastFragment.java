@@ -140,22 +140,18 @@ public class FeastFragment extends Fragment {
         loadMunchSound();
 
         // --- NEW LIVE DATABASE LOGIC ---
-        // Lock to the current Monday-to-Sunday week
-        Calendar startCal = Calendar.getInstance();
-        // Calendar.MONDAY is 2, SUNDAY is 1. This math converts it so Monday = 0 ... Sunday = 6
-        int todayIndex = (startCal.get(Calendar.DAY_OF_WEEK) + 5) % 7;
+        // The Monday-to-Sunday week whose apples are on the table, as computed by RewardWeek:
+        // the week ending yesterday. On Monday morning yesterday is Sunday, so this is the
+        // week that has just ended - the week whose apples the user has just collected - and
+        // the harvest's basket total and this basket agree. Anchoring on today instead would
+        // put the Monday feast in a brand-new week that holds nothing yet, so the harvest
+        // would hand over a full basket and the feast would immediately answer "no apples".
+        // Tuesday to Sunday both anchors name the same week, so only Monday is affected.
+        RewardWeek week = RewardWeek.forFeast(Calendar.getInstance());
+        String startDate = week.start();
+        String endDate = week.end();
 
-        // Step back to this week's Monday
-        startCal.add(Calendar.DAY_OF_YEAR, -todayIndex);
-        String startDate = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(startCal.getTime());
-
-        // Step forward to this week's Sunday
-        Calendar endCal = Calendar.getInstance();
-        endCal.setTime(startCal.getTime());
-        endCal.add(Calendar.DAY_OF_YEAR, 6);
-        String endDate = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(endCal.getTime());
-
-        this.weekKey = "feast_" + startDate; // Save the week key for later
+        this.weekKey = week.feastKey(); // Save the week key for later
 
         com.example.codenection2026_package.data.TaskRepository.getWeeklyAppleCount(requireContext(), startDate, endDate, count -> {
             if (!viewAlive()) return;
