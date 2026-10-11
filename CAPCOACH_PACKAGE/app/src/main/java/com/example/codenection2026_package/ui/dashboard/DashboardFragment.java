@@ -234,6 +234,26 @@ public class DashboardFragment extends Fragment {
         reloadTasks();
     }
 
+    /**
+     * Gives the day's pop-up its turn every time the dashboard comes to the front.
+     *
+     * <p>The pop-up is owed to the first open of a day, and the app can be left sitting on
+     * any screen overnight - Biometrics, Settings, the Dino. A check that only ran when the
+     * process started would miss every one of those mornings: the user would come back to
+     * their schedule and the harvest would not appear until the next real app start. Asking
+     * here means it arrives as soon as they are back on their home screen, which is the
+     * moment the pop-up was always meant for.
+     *
+     * <p>Cheap when nothing is owed: the answer comes from stored dates, so the usual resume -
+     * a sheet closing, a tab switch, coming back from the background later the same day - does
+     * no database work at all.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        ScreenNav.showDuePopup(this);
+    }
+
     @Override
     public void onDestroyView() {
         if (rebalanceToast != null) {

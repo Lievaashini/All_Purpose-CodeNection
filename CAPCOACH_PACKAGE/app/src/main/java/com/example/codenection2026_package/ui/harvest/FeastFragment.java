@@ -26,6 +26,7 @@ import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
+import com.example.codenection2026_package.ui.shell.PopupGate;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.shell.ToneCopy;
 
@@ -105,6 +106,12 @@ public class FeastFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // This screen is now on the user's display, so the week's automatic feast is spent -
+        // whether the app opened it on Monday or the dashboard's button did. PopupGate writes
+        // the marker here rather than when it picked the screen, so a feast that never got
+        // shown stays owed instead of being silently lost for the week.
+        PopupGate.markShown(requireContext(), this);
+
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
 
         feastDino = view.findViewById(R.id.feastDino);
@@ -140,12 +147,22 @@ public class FeastFragment extends Fragment {
         loadMunchSound();
 
         // --- NEW LIVE DATABASE LOGIC ---
-        // Lock to the current Monday-to-Sunday week
+        // Lock to the Monday-to-Sunday week whose apples are on the table.
+        //
+        // Anchored to YESTERDAY, exactly as the daily harvest anchors its stash: on Monday
+        // morning yesterday is Sunday, which belongs to the week that just ended - the week
+        // whose apples the user has just collected. Anchoring to today instead would put the
+        // Monday feast in a brand-new week that holds nothing yet, so the harvest would hand
+        // over a full basket and the feast would immediately answer "no apples" - the two
+        // screens would disagree on the same morning. Tuesday to Sunday the two anchors name
+        // the same week, so only Monday's behaviour changes.
         Calendar startCal = Calendar.getInstance();
+        startCal.add(Calendar.DAY_OF_YEAR, -1);
+
         // Calendar.MONDAY is 2, SUNDAY is 1. This math converts it so Monday = 0 ... Sunday = 6
         int todayIndex = (startCal.get(Calendar.DAY_OF_WEEK) + 5) % 7;
 
-        // Step back to this week's Monday
+        // Step back to that week's Monday
         startCal.add(Calendar.DAY_OF_YEAR, -todayIndex);
         String startDate = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(startCal.getTime());
 
