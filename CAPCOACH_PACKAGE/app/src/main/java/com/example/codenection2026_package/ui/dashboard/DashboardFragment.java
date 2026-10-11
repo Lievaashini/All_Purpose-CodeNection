@@ -175,6 +175,8 @@ public class DashboardFragment extends Fragment {
 
     private final Runnable hideToast = this::dismissRebalanceToast;
 
+    private boolean demoInjected = false;
+
     // API INJECTION
     private CalendarManager calendarManager;
 
@@ -283,6 +285,18 @@ public class DashboardFragment extends Fragment {
         headline = view.findViewById(R.id.headline);
         telemetry = view.findViewById(R.id.telemetry);
         capLabel = view.findViewById(R.id.capLabel);
+
+        // THE HIDDEN TRIGGER
+        if (capLabel != null) {
+            capLabel.setOnLongClickListener(v -> {
+                if (!demoInjected) {
+                    injectDemoModeData();
+                    demoInjected = true;
+                }
+                return true; // Consume the long click so it doesn't trigger anything else
+            });
+        }
+
         monthLabel = view.findViewById(R.id.monthLabel);
         weekLabel = view.findViewById(R.id.weekLabel);
         currentDayTitle = view.findViewById(R.id.currentDayTitle);
@@ -547,9 +561,9 @@ public class DashboardFragment extends Fragment {
      */
     private void renderCapacityCard() {
         Context context = requireContext();
-        // FIX: Clamp the text display value to 100 so the UI looks clean,
-        // but the engine still evaluates the true 'selectedLoad' (e.g. 554%).
-        int displayValue = Math.min(100, selectedLoad);
+        // UX FIX: Let the text show the true >100% number so the user
+        // sees it drop after a rebalance.
+        int displayValue = selectedLoad;
 
         CoachVoice.Line stateLine;
         CoachVoice.Line headlineLine;
@@ -1383,5 +1397,40 @@ public class DashboardFragment extends Fragment {
         if (target != null) {
             target.setOnClickListener(v -> action.run());
         }
+    }
+
+    /**
+     * DEMO MODE: Hidden Demo Injector.
+     * Instantly populates the selected day with a mathematically curated workload
+     * to guarantee a flawless ML Triage demonstration without manual typing.
+     */
+    private void injectDemoModeData() {
+        if (weekDates[selectedDay] == null) return;
+        Toast.makeText(requireContext(), getString(R.string.dash_demo_mode_inject), Toast.LENGTH_SHORT).show();
+
+        String today = weekDates[selectedDay];
+
+        // 1. Inflexible Shift (3 Hours) - Reduced from 7h to dial the initial load to ~106%
+        Task shift = new Task("INFLEXIBLE", "Warehouse Evening Shift", null, today, "16:00", "19:00");
+        shift.setPriority(Task.PRIORITY_MED);
+        shift.setDeferralHours(0);
+        TaskRepository.save(requireContext(), shift, CategoryRepository.WORK, id1 -> {});
+
+        // 2. High Priority Academic (2 Hours) - The ML MUST protect this (Rail 3).
+        Task project = new Task("FLEXIBLE", "OS Final Project", null, today, "20:30", "22:30");
+        project.setPriority(Task.PRIORITY_HIGH);
+        project.setDeferralHours(48);
+        TaskRepository.save(requireContext(), project, CategoryRepository.ACADEMIC, id2 -> {});
+
+        // 3. Medium Priority Academic (2.5 Hours) - THE TASK THAT WILL BE POSTPONED
+        Task reading = new Task("FLEXIBLE", "Read Chapter 6", null, today, "09:00", "11:30");
+        reading.setPriority(Task.PRIORITY_MED);
+        reading.setDeferralHours(48);
+
+        // Save the last one and reload the UI
+        TaskRepository.save(requireContext(), reading, CategoryRepository.ACADEMIC, id3 -> {
+            reloadTasks();
+            Toast.makeText(requireContext(), getString(R.string.dash_demo_mode_ready), Toast.LENGTH_LONG).show();
+        });
     }
 }

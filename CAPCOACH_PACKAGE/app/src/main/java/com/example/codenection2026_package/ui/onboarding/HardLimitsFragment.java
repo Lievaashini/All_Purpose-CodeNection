@@ -74,7 +74,7 @@ public class HardLimitsFragment extends Fragment {
                 Boolean writeGranted = result.getOrDefault(Manifest.permission.WRITE_CALENDAR, false);
 
                 if (Boolean.TRUE.equals(readGranted) && Boolean.TRUE.equals(writeGranted)) {
-                    runCalendarTest();
+                    //removed calendar test
                 } else {
                     Toast.makeText(getContext(), R.string.limits_calendar_permission_required, Toast.LENGTH_SHORT).show();
                 }
@@ -201,7 +201,6 @@ public class HardLimitsFragment extends Fragment {
             if (initialized && getContext() != null && isChecked) {
                 if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED &&
                         ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-                    runCalendarTest();
                 } else {
                     requestCalendarPermissionsLauncher.launch(new String[]{
                             Manifest.permission.READ_CALENDAR,
@@ -211,23 +210,6 @@ public class HardLimitsFragment extends Fragment {
             }
         });
     }
-
-    private void runCalendarTest() {
-        try {
-            // 1. Test Writing
-            calendarManager.blockRecoveryTime(getString(R.string.limits_recovery_block_title), 4);
-
-            // 2. Test Reading
-            java.util.List<CalendarManager.CalendarEvent> events = calendarManager.logUpcomingWeekEvents();
-            android.util.Log.d("CapCoachAPI", "Found " + events.size() + " calendar events.");
-            for (CalendarManager.CalendarEvent event : events) {
-                android.util.Log.d("CapCoachAPI", "Event: " + event.title + " on " + event.dateStr + " from " + event.startTimeStr + " to " + event.endTimeStr);
-            }
-        } catch (Exception e) {
-            android.util.Log.e("CapCoachAPI", "Calendar Test failed: " + e.getMessage());
-        }
-    }
-
 
     private void wireThemePreview() {
         if (dinoGuardAvatar != null) {

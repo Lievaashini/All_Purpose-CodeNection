@@ -57,10 +57,11 @@ public class CapacityTrigger {
 
         int debt = clampToMlRange(recoveryDebtScore);
 
-        int daysUntilDue =
-                TaskFeatureExtractor.calculateDaysUntilDue(
-                        task.getDate()
-                );
+        // Slack = days until the task's own date + how far the user lets it slip.
+        int daysUntilDue = Math.min(14,
+                TaskFeatureExtractor.calculateDaysUntilDue(task.getDate())
+                        + task.getDeferralHours() / 24);
+
 
         int durationMinutes =
                 TaskFeatureExtractor.calculateDurationMinutes(

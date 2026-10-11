@@ -118,10 +118,10 @@
          SCREEN 4 - ADD ACTIVITY
          ================================================================== -->
 
-    <string name="addtask_subtitle_work_plain">Work Mode: Fixed</string>
+    <string name="addtask_subtitle_work_plain">%1$s Mode: Fixed</string>
     <string name="addtask_subtitle_flexible_category_plain">%1$s Mode: Flexible</string>
 
-    <string name="addtask_mode_work_desc_plain">Fixed work hours. Not deferred.</string>
+    <string name="addtask_mode_work_desc_plain">Fixed hours. Not deferred.</string>
     <string name="addtask_mode_work_badge_plain">Under the 20h cap</string>
     <string name="addtask_mode_academic_desc_plain">Eligible for auto-deferral during overload.</string>
     <string name="addtask_mode_academic_badge_plain">Auto-deferral enabled</string>

@@ -1,6 +1,5 @@
 <resources>
-    <!-- Kept from this project's scaffold - do not rename to CapCoach. -->
-    <string name="app_name">CODENECTION2026_PACKAGE</string>
+    <string name="app_name">CapCoach</string>
 
     <!-- ==================== Onboarding (Screen 1) ==================== -->
     <string name="onboarding_phase_badge">PHASE 01 / SETUP</string>
@@ -160,6 +159,9 @@
     <string name="cd_add_task">Add a new task or shift</string>
     <string name="cd_mark_task_done">Mark task done</string>
 
+    <!--DEMO MODE MESSAGES-->
+    <string name="dash_demo_mode_inject">DEMO MODE: Injecting Demo Burnout...</string>
+    <string name="dash_demo_mode_ready">"Demo Data Ready! Now log 2h sleep."</string>
 
     <!-- DASHBOARD & CALENDAR SYNC ERRORS-->
     <string name="dash_error_completed_edit">Completed tasks cannot be edited.</string>
@@ -229,6 +231,11 @@
     <string name="addtask_academic_default">Read Ch. 4 Neurobiology</string>
     <string name="cd_dictate_task">Dictate the task name</string>
     <string name="addtask_category_label">CATEGORY</string>
+
+    <!-- Dynamic subtitle for Add Task sheet modes -->
+    <string name="addtask_mode_name_flexible">Flexible</string>
+    <string name="addtask_mode_name_fixed">Fixed</string>
+
     <!--
       The five baseline categories. These are the labels shown in the spinner;
       CategoryRepository holds the canonical names that are actually written to the

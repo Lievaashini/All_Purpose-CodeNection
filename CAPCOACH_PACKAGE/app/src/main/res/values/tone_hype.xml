@@ -138,9 +138,9 @@
          SCREEN 4 - ADD ACTIVITY
          ================================================================== -->
 
-    <string name="addtask_subtitle_work_hype">Inflexible Work Mode Active</string>
+    <string name="addtask_subtitle_work_hype">Inflexible %1$s Mode Active</string>
     <string name="addtask_subtitle_flexible_category_hype">Flexible %1$s Mode Active</string>
-    <string name="addtask_mode_work_desc_hype">Fixed work hours. Never deferred.</string>
+    <string name="addtask_mode_work_desc_hype">Fixed hours. Never deferred.</string>
     <string name="addtask_mode_work_badge_hype">Protected under 20h cap</string>
     <string name="addtask_mode_academic_desc_hype">Eligible for auto-deferral during crunch.</string>
     <string name="addtask_mode_academic_badge_hype">Auto-deferral active</string>
