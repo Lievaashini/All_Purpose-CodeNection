@@ -116,7 +116,7 @@ public final class PopupGate {
 
     /** True until the daily harvest has been opened once on the current calendar day. */
     public static boolean isDailyDue(@NonNull Context context) {
-        return dailyDue(Calendar.getInstance(), prefs(context).getString(KEY_DAILY_SHOWN, NO_DATE));
+        return !today().equals(prefs(context).getString(KEY_DAILY_SHOWN, NO_DATE));
     }
 
     /**
@@ -127,34 +127,10 @@ public final class PopupGate {
      * dashboard's Weekly Pop-up button remains the way to feast late.
      */
     public static boolean isWeeklyDue(@NonNull Context context) {
-        return weeklyDue(Calendar.getInstance(),
-                prefs(context).getString(KEY_WEEKLY_SHOWN, NO_DATE));
-    }
-
-    /**
-     * The daily rule on its own: today is owed a harvest unless today's date is the one
-     * already recorded.
-     *
-     * <p>Separated from the stored read so the rule can be pinned by a JVM test
-     * ({@code app/src/test/.../PopupGateTest.java}) instead of only on a device whose clock
-     * cannot be moved.
-     */
-    static boolean dailyDue(@NonNull Calendar today, @Nullable String lastShownDate) {
-        return !iso(today).equals(lastShownDate);
-    }
-
-    /**
-     * The weekly rule on its own: Monday is owed a feast unless this week's Monday is the one
-     * already recorded.
-     *
-     * <p>Keyed on the week's Monday, so "already feasted" expires by itself when the next
-     * Monday arrives - there is no week counter to keep in step.
-     */
-    static boolean weeklyDue(@NonNull Calendar today, @Nullable String lastShownMonday) {
-        if (today.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+        if (!isMonday()) {
             return false;
         }
-        return !weekStartMonday(today).equals(lastShownMonday);
+        return !weekStartMonday().equals(prefs(context).getString(KEY_WEEKLY_SHOWN, NO_DATE));
     }
 
     // ==================================================================
@@ -163,7 +139,7 @@ public final class PopupGate {
 
     /** Records that today's harvest has been shown. */
     public static void markDailyShown(@NonNull Context context) {
-        prefs(context).edit().putString(KEY_DAILY_SHOWN, iso(Calendar.getInstance())).apply();
+        prefs(context).edit().putString(KEY_DAILY_SHOWN, today()).apply();
     }
 
     /**
@@ -173,9 +149,7 @@ public final class PopupGate {
      * match a later day: next Monday is a different date and the feast is due again.
      */
     public static void markWeeklyShown(@NonNull Context context) {
-        prefs(context).edit()
-                .putString(KEY_WEEKLY_SHOWN, weekStartMonday(Calendar.getInstance()))
-                .apply();
+        prefs(context).edit().putString(KEY_WEEKLY_SHOWN, weekStartMonday()).apply();
     }
 
     // ==================================================================
@@ -187,23 +161,31 @@ public final class PopupGate {
                 .getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
+    @NonNull
+    private static String today() {
+        return iso(Calendar.getInstance());
+    }
+
     /**
-     * Monday of the week {@code today} falls in, as "yyyy-MM-dd".
+     * Monday of the week today falls in, as "yyyy-MM-dd".
      *
      * <p>{@code Calendar.MONDAY} is 2 and Sunday is 1, so the usual
      * {@code (DAY_OF_WEEK + 5) % 7} turns Monday into 0 and Sunday into 6 - the same
      * week arithmetic the harvest and feast screens use.
      */
     @NonNull
-    static String weekStartMonday(@NonNull Calendar today) {
-        Calendar monday = (Calendar) today.clone();
-        monday.add(Calendar.DAY_OF_YEAR, -((monday.get(Calendar.DAY_OF_WEEK) + 5) % 7));
-        return iso(monday);
+    private static String weekStartMonday() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, -((cal.get(Calendar.DAY_OF_WEEK) + 5) % 7));
+        return iso(cal);
     }
 
-    /** The day's date as "yyyy-MM-dd", the format every date key in the app uses. */
+    private static boolean isMonday() {
+        return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY;
+    }
+
     @NonNull
-    static String iso(@NonNull Calendar day) {
-        return new SimpleDateFormat(DATE_PATTERN, Locale.US).format(day.getTime());
+    private static String iso(@NonNull Calendar cal) {
+        return new SimpleDateFormat(DATE_PATTERN, Locale.US).format(cal.getTime());
     }
 }
