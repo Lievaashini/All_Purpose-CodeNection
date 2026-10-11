@@ -845,9 +845,15 @@ public class DashboardFragment extends Fragment {
         int index = indexOfWeekDate(isoDate);
         if (index >= 0 && index != selectedDay) {
             selectDay(index);
-            return;
+        } else {
+            reloadTasks();
         }
-        reloadTasks();
+        // An edit inside the week on screen can tip the day the user is looking at over the
+        // line, so the rebalance offer follows it too. A row filed in another week is not this
+        // screen's business and is left alone.
+        if (index >= 0) {
+            offerRebalanceIfOverloaded(weekDates[selectedDay]);
+        }
     }
 
     /** @return the localised label for a canonical category name */
@@ -1215,6 +1221,9 @@ public class DashboardFragment extends Fragment {
             Toast.makeText(requireContext(),
                     getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
                     Toast.LENGTH_SHORT).show();
+            // A sync can import a whole day's events at once, which loads a day exactly the
+            // way adding a row by hand does, so the same offer is made once it has finished.
+            offerRebalanceIfOverloaded(weekDates[selectedDay]);
         }
     }
     /**
@@ -1248,10 +1257,70 @@ public class DashboardFragment extends Fragment {
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
-                TriageSheetFragment sheet = new TriageSheetFragment();
-                sheet.setPlan(plan);
-                sheet.setOnRebalanceAccepted(() -> applyPlan(plan));
-                sheet.show(getChildFragmentManager(), TriageSheetFragment.TAG);
+                showTriageSheet(plan);
+            });
+        });
+    }
+
+    /**
+     * Puts a finished plan on screen.
+     *
+     * <p>Shared by the Rebalance button and the automatic offer below, so both routes show the
+     * same sheet with the same accept handler - the only difference between them is what
+     * decided to open it.
+     */
+    private void showTriageSheet(@NonNull RebalancePlanner.Plan plan) {
+        TriageSheetFragment sheet = new TriageSheetFragment();
+        sheet.setPlan(plan);
+        sheet.setOnRebalanceAccepted(() -> applyPlan(plan));
+        sheet.show(getChildFragmentManager(), TriageSheetFragment.TAG);
+    }
+
+    /**
+     * Offers the rebalance sheet by itself when a task has just tipped a day over the line.
+     *
+     * <p>The three conditions are all read off the plan the engine already produced - this
+     * method decides nothing about workload itself:
+     * <ul>
+     *   <li>{@link RebalancePlanner.Plan#isOverThreshold()} - the day's measured load has
+     *       reached the intervention threshold (90%), which is the same gate the model uses
+     *       before it is allowed to move anything;</li>
+     *   <li>{@link RebalancePlanner.Plan#placedCount()} - at least one task was not only
+     *       judged movable but also given a day to move to. The sheet hides its Accept button
+     *       when there is no destination, so opening it on anything less would be an offer the
+     *       user cannot accept;</li>
+     *   <li>the caller - only a task arriving calls this, so browsing days or ticking a task
+     *       off never prompts.</li>
+     * </ul>
+     *
+     * <p>The offer is made once per arrival, which is the honest reading of "a new task came
+     * in": adding four tasks to a loaded day offers four times, and the day stops offering as
+     * soon as accepting brings it back under the threshold or the model finds nothing to move.
+     * A sheet already on screen is never doubled up.
+     *
+     * <p>The Rebalance button is untouched and still opens the same sheet on demand.
+     */
+    private void offerRebalanceIfOverloaded(@Nullable String isoDate) {
+        if (isoDate == null || !isAdded() || getView() == null) {
+            return;
+        }
+        if (getChildFragmentManager().findFragmentByTag(TriageSheetFragment.TAG) != null) {
+            return;
+        }
+
+        TaskRepository.loadByDate(requireContext(), isoDate, feed -> {
+            if (!isAdded() || getView() == null || feed == null) {
+                return;
+            }
+            RebalancePlanner.plan(requireContext(), isoDate, feed, plan -> {
+                // A failed measurement says nothing about the day, so it opens nothing.
+                if (!isAdded() || getView() == null || plan == null) {
+                    return;
+                }
+                if (!plan.isOverThreshold() || plan.placedCount() == 0) {
+                    return;
+                }
+                showTriageSheet(plan);
             });
         });
     }
@@ -1328,6 +1397,10 @@ public class DashboardFragment extends Fragment {
             } else {
                 reloadTasks();
             }
+            // The row that just came in is the trigger: if it has pushed this day past the
+            // intervention threshold and the model found something it can move, the rebalance
+            // sheet offers itself rather than waiting for the button.
+            offerRebalanceIfOverloaded(weekDates[selectedDay]);
             return;
         }
         Toast.makeText(requireContext(),
@@ -1451,6 +1524,12 @@ public class DashboardFragment extends Fragment {
         TaskRepository.save(requireContext(), reading, CategoryRepository.ACADEMIC, id3 -> {
             reloadTasks();
             Toast.makeText(requireContext(), getString(R.string.dash_demo_mode_ready), Toast.LENGTH_LONG).show();
+            // The three rows above are a task arrival like any other, and this is the load they
+            // are dialled to produce: ~106%, with a flexible medium-priority task the model can
+            // move. Letting the offer run here is what makes the demo show the automatic
+            // trigger rather than the button. Remove this one line if the demo is meant to
+            // press Rebalance by hand instead.
+            offerRebalanceIfOverloaded(weekDates[selectedDay]);
         });
     }
 }
