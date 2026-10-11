@@ -12,6 +12,7 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.codenection2026_package.R;
@@ -49,27 +50,70 @@ public final class ScreenNav {
     }
 
     /**
-     * Goes to the dashboard - or, when the screen being left is the daily harvest that the
-     * app opened by itself on a Monday, to the weekly feast still owed that day.
+     * Goes to the dashboard - or, when the screen being left is the daily harvest and the
+     * weekly feast is still owed that day, to the feast instead.
      *
      * <p>The two pop-ups are a queue, not two separate screens: the user collects the apples
-     * first and only then feeds them to the Dino, so the feast never jumps in front of the
-     * harvest. The dashboard is reached on the next navigation, from the feast's Done button.
+     * first and only then feeds them to the Dino, so on a Monday the feast never jumps in
+     * front of the harvest. The dashboard is reached on the next navigation, from the feast's
+     * own Done button.
      *
-     * <p>The check is deliberately limited to {@link DailyHarvestFragment}: every other
-     * caller of this method means the dashboard, exactly as before, so no screen can be
-     * redirected by a pop-up that happens to be pending behind it.
+     * <p>The check is on the screen being left, not on how the user got there: a harvest
+     * opened from the dashboard's button on a Monday chains to the feast exactly like the one
+     * the app opened by itself. Both end at the same place, and requiring a flag to tell them
+     * apart would only mean a button-opened Monday harvest silently swallowed the feast.
+     *
+     * <p>Every other caller of this method means the dashboard, exactly as before, so no
+     * screen can be redirected by a pop-up that happens to be pending behind it.
      */
     public static void showDashboard(@NonNull Fragment from) {
         if (from instanceof DailyHarvestFragment) {
             Context context = from.getContext();
-            Fragment queued = context == null ? null : PopupGate.claimWeeklyPopup(context);
+            Fragment queued = context == null ? null : PopupGate.weeklyPopup(context);
             if (queued != null) {
                 replace(from, queued, "feast");
                 return;
             }
         }
         replace(from, new DashboardFragment(), "dashboard");
+    }
+
+    /**
+     * Opens whatever pop-up the day still owes, if the screen asking is still the one on
+     * show. Called when the dashboard appears, which is what lets a harvest arrive on a
+     * morning the app was left sitting on another screen.
+     *
+     * <p>The answer takes a database read, so the screen the user asked from may be gone by
+     * the time it lands - they tapped Biometrics, or left the app. Rather than interrupting
+     * whatever they are doing now, the pop-up is dropped, and because a pop-up is only marked
+     * as seen once it is on screen ({@link PopupGate#markShown}), nothing is spent: the next
+     * arrival at the dashboard is offered it again.
+     *
+     * <p>Does nothing when the day is owed nothing, which is the everyday case and costs one
+     * prefs read; see {@link PopupGate#resolveAppOpenPopup}.
+     */
+    public static void showDuePopup(@NonNull Fragment from) {
+        final Context context = from.getContext();
+        if (context == null) {
+            return;
+        }
+
+        PopupGate.resolveAppOpenPopup(context, popup -> {
+            if (popup == null || !from.isAdded()) {
+                return;
+            }
+            FragmentManager fragments = from.getParentFragmentManager();
+            Fragment visible = fragments.findFragmentById(R.id.nav_host_container);
+            if (visible != from || fragments.isStateSaved()) {
+                return;
+            }
+            String tag = popup instanceof FeastFragment ? "feast" : "daily_harvest";
+            fragments.beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .replace(R.id.nav_host_container, popup, tag)
+                    .addToBackStack(tag)
+                    .commit();
+        });
     }
 
     public static void showBiometrics(@NonNull Fragment from) {

@@ -26,6 +26,7 @@ import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.ToneType;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
+import com.example.codenection2026_package.ui.shell.PopupGate;
 import com.example.codenection2026_package.ui.shell.ScreenNav;
 import com.example.codenection2026_package.ui.shell.ToneCopy;
 
@@ -104,6 +105,12 @@ public class FeastFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // This screen is now on the user's display, so the week's automatic feast is spent -
+        // whether the app opened it on Monday or the dashboard's button did. PopupGate writes
+        // the marker here rather than when it picked the screen, so a feast that never got
+        // shown stays owed instead of being silently lost for the week.
+        PopupGate.markShown(requireContext(), this);
 
         ThemeController.bind(view, R.id.themeToggleButton, R.id.themeToggleIcon);
 
