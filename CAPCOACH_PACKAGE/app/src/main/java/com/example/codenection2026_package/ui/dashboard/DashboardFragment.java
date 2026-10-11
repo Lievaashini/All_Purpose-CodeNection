@@ -1221,6 +1221,9 @@ public class DashboardFragment extends Fragment {
             Toast.makeText(requireContext(),
                     getString(CoachVoice.Line.DASH_SYNC_DONE.pick(tone())),
                     Toast.LENGTH_SHORT).show();
+            //Force the UI refresh
+            refreshLoads();
+
             // A sync can import a whole day's events at once, which loads a day exactly the
             // way adding a row by hand does, so the same offer is made once it has finished.
             offerRebalanceIfOverloaded(weekDates[selectedDay]);
