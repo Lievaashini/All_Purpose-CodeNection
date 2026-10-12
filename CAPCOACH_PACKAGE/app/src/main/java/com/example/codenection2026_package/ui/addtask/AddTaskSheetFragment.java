@@ -102,11 +102,12 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     /**
      * The deferral windows the user can allow, in hours, paired one-to-one with the
      * labels built in {@link #deferralLabels()}. 0 means "never defer this".
+     * Removed 12h deferral as Ml moves tasks in 24h block.
      */
-    private static final int[] DEFERRAL_HOURS = {0, 12, 24, 48, 72};
+    private static final int[] DEFERRAL_HOURS = {0, 24, 48, 72};
 
     /** The prototype's "48h max", which is also {@link Task#DEFAULT_DEFERRAL_HOURS}. */
-    private static final int DEFAULT_DEFERRAL_INDEX = 3;
+    private static final int DEFAULT_DEFERRAL_INDEX = 2;
     private VoiceManager voiceManager;
 
     /** Tells the dashboard a row landed, so it can refresh the day it belongs to. */
@@ -1062,7 +1063,6 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     private String[] deferralLabels() {
         return new String[]{
                 getString(R.string.addtask_deferral_none),
-                getString(R.string.addtask_deferral_12),
                 getString(R.string.addtask_deferral_24),
                 getString(R.string.addtask_deferral_48),
                 getString(R.string.addtask_deferral_72)

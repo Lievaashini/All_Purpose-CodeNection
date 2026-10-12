@@ -8,7 +8,7 @@ package com.example.codenection2026_package.engine;
  *
  * Source model : Scikit-Learn DecisionTreeClassifier (max_depth=8)
  * Trained on   : 2400 rows | Tested on 600 rows
- * Test accuracy: 0.9950
+ * Test accuracy: 0.9917
  *
  * The tree is exported as plain branching logic rather than a .tflite
  * binary: identical decisions, no runtime dependency, nothing to load
@@ -81,51 +81,55 @@ public final class LoadShedder {
             return KEEP;
         }
 
-        if (recoveryDebtScore <= 60.5000) {
-            return KEEP;
-        } else {
-            if (isFixedTime <= 0.5000) {
-                if (daysUntilDue <= 3.5000) {
-                    if (recoveryDebtScore <= 81.5000) {
+        if (recoveryDebtScore <= 49.5000) {
+            if (recoveryDebtScore <= 45.5000) {
+                return KEEP;
+            } else {
+                if (taskPriorityWeight <= 1.5000) {
+                    if (isFixedTime <= 0.5000) {
+                        if (daysUntilDue <= 5.0000) {
+                            return KEEP;
+                        } else {
+                            return MOVE;
+                        }
+                    } else {
+                        return KEEP;
+                    }
+                } else {
+                    if (durationMinutes <= 210.0000) {
                         return KEEP;
                     } else {
-                        if (durationMinutes <= 120.5000) {
-                            if (daysUntilDue <= 2.5000) {
-                                return KEEP;
-                            } else {
-                                if (durationMinutes <= 70.5000) {
-                                    return MOVE;
-                                } else {
-                                    return KEEP;
-                                }
-                            }
+                        if (recoveryDebtScore <= 46.5000) {
+                            return MOVE;
                         } else {
-                            if (isRecoveryActivity <= 0.5000) {
-                                if (taskPriorityWeight <= 2.5000) {
-                                    return MOVE;
+                            return KEEP;
+                        }
+                    }
+                }
+            }
+        } else {
+            if (isFixedTime <= 0.5000) {
+                if (isRecoveryActivity <= 0.5000) {
+                    if (recoveryDebtScore <= 70.5000) {
+                        if (taskPriorityWeight <= 1.5000) {
+                            if (daysUntilDue <= 5.5000) {
+                                if (durationMinutes <= 192.5000) {
+                                    return KEEP;
                                 } else {
-                                    if (daysUntilDue <= 2.5000) {
-                                        return KEEP;
-                                    } else {
+                                    if (durationMinutes <= 200.0000) {
                                         return MOVE;
+                                    } else {
+                                        return KEEP;
                                     }
                                 }
                             } else {
-                                return KEEP;
+                                return MOVE;
                             }
-                        }
-                    }
-                } else {
-                    if (isRecoveryActivity <= 0.5000) {
-                        if (recoveryDebtScore <= 80.5000) {
-                            if (taskPriorityWeight <= 1.5000) {
-                                if (daysUntilDue <= 5.5000) {
-                                    return KEEP;
-                                } else {
-                                    return MOVE;
-                                }
+                        } else {
+                            if (durationMinutes <= 180.5000) {
+                                return KEEP;
                             } else {
-                                if (durationMinutes <= 182.0000) {
+                                if (daysUntilDue <= 3.5000) {
                                     return KEEP;
                                 } else {
                                     if (taskPriorityWeight <= 2.5000) {
@@ -135,35 +139,47 @@ public final class LoadShedder {
                                     }
                                 }
                             }
-                        } else {
-                            return MOVE;
                         }
                     } else {
-                        if (recoveryDebtScore <= 78.5000) {
-                            if (taskPriorityWeight <= 1.5000) {
-                                if (daysUntilDue <= 5.5000) {
-                                    if (durationMinutes <= 179.0000) {
-                                        return KEEP;
-                                    } else {
-                                        return MOVE;
-                                    }
-                                } else {
-                                    return MOVE;
-                                }
+                        if (daysUntilDue <= 2.5000) {
+                            if (durationMinutes <= 119.5000) {
+                                return KEEP;
                             } else {
-                                if (durationMinutes <= 183.5000) {
-                                    return KEEP;
+                                if (taskPriorityWeight <= 2.5000) {
+                                    return MOVE;
                                 } else {
-                                    if (recoveryDebtScore <= 74.5000) {
-                                        return MOVE;
-                                    } else {
-                                        return KEEP;
-                                    }
+                                    return KEEP;
                                 }
                             }
                         } else {
-                            return KEEP;
+                            return MOVE;
                         }
+                    }
+                } else {
+                    if (recoveryDebtScore <= 67.5000) {
+                        if (daysUntilDue <= 5.5000) {
+                            if (durationMinutes <= 196.0000) {
+                                return KEEP;
+                            } else {
+                                if (daysUntilDue <= 3.0000) {
+                                    return KEEP;
+                                } else {
+                                    return MOVE;
+                                }
+                            }
+                        } else {
+                            if (taskPriorityWeight <= 1.5000) {
+                                return MOVE;
+                            } else {
+                                if (durationMinutes <= 188.5000) {
+                                    return KEEP;
+                                } else {
+                                    return MOVE;
+                                }
+                            }
+                        }
+                    } else {
+                        return KEEP;
                     }
                 }
             } else {
