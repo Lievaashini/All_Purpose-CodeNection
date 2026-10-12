@@ -84,6 +84,13 @@ public class HealthConnectReader {
     public static final double TARGET_SLEEP_HOURS = 8.0;
 
     /**
+     * Below this RMSSD, in milliseconds, HRV counts as low: the debt score adds a stress
+     * penalty and the Biometrics screen shows the stressed state. One constant, so the two
+     * cannot disagree.
+     */
+    public static final double LOW_HRV_MS = 40.0;
+
+    /**
      * Today's Recovery Debt Score straight from Health Connect: last night's sleep against
      * {@link #TARGET_SLEEP_HOURS}, worsened by low HRV.
      *
@@ -140,9 +147,8 @@ public class HealthConnectReader {
         // Adding (40 - HRV) points keeps stress visible after a full night. On its own it
         // tops out near 40, below the model's first shedding band (above 60), so stress alone
         // raises the score without moving tasks; combined with short sleep it can.
-        // HRV Stress Penalty
-        if (hrvMs > 0 && hrvMs < 40.0) {
-            score += 40.0 - hrvMs;
+        if (hrvMs > 0 && hrvMs < LOW_HRV_MS) {
+            score += LOW_HRV_MS - hrvMs;
         }
 
         if (score > 100) return 100;

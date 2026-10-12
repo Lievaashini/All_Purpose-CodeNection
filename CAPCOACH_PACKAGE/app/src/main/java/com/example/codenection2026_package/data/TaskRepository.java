@@ -305,6 +305,71 @@ public final class TaskRepository {
         });
     }
 
+    /**
+     * Total scheduled minutes of every task filed under {@code categoryName} between two ISO
+     * dates, inclusive. The Add Task sheet uses it to show how much work the week already holds.
+     *
+     * <p>A task ending before it starts runs past midnight and gains 24 hours, the same rule the
+     * sheet's duration pill uses, so the two never disagree about a night shift.
+     *
+     * @param excludeId a row to leave out - the one being edited, so its old hours are not
+     *                  counted next to its new ones. 0 excludes nothing.
+     * @param callback  receives the minutes, or null when the read failed
+     */
+    public static void sumMinutesByCategory(@NonNull Context context,
+                                            @NonNull String categoryName,
+                                            @NonNull String startDate,
+                                            @NonNull String endDate,
+                                            long excludeId,
+                                            @NonNull Callback<Integer> callback) {
+        final Context appContext = context.getApplicationContext();
+        IO.execute(() -> {
+            Integer minutes;
+            try {
+                AppDatabase db = AppDatabase.get(appContext);
+                seedCategories(db);
+                int total = 0;
+                for (Task task : db.taskDao()
+                        .findByCategoryNameInDateRange(categoryName, startDate, endDate)) {
+                    if (task.getId() != excludeId) {
+                        total += durationMinutes(task.getStartTime(), task.getEndTime());
+                    }
+                }
+                minutes = total;
+            } catch (RuntimeException e) {
+                minutes = null;
+            }
+            final Integer result = minutes;
+            MAIN.post(() -> callback.onResult(result));
+        });
+    }
+
+    /** "HH:mm" to "HH:mm" in minutes, wrapping past midnight. 0 for an unreadable time. */
+    private static int durationMinutes(@Nullable String start, @Nullable String end) {
+        int from = clockMinutes(start);
+        int to = clockMinutes(end);
+        if (from < 0 || to < 0) {
+            return 0;
+        }
+        int span = to - from;
+        return span < 0 ? span + 24 * 60 : span;
+    }
+
+    private static int clockMinutes(@Nullable String time) {
+        if (time == null) {
+            return -1;
+        }
+        String[] parts = time.trim().split(":");
+        if (parts.length < 2) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
     public static void getDailyAppleCount(@NonNull Context context, @NonNull String dateStr, @NonNull Callback<Integer> callback) {
         final Context appContext = context.getApplicationContext();
         IO.execute(() -> {

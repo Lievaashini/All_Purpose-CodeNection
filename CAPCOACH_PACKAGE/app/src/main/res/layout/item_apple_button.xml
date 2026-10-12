@@ -21,7 +21,7 @@
     <View
         android:layout_width="22dp"
         android:layout_height="22dp"
-        android:background="@drawable/bg_apple" />
+        android:background="@drawable/apple_pixel" />
 
     <TextView
         android:id="@+id/appleButtonLabel"

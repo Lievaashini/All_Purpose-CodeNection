@@ -498,6 +498,23 @@ public class BiometricsFragment extends Fragment {
                 SCALE_MINUTES,
                 latest,
                 warnIndex(snapshot.nightlyMinutes, latest));
+
+        // The label describes the newest night on the chart against the sleep target. A week
+        // with no reading has nothing to describe, so the label is hidden.
+        TextView trendState = view.findViewById(R.id.bioTrendState);
+        if (trendState != null) {
+            if (latest < 0) {
+                trendState.setVisibility(View.GONE);
+            } else {
+                boolean dip = snapshot.nightlyMinutes[latest] < SCALE_MINUTES;
+                trendState.setVisibility(View.VISIBLE);
+                trendState.setText((dip
+                        ? CoachVoice.Line.BIO_TREND_STATE
+                        : CoachVoice.Line.BIO_TREND_STATE_STEADY).pick(tone()));
+                trendState.setTextColor(ContextCompat.getColor(requireContext(),
+                        dip ? R.color.status_red : R.color.brand_mint));
+            }
+        }
     }
 
     /**
@@ -508,12 +525,35 @@ public class BiometricsFragment extends Fragment {
      */
     private void bindHrv(@NonNull View view, @NonNull Snapshot snapshot) {
         TextView hrvValue = view.findViewById(R.id.hrvValue);
-        if (hrvValue == null) {
-            return;
+        if (hrvValue != null) {
+            hrvValue.setText(snapshot.hrvMs > 0
+                    ? getString(R.string.bio_hrv_value, formatHrv(snapshot.hrvMs))
+                    : getString(R.string.bio_hrv_no_watch));
         }
-        hrvValue.setText(snapshot.hrvMs > 0
-                ? getString(R.string.bio_hrv_value, formatHrv(snapshot.hrvMs))
-                : getString(R.string.bio_hrv_no_watch));
+
+        // The state under the value judges the reading, using the same low-HRV line the debt
+        // score uses. With no reading there is nothing to judge - "calm" would be as made up
+        // as "stressed" - so both lines are hidden and the value explains why.
+        TextView state = view.findViewById(R.id.bioHrvState);
+        TextView stateSub = view.findViewById(R.id.bioHrvStateSub);
+        boolean hasReading = snapshot.hrvMs > 0;
+        boolean low = hasReading && snapshot.hrvMs < HealthConnectReader.LOW_HRV_MS;
+        ToneType tone = tone();
+        if (state != null) {
+            setVisible(state, hasReading);
+            state.setText((low
+                    ? CoachVoice.Line.BIO_HRV_STATE
+                    : CoachVoice.Line.BIO_HRV_STATE_CALM).pick(tone));
+            state.setTextColor(ContextCompat.getColor(requireContext(),
+                    low ? R.color.status_red : R.color.brand_mint));
+            state.setBackgroundResource(low ? R.drawable.bg_tag_red : R.drawable.bg_tag_mint);
+        }
+        if (stateSub != null) {
+            setVisible(stateSub, hasReading);
+            stateSub.setText((low
+                    ? CoachVoice.Line.BIO_HRV_STATE_SUB
+                    : CoachVoice.Line.BIO_HRV_STATE_SUB_CALM).pick(tone));
+        }
     }
 
     /**
@@ -548,6 +588,7 @@ public class BiometricsFragment extends Fragment {
      * the triage model cannot disagree about how depleted today is.
      */
     private void bindDeficitAndPenalty(@NonNull View view, @NonNull Snapshot snapshot) {
+        ToneType tone = tone();
         TextView badge = view.findViewById(R.id.deficitBadge);
         if (badge != null) {
             String goal = formatShortDuration(SCALE_MINUTES);
@@ -555,12 +596,12 @@ public class BiometricsFragment extends Fragment {
                 // In hours rather than a percentage: "6h short of your 8h goal" reads at a
                 // glance, where "-75% Deficit" has to be worked out.
                 badge.setVisibility(View.VISIBLE);
-                badge.setText(getString(R.string.bio_deficit_badge,
+                badge.setText(getString(CoachVoice.Line.BIO_DEFICIT_BADGE.pick(tone),
                         formatShortDuration(SCALE_MINUTES - snapshot.lastNightMinutes), goal));
             } else if (snapshot.lastNightMinutes > 0) {
                 // Slept at or past the target, so the shortfall is a real, reportable zero.
                 badge.setVisibility(View.VISIBLE);
-                badge.setText(getString(R.string.bio_deficit_none, goal));
+                badge.setText(getString(CoachVoice.Line.BIO_DEFICIT_NONE.pick(tone), goal));
             } else {
                 // No reading, so there is no shortfall to claim in either direction.
                 badge.setVisibility(View.GONE);
@@ -568,7 +609,7 @@ public class BiometricsFragment extends Fragment {
         }
 
         penaltyFraction = snapshot.recoveryDebtScore / 100f;
-        penaltyBand = getString(debtBand(snapshot));
+        penaltyBand = getString(debtBand(snapshot).pick(tone));
     }
 
     /**
@@ -577,18 +618,18 @@ public class BiometricsFragment extends Fragment {
      * more. Without a sleep reading the score is the neutral default, so it says so rather
      * than describing a measurement that never happened.
      */
-    @StringRes
-    private static int debtBand(@NonNull Snapshot snapshot) {
+    @NonNull
+    private static CoachVoice.Line debtBand(@NonNull Snapshot snapshot) {
         if (snapshot.lastNightMinutes <= 0) {
-            return R.string.bio_debt_band_no_data;
+            return CoachVoice.Line.BIO_DEBT_BAND_NO_DATA;
         }
         if (snapshot.recoveryDebtScore > 80) {
-            return R.string.bio_debt_band_high;
+            return CoachVoice.Line.BIO_DEBT_BAND_HIGH;
         }
         if (snapshot.recoveryDebtScore > 60) {
-            return R.string.bio_debt_band_moderate;
+            return CoachVoice.Line.BIO_DEBT_BAND_MODERATE;
         }
-        return R.string.bio_debt_band_low;
+        return CoachVoice.Line.BIO_DEBT_BAND_LOW;
     }
 
     /**
@@ -610,11 +651,10 @@ public class BiometricsFragment extends Fragment {
         if (getContext() == null) {
             return;
         }
+        // The HRV and trend states are not here: they depend on the readings, so bindHrv and
+        // bindTrend choose them. Binding them here would print a warning on every visit.
         ToneCopy.on(view, tone())
                 .set(R.id.bioEventPill, CoachVoice.Line.BIO_EVENT_PILL)
-                .set(R.id.bioHrvState, CoachVoice.Line.BIO_HRV_STATE)
-                .set(R.id.bioHrvStateSub, CoachVoice.Line.BIO_HRV_STATE_SUB)
-                .set(R.id.bioTrendState, CoachVoice.Line.BIO_TREND_STATE)
                 .set(R.id.bioPenaltySub, CoachVoice.Line.BIO_PENALTY_SUB)
                 .set(R.id.bioPenaltyFootnote, CoachVoice.Line.BIO_PENALTY_FOOTNOTE);
     }

@@ -4,7 +4,7 @@
 
   Layer order, bottom to top:
     1. ObservableScrollView  the scrolling feed (capacity card, week strip,
-                             weekly load chart, simulation banner, filter chips,
+                             weekly load chart, quick actions banner, filter chips,
                              schedule, sync strip)
     2. header                fixed 64dp bar pinned to the top
     3. rebalanceToast        fixed notice pinned below the header
@@ -247,7 +247,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ============ Simulation banner ============ -->
+            <!-- ============ Quick actions banner ============ -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -269,7 +269,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_xxs"
-                    android:text="@string/dash_simulation"
+                    android:text="@string/dash_quick_actions"
                     android:textColor="@color/text_primary_dark"
                     android:textStyle="bold" />
 

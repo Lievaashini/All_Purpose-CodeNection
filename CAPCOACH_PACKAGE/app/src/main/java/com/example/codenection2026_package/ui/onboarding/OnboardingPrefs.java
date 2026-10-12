@@ -30,6 +30,9 @@ public final class OnboardingPrefs {
     private static final String KEY_ONBOARDED = "onboarding_complete";
     private static final String KEY_NAME = "display_name";
 
+    /** First-run screens, for the "STEP 1 OF 2" badges: tone (Screen 1), limits (Screen 2). */
+    public static final int SETUP_STEPS = 2;
+
     // Defaults taken from the prototype's initial slider positions.
     public static final int DEFAULT_STUDY_HOURS = 24;
     public static final int DEFAULT_WORK_HOURS = 20;

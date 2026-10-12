@@ -33,12 +33,14 @@ import com.example.codenection2026_package.data.TaskRepository;
 import com.example.codenection2026_package.model.CoachVoice;
 import com.example.codenection2026_package.model.Task;
 import com.example.codenection2026_package.model.ToneType;
+import com.example.codenection2026_package.ui.onboarding.LoadZones;
 import com.example.codenection2026_package.ui.onboarding.OnboardingPrefs;
 import com.example.codenection2026_package.ui.onboarding.ThemeController;
 import com.example.codenection2026_package.ui.shell.ToneCopy;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -161,6 +163,13 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
     /** Guards the save button against a double tap while the insert is in flight. */
     private boolean saving;
+
+    /** Work minutes already booked in the sheet's week, or -1 until (or if) the read lands. */
+    private int bookedWorkMinutes = -1;
+
+    /** The week and excluded row {@link #bookedWorkMinutes} was read for. */
+    @Nullable
+    private String bookedWorkKey;
 
     @Nullable
     private View root;
@@ -501,9 +510,15 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
      * line of copy rather than the whole sheet.
      */
     private void bindToneCopy(@NonNull View view) {
+        // The work badge names the weekly cap, so it takes the real figure rather than
+        // going through ToneCopy, which only handles argument-free lines.
+        TextView workBadge = view.findViewById(R.id.modeWorkBadge);
+        if (workBadge != null) {
+            workBadge.setText(getString(CoachVoice.Line.ADDTASK_MODE_WORK_BADGE.pick(tone()),
+                    LoadZones.WORK_CAP_HOURS));
+        }
         ToneCopy.on(view, tone())
                 .set(R.id.modeWorkDesc, CoachVoice.Line.ADDTASK_MODE_WORK_DESC)
-                .set(R.id.modeWorkBadge, CoachVoice.Line.ADDTASK_MODE_WORK_BADGE)
                 .set(R.id.modeAcademicDesc, CoachVoice.Line.ADDTASK_MODE_ACADEMIC_DESC)
                 .set(R.id.modeAcademicBadge, CoachVoice.Line.ADDTASK_MODE_ACADEMIC_BADGE)
                 .set(R.id.capFootnote, CoachVoice.Line.ADDTASK_CAP_FOOTNOTE)
@@ -900,6 +915,8 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
 
         show(panelCognitiveBuffer, flexible);
         show(panelWorkCap, !flexible);
+        // The category decides whether this entry counts toward the week's work.
+        refreshWorkCap();
 
         if (durationPill != null) {
             durationPill.setTextColor(color(flexible
@@ -1077,6 +1094,8 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
                     renderDate(dateIso);
                     // The saved date changes with it, so the Dino line stays truthful.
                     updateDinoCopy();
+                    // A different week can hold a different amount of work.
+                    refreshWorkCap();
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -1118,13 +1137,162 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         if (durationPill == null) {
             return;
         }
-        double hours = (endMinutes - startMinutes) / 60.0;
-        if (hours < 0) {
-            hours += 24.0;
-        }
         durationPill.setText(getString(
                 R.string.addtask_duration_hours,
-                String.format(Locale.US, "%.1f", hours)));
+                String.format(Locale.US, "%.1f", shiftMinutes() / 60.0)));
+        // The shift's length feeds the week's work total.
+        refreshWorkCap();
+    }
+
+    /** This entry's length in minutes, wrapping past midnight. */
+    private int shiftMinutes() {
+        int span = endMinutes - startMinutes;
+        return span < 0 ? span + 24 * 60 : span;
+    }
+
+    // ==================================================================
+    // Weekly work panel
+    // ==================================================================
+
+    /**
+     * Fills the work panel: the week's Work hours, this shift included, against the user's own
+     * weekly work hours from Set Limits.
+     *
+     * <p>The week runs Monday to Sunday, the same week the dashboard strip shows. Only a new
+     * week, or a different row being edited, costs a read; time and category changes repaint
+     * from the figure already held.
+     */
+    private void refreshWorkCap() {
+        if (root == null || getContext() == null) {
+            return;
+        }
+        String[] week = weekOf(dateIso);
+        if (week == null) {
+            return;
+        }
+        // An edited row is left out of the total, or its old hours would sit next to its new.
+        long excludeId = editingTask == null ? 0 : editingTask.getId();
+        final String key = week[0] + "#" + excludeId;
+        if (key.equals(bookedWorkKey)) {
+            renderWorkCap();
+            return;
+        }
+        bookedWorkKey = key;
+        bookedWorkMinutes = -1;
+        renderWorkCap();
+        TaskRepository.sumMinutesByCategory(requireContext(), CategoryRepository.WORK,
+                week[0], week[1], excludeId, minutes -> {
+                    // A newer week may have been picked while this one was reading.
+                    if (!isAdded() || !key.equals(bookedWorkKey)) {
+                        return;
+                    }
+                    bookedWorkMinutes = minutes == null ? -1 : minutes;
+                    renderWorkCap();
+                });
+    }
+
+    /**
+     * Paints the panel from {@link #bookedWorkMinutes}.
+     *
+     * <p>Going past the weekly cap is overload whatever the user's own limit says, so it wins
+     * over going past their limit, and takes the same amber-then-red bands Set Limits uses.
+     * Both are warnings only: a shift is fixed, so the sheet still lets it be saved.
+     */
+    private void renderWorkCap() {
+        if (root == null) {
+            return;
+        }
+        TextView value = root.findViewById(R.id.capValue);
+        LinearProgressIndicator bar = root.findViewById(R.id.capProgress);
+        TextView footnote = root.findViewById(R.id.capFootnote);
+        ImageView icon = root.findViewById(R.id.capFootnoteIcon);
+
+        if (bookedWorkMinutes < 0) {
+            // Not read yet, or the read failed: show no figure rather than a wrong one.
+            if (value != null) {
+                value.setText("");
+            }
+            if (bar != null) {
+                bar.setProgressCompat(0, false);
+            }
+            return;
+        }
+
+        // This entry only adds to the work total when it is filed under Work.
+        int position = categorySpinner == null ? -1 : categorySpinner.getSelectedItemPosition();
+        int total = bookedWorkMinutes + (isWorkCategory(position) ? shiftMinutes() : 0);
+        int limitHours = OnboardingPrefs.getWorkHours(requireContext());
+        int limit = limitHours * 60;
+        int cap = LoadZones.WORK_CAP_HOURS * 60;
+
+        ToneType tone = tone();
+        @ColorRes int colorRes;
+        String note;
+        if (total > cap) {
+            colorRes = LoadZones.workBand((int) Math.ceil(total / 60.0)).colorRes;
+            note = getString(CoachVoice.Line.ADDTASK_CAP_OVER_CAP.pick(tone),
+                    formatHours(total - cap), LoadZones.WORK_CAP_HOURS);
+        } else if (total > limit) {
+            colorRes = R.color.status_amber;
+            note = getString(CoachVoice.Line.ADDTASK_CAP_OVER_LIMIT.pick(tone),
+                    formatHours(total - limit), limitHours);
+        } else {
+            colorRes = R.color.secondary_blue;
+            note = getString(CoachVoice.Line.ADDTASK_CAP_FOOTNOTE.pick(tone));
+        }
+        int color = color(colorRes);
+
+        if (value != null) {
+            value.setText(getString(R.string.addtask_cap_value, formatHours(total), limitHours));
+            value.setTextColor(color);
+        }
+        if (bar != null) {
+            int percent = limit <= 0
+                    ? (total > 0 ? 100 : 0)
+                    : Math.min(100, Math.round(total * 100f / limit));
+            bar.setProgressCompat(percent, true);
+            bar.setIndicatorColor(color);
+        }
+        if (footnote != null) {
+            footnote.setText(note);
+            footnote.setTextColor(color);
+        }
+        if (icon != null) {
+            tint(icon, colorRes);
+        }
+    }
+
+    /** Minutes as hours the way the panel prints them: "16", or "16.5" for a part hour. */
+    @NonNull
+    private static String formatHours(int minutes) {
+        return minutes % 60 == 0
+                ? String.valueOf(minutes / 60)
+                : String.format(Locale.US, "%.1f", minutes / 60.0);
+    }
+
+    /**
+     * Monday and Sunday of the week {@code isoDate} falls in, as ISO dates, or null for a
+     * date that cannot be read.
+     */
+    @Nullable
+    private static String[] weekOf(@NonNull String isoDate) {
+        SimpleDateFormat iso = new SimpleDateFormat(ISO_PATTERN, Locale.US);
+        try {
+            Date parsed = iso.parse(isoDate);
+            if (parsed == null) {
+                return null;
+            }
+            Calendar cursor = Calendar.getInstance();
+            cursor.setTime(parsed);
+            // Calendar.SUNDAY is 1, so this makes Monday 0 ... Sunday 6, like the dashboard.
+            int fromMonday = (cursor.get(Calendar.DAY_OF_WEEK) + 5) % 7;
+            cursor.add(Calendar.DAY_OF_YEAR, -fromMonday);
+            String start = iso.format(cursor.getTime());
+            cursor.add(Calendar.DAY_OF_YEAR, 6);
+            return new String[]{start, iso.format(cursor.getTime())};
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
     private void renderDate(@NonNull String isoDate) {

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The apple sprite, drawn from the pixel-art PNG the UI team supplied
+  (drawable-nodpi/apple_pixel_art.png, 34x34).
+
+  filter="false" is the whole point of this file. Bitmap filtering smooths the sprite into a
+  soft red blob when it is scaled up to a 24dp view, and crisp square pixels are exactly why
+  this art was chosen over the flat dot it replaces. Nearest-neighbour keeps them.
+
+  The PNG sits in drawable-nodpi so Android hands it over at its own 34x34 pixels rather than
+  pre-scaling it for the device density, and it is square because every slot that uses it is
+  square - the sprite was cropped to the fruit and padded out, so stretch-to-fill cannot
+  distort it.
+
+  Used wherever a real apple is drawn: the tree in the daily harvest, the apple that flies to
+  the Dino, and the feast tray's icon.
+
+  bg_apple (the flat red pill) is still used for the one 8dp inline dot in the harvest
+  tooltip: at that size the stem and leaf have nothing left after the downscale, and a solid
+  dot reads better than a mush of pixels.
+-->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/apple_pixel_art"
+    android:gravity="fill"
+    android:filter="false" />

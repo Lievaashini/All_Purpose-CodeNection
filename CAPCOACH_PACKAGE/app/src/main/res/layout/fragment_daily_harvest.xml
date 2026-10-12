@@ -129,6 +129,12 @@
                     android:paddingHorizontal="@dimen/space_md"
                     android:paddingVertical="@dimen/space_xxs">
 
+                    <!--
+                      Deliberately still the flat red dot, not @drawable/apple_pixel: this
+                      marker is 8dp, and the sprite's stem and leaf are gone by the time it is
+                      scaled down that far. The real apples - the tree and the tray - use the
+                      sprite.
+                    -->
                     <View
                         android:layout_width="8dp"
                         android:layout_height="8dp"

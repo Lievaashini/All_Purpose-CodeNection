@@ -236,7 +236,7 @@
                             android:background="@drawable/bg_tag_red"
                             android:paddingHorizontal="@dimen/space_sm"
                             android:paddingVertical="2dp"
-                            android:text="@string/bio_deficit_badge"
+                            android:text="@string/bio_deficit_badge_hype"
                             android:textColor="@color/status_red"
                             android:textStyle="bold" />
                     </LinearLayout>
