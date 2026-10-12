@@ -132,7 +132,7 @@ public class HealthConnectReader {
         // Acute Penalty (Last 24 Hours)
         double score = acuteDebt > 0 ? (acuteDebt * 11.0) : 0;
 
-        // Chronic Penalty (Last 7 Days) - We use a smaller multiplier (5.0) so it
+        // Chronic Penalty (Last 7 Days) - We use a smaller multiplier (7.0) so it
         // elevates the baseline without instantly maxing out the 100-point scale.
         if (chronicDebt > 0) {
             score += (chronicDebt * 7.0);

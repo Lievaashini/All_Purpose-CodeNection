@@ -14,13 +14,13 @@ public class RecoveryDebtScoreTest {
 
     @Test
     public void noSleepData_isTheNeutralFifty() {
-        assertEquals(33, HealthConnectReader.calculateRecoveryDebtScore(0,0.0, 0, false));
+        assertEquals(50, HealthConnectReader.calculateRecoveryDebtScore(0,0.0, 0, false));
     }
 
     /** No HRV reading (no wearable) leaves the score on sleep alone. */
     @Test
     public void noHrvReading_usesSleepOnly() {
-        assertEquals(20, HealthConnectReader.calculateRecoveryDebtScore(3, 0.0,0, true));
+        assertEquals(33, HealthConnectReader.calculateRecoveryDebtScore(3, 0.0,0, true));
     }
 
     /** The bug this replaced: a full night zeroed out the HRV penalty entirely. */
