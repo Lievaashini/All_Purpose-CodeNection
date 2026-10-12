@@ -261,7 +261,7 @@ public class BiometricsFragment extends Fragment {
 
         // NEW: Calculate Chronic Debt
         double avg7Days = HealthConnectReader.getAverageSleepLast7Days(context);
-        double chronicDebt = TARGET_SLEEP_HOURS - avg7Days;
+        double chronicDebt = Math.max(0.0, TARGET_SLEEP_HOURS - avg7Days);
 
         // NEW: Pass BOTH debts to the updated engine so the UI and ML perfectly match
         int debtScore = HealthConnectReader.calculateRecoveryDebtScore(acuteDebt, chronicDebt, hrvMs, hasSleep);

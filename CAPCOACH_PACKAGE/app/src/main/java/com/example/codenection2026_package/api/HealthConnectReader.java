@@ -102,7 +102,8 @@ public class HealthConnectReader {
 
             // NEW: Fetch 7-day average for the chronic penalty
             double avg7Days = getAverageSleepLast7Days(context);
-            double chronicDebt = TARGET_SLEEP_HOURS - avg7Days;
+            // FIX: Clamped at 0.0
+            double chronicDebt = Math.max(0.0, TARGET_SLEEP_HOURS - avg7Days);
 
             return calculateRecoveryDebtScore(acuteDebt, chronicDebt, hrvMs, hasSleep);
         } catch (RuntimeException e) {
@@ -161,9 +162,17 @@ public class HealthConnectReader {
                 return TARGET_SLEEP_HOURS; // No penalty if they have no history
             }
 
-            // THE PRODUCTION FIX: Divide by the number of sessions actually recorded
+            // FIX: Extract unique days rather than raw session counts
+            java.util.Set<java.time.LocalDate> uniqueDays = new java.util.HashSet<>();
+            for (SleepSessionRecord record : records) {
+                java.time.ZoneOffset offset = record.getEndZoneOffset();
+                java.time.ZoneId zone = offset != null ? offset : java.time.ZoneId.systemDefault();
+                uniqueDays.add(record.getEndTime().atZone(zone).toLocalDate());
+            }
+
+            // THE PRODUCTION FIX: Divide by the number of days actually recorded
             // Prevents a new user from being penalized for days before they installed the app.
-            double daysRecorded = Math.min(7.0, Math.max(1.0, records.size()));
+            double daysRecorded = Math.min(7.0, Math.max(1.0, uniqueDays.size()));
             return calculateTotalSleepHours(records) / daysRecorded;
         } catch (Exception e) {
             return TARGET_SLEEP_HOURS;

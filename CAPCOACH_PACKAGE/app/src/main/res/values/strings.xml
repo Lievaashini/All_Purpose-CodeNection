@@ -262,7 +262,6 @@
         <!-- Deferral is a choice, not a constant: the user decides how late it may slip. -->
     <string name="addtask_buffer_deferral">DEFERRAL WINDOW</string>
         <string name="addtask_deferral_none">Locked - never deferred</string>
-    <string name="addtask_deferral_12">Up to 12h late</string>
     <string name="addtask_deferral_24">Up to 24h late</string>
     <string name="addtask_deferral_48">Up to 48h late</string>
     <string name="addtask_deferral_72">Up to 72h late</string>
