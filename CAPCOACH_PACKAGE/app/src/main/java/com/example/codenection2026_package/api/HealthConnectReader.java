@@ -84,6 +84,13 @@ public class HealthConnectReader {
     public static final double TARGET_SLEEP_HOURS = 8.0;
 
     /**
+     * Below this RMSSD, in milliseconds, HRV counts as low: the debt score adds a stress
+     * penalty and the Biometrics screen shows the stressed state. One constant, so the two
+     * cannot disagree.
+     */
+    public static final double LOW_HRV_MS = 40.0;
+
+    /**
      * Today's Recovery Debt Score straight from Health Connect: last night's sleep against
      * {@link #TARGET_SLEEP_HOURS}, worsened by low HRV.
      *
@@ -96,25 +103,40 @@ public class HealthConnectReader {
         try {
             List<SleepSessionRecord> lastNight = getSleepSessionsLast24Hours(context);
             boolean hasSleep = calculateTotalSleepHours(lastNight) > 0;
-            double debtHours = getSleepDebtHours(lastNight, TARGET_SLEEP_HOURS);
+
+            double acuteDebt = getSleepDebtHours(lastNight, TARGET_SLEEP_HOURS);
             double hrvMs = getAverageHrvLast24Hours(context);
-            return calculateRecoveryDebtScore(debtHours, hrvMs, hasSleep);
+
+            // NEW: Fetch 7-day average for the chronic penalty
+            double avg7Days = getAverageSleepLast7Days(context);
+            // FIX: Clamped at 0.0
+            double chronicDebt = Math.max(0.0, TARGET_SLEEP_HOURS - avg7Days);
+
+            return calculateRecoveryDebtScore(acuteDebt, chronicDebt, hrvMs, hasSleep);
         } catch (RuntimeException e) {
-            // Permission revoked or no provider installed: treat it like missing data.
-            return calculateRecoveryDebtScore(0, 0, false);
+            return calculateRecoveryDebtScore(0, 0.0, 0, false);
         }
     }
 
+    //==============
     /**
-     * Converts raw sleep deficit and HRV into a 0-100 Recovery Debt Score.
+     * THE NEW ENGINE: Converts acute sleep, chronic sleep, and HRV into a 0-100 Score.
+     * We deleted the 3-parameter version to prevent Split-Brain bugs.
      * @param hasData Pass false if the Health Connect list was empty.
      */
-    public static int calculateRecoveryDebtScore(double sleepDeficitHours, double hrvMs, boolean hasData) {
+    public static int calculateRecoveryDebtScore(double acuteDebt, double chronicDebt, double hrvMs, boolean hasData) {
         if (!hasData) {
-            return 50; // Neutral baseline for emulators and missing data
+            return 50;
         }
 
-        double score = sleepDeficitHours > 0 ? (sleepDeficitHours * 15.0) : 0;
+        // Acute Penalty (Last 24 Hours)
+        double score = acuteDebt > 0 ? (acuteDebt * 11.0) : 0;
+
+        // Chronic Penalty (Last 7 Days) - We use a smaller multiplier (7.0) so it
+        // elevates the baseline without instantly maxing out the 100-point scale.
+        if (chronicDebt > 0) {
+            score += (chronicDebt * 7.0);
+        }
 
         // HRV stress penalty. An RMSSD below 40 ms is this app's heuristic for poor recovery
         // in young adults, not a clinical threshold. An HRV of 0 means no reading (no
@@ -125,11 +147,43 @@ public class HealthConnectReader {
         // Adding (40 - HRV) points keeps stress visible after a full night. On its own it
         // tops out near 40, below the model's first shedding band (above 60), so stress alone
         // raises the score without moving tasks; combined with short sleep it can.
-        if (hrvMs > 0 && hrvMs < 40.0) {
-            score += 40.0 - hrvMs;
+        if (hrvMs > 0 && hrvMs < LOW_HRV_MS) {
+            score += LOW_HRV_MS - hrvMs;
         }
 
         if (score > 100) return 100;
         return (int) Math.round(score);
     }
+
+
+    /** NEW: Reads the trailing 7 days to calculate chronic sleep debt. */
+    public static double getAverageSleepLast7Days(Context context) {
+        try {
+            HealthConnectClient client = HealthConnectClient.getOrCreate(context);
+            Instant end = Instant.now();
+            Instant start = end.minus(7, ChronoUnit.DAYS);
+            List<SleepSessionRecord> records = HealthConnectHelper.readSleepDataSync(client, start, end);
+
+            if (records == null || records.isEmpty()) {
+                return TARGET_SLEEP_HOURS; // No penalty if they have no history
+            }
+
+            // FIX: Extract unique days rather than raw session counts
+            java.util.Set<java.time.LocalDate> uniqueDays = new java.util.HashSet<>();
+            for (SleepSessionRecord record : records) {
+                java.time.ZoneOffset offset = record.getEndZoneOffset();
+                java.time.ZoneId zone = offset != null ? offset : java.time.ZoneId.systemDefault();
+                uniqueDays.add(record.getEndTime().atZone(zone).toLocalDate());
+            }
+
+            // THE PRODUCTION FIX: Divide by the number of days actually recorded
+            // Prevents a new user from being penalized for days before they installed the app.
+            double daysRecorded = Math.min(7.0, Math.max(1.0, uniqueDays.size()));
+            return calculateTotalSleepHours(records) / daysRecorded;
+        } catch (Exception e) {
+            return TARGET_SLEEP_HOURS;
+        }
+    }
+
+
 }

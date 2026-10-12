@@ -109,6 +109,12 @@ public class OnboardingFragment extends Fragment {
         // right; this pass swaps in the stored tone's wording.
         bindToneCopy(view);
 
+        TextView phaseBadge = view.findViewById(R.id.phaseBadge);
+        if (phaseBadge != null) {
+            phaseBadge.setText(getString(R.string.onboarding_step_badge,
+                    1, OnboardingPrefs.SETUP_STEPS));
+        }
+
         // --- Hero Dino sprite ---
         // setImageResource() would freeze an animated GIF on its first frame, so the
         // sprite goes through Glide instead. The layout keeps android:src purely as a

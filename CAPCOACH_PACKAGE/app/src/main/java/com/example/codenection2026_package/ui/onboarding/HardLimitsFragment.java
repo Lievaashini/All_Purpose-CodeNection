@@ -154,6 +154,27 @@ public class HardLimitsFragment extends Fragment {
                 .set(R.id.limitsSubtitle, CoachVoice.Line.LIMITS_SUBTITLE)
                 .set(R.id.limitsFootnote, CoachVoice.Line.LIMITS_FOOTNOTE)
                 .set(R.id.limitsNameLabel, CoachVoice.Line.LIMITS_NAME_LABEL);
+
+        // First run is step 2 of setup. Reopened later (Biometrics, the Dino), there are no
+        // steps left, so the badge just names the screen.
+        TextView phaseBadge = view.findViewById(R.id.phaseBadge);
+        if (phaseBadge != null) {
+            phaseBadge.setText(OnboardingPrefs.isOnboardingComplete(requireContext())
+                    ? getString(R.string.limits_edit_badge)
+                    : getString(R.string.onboarding_step_badge,
+                            OnboardingPrefs.SETUP_STEPS, OnboardingPrefs.SETUP_STEPS));
+        }
+
+        // Both name the weekly work cap, so they read it from LoadZones rather than
+        // repeating the number in resources.
+        TextView capChip = view.findViewById(R.id.workCapChip);
+        if (capChip != null) {
+            capChip.setText(getString(R.string.work_cap_chip, LoadZones.WORK_CAP_HOURS));
+        }
+        TextView limitLabel = view.findViewById(R.id.workLimitLabel);
+        if (limitLabel != null) {
+            limitLabel.setText(getString(R.string.work_limit_label, LoadZones.WORK_CAP_HOURS));
+        }
     }
 
     private void restoreSavedValues() {
@@ -322,21 +343,22 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (workBadge != null) {
-            // One whole string per band, so the hours and the "h" unit sit inside the
-            // resource and a translator can move them.
-            workBadge.setText(getString(work <= LoadZones.WORK_CAP_HOURS
-                            ? R.string.work_badge_protected
-                            : (band == LoadZones.WorkBand.CAUTION
-                                    ? R.string.work_badge_caution
-                                    : R.string.work_badge_risk),
-                    work));
-            workBadge.setTextColor(accent);
+            // Only past the cap does the badge add anything: how far over. Within the cap
+            // the status line already says so, and the big number already shows the hours.
+            int over = work - LoadZones.WORK_CAP_HOURS;
+            if (over > 0) {
+                workBadge.setVisibility(View.VISIBLE);
+                workBadge.setText(getString(R.string.work_badge_over, over));
+                workBadge.setTextColor(accent);
+            } else {
+                workBadge.setVisibility(View.GONE);
+            }
         }
 
         if (workWarningText != null) {
-            // The warning is a fixed sentence per band and is deliberately not given the
-            // hours - only the Dino's line below takes a value.
-            workWarningText.setText(band.warningText.pick(tone));
+            // Every band's warning is handed the cap; the ones that do not name it ignore it.
+            workWarningText.setText(getString(band.warningText.pick(tone),
+                    LoadZones.WORK_CAP_HOURS));
         }
         if (workWarningIcon != null && tintList != null) {
             workWarningIcon.setImageTintList(tintList);

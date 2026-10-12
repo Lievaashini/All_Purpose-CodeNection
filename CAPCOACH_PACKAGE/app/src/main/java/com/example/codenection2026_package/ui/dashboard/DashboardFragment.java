@@ -638,7 +638,9 @@ public class DashboardFragment extends Fragment {
             telemetry.setText(getString(
                     R.string.dash_telemetry,
                     sleep,
-                    OnboardingPrefs.getWorkHours(context) + "/20h"));
+                    getString(R.string.dash_work_hours,
+                            OnboardingPrefs.getWorkHours(context),
+                            com.example.codenection2026_package.ui.onboarding.LoadZones.WORK_CAP_HOURS)));
         }
 
         ImageView mascot = getView() == null ? null : getView().findViewById(R.id.heroMascot);
@@ -1427,14 +1429,31 @@ public class DashboardFragment extends Fragment {
             if (proposal.getOutcome() == RebalancePlanner.Outcome.MOVED
                     && proposal.getTargetDate() != null) {
                 Task task = proposal.getTask();
+
+                // --- THE ENDLESS DEFERRAL FIX ---
+                // Safely calculate how many days the task is being pushed
+                try {
+                    java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern(ISO_PATTERN);
+                    java.time.LocalDate oldDate = java.time.LocalDate.parse(task.getDate(), formatter);
+                    java.time.LocalDate newDate = java.time.LocalDate.parse(proposal.getTargetDate(), formatter);
+                    long daysPushed = java.time.temporal.ChronoUnit.DAYS.between(oldDate, newDate);
+
+                    // Subtract the pushed time from the task's remaining flexibility buffer
+                    int hoursPushed = (int) (daysPushed * 24);
+                    int remainingBuffer = Math.max(0, task.getDeferralHours() - hoursPushed);
+                    task.setDeferralHours(remainingBuffer);
+                } catch (Exception e) {
+                    android.util.Log.e("CapCoachAPI", "Failed to decrement deferral buffer", e);
+                }
+
+                // Set the new date and add to the save queue
                 task.setDate(proposal.getTargetDate());
                 moving.add(task);
             }
         }
 
         if (moving.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.triage_nothing_applied,
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.triage_nothing_applied, Toast.LENGTH_SHORT).show();
             return;
         }
 
