@@ -291,7 +291,8 @@ public class DailyHarvestFragment extends Fragment {
                 float[] spot = APPLE_SPOTS[i % APPLE_SPOTS.length];
 
                 View apple = new View(requireContext());
-                apple.setBackgroundResource(R.drawable.bg_apple);
+                // The supplied pixel-art apple, replacing the flat red pill this used to be.
+                apple.setBackgroundResource(R.drawable.apple_pixel);
 
                 android.widget.FrameLayout.LayoutParams params =
                         new android.widget.FrameLayout.LayoutParams(size, size);
