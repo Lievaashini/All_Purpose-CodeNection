@@ -152,7 +152,10 @@
     <string name="bio_anomaly_body_plain">Under 5h. Recovery likely incomplete.</string>
     <string name="bio_hrv_state_plain">Stress high</string>
     <string name="bio_hrv_state_sub_plain">Heart-rate pattern shows strain</string>
-    <string name="bio_trend_state_plain">Sleep below usual</string>
+    <string name="bio_hrv_state_calm_plain">Stress normal</string>
+    <string name="bio_hrv_state_sub_calm_plain">Heart-rate pattern normal</string>
+    <string name="bio_trend_state_plain">Below sleep target</string>
+    <string name="bio_trend_state_steady_plain">Sleep on target</string>
     <string name="bio_penalty_sub_plain">Less sleep, less capacity today.</string>
     <string name="bio_penalty_footnote_plain">Tasks move when the day overflows. Manual option: Rebalance on Home.</string>
     <!-- "−6h vs 8h goal": shortfall, then the target. -->

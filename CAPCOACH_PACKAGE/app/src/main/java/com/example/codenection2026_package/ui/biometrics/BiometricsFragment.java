@@ -492,6 +492,23 @@ public class BiometricsFragment extends Fragment {
                 SCALE_MINUTES,
                 latest,
                 warnIndex(snapshot.nightlyMinutes, latest));
+
+        // The label describes the newest night on the chart against the sleep target. A week
+        // with no reading has nothing to describe, so the label is hidden.
+        TextView trendState = view.findViewById(R.id.bioTrendState);
+        if (trendState != null) {
+            if (latest < 0) {
+                trendState.setVisibility(View.GONE);
+            } else {
+                boolean dip = snapshot.nightlyMinutes[latest] < SCALE_MINUTES;
+                trendState.setVisibility(View.VISIBLE);
+                trendState.setText((dip
+                        ? CoachVoice.Line.BIO_TREND_STATE
+                        : CoachVoice.Line.BIO_TREND_STATE_STEADY).pick(tone()));
+                trendState.setTextColor(ContextCompat.getColor(requireContext(),
+                        dip ? R.color.status_red : R.color.brand_mint));
+            }
+        }
     }
 
     /**
@@ -502,12 +519,35 @@ public class BiometricsFragment extends Fragment {
      */
     private void bindHrv(@NonNull View view, @NonNull Snapshot snapshot) {
         TextView hrvValue = view.findViewById(R.id.hrvValue);
-        if (hrvValue == null) {
-            return;
+        if (hrvValue != null) {
+            hrvValue.setText(snapshot.hrvMs > 0
+                    ? getString(R.string.bio_hrv_value, formatHrv(snapshot.hrvMs))
+                    : getString(R.string.bio_hrv_no_watch));
         }
-        hrvValue.setText(snapshot.hrvMs > 0
-                ? getString(R.string.bio_hrv_value, formatHrv(snapshot.hrvMs))
-                : getString(R.string.bio_hrv_no_watch));
+
+        // The state under the value judges the reading, using the same low-HRV line the debt
+        // score uses. With no reading there is nothing to judge - "calm" would be as made up
+        // as "stressed" - so both lines are hidden and the value explains why.
+        TextView state = view.findViewById(R.id.bioHrvState);
+        TextView stateSub = view.findViewById(R.id.bioHrvStateSub);
+        boolean hasReading = snapshot.hrvMs > 0;
+        boolean low = hasReading && snapshot.hrvMs < HealthConnectReader.LOW_HRV_MS;
+        ToneType tone = tone();
+        if (state != null) {
+            setVisible(state, hasReading);
+            state.setText((low
+                    ? CoachVoice.Line.BIO_HRV_STATE
+                    : CoachVoice.Line.BIO_HRV_STATE_CALM).pick(tone));
+            state.setTextColor(ContextCompat.getColor(requireContext(),
+                    low ? R.color.status_red : R.color.brand_mint));
+            state.setBackgroundResource(low ? R.drawable.bg_tag_red : R.drawable.bg_tag_mint);
+        }
+        if (stateSub != null) {
+            setVisible(stateSub, hasReading);
+            stateSub.setText((low
+                    ? CoachVoice.Line.BIO_HRV_STATE_SUB
+                    : CoachVoice.Line.BIO_HRV_STATE_SUB_CALM).pick(tone));
+        }
     }
 
     /**
@@ -605,11 +645,10 @@ public class BiometricsFragment extends Fragment {
         if (getContext() == null) {
             return;
         }
+        // The HRV and trend states are not here: they depend on the readings, so bindHrv and
+        // bindTrend choose them. Binding them here would print a warning on every visit.
         ToneCopy.on(view, tone())
                 .set(R.id.bioEventPill, CoachVoice.Line.BIO_EVENT_PILL)
-                .set(R.id.bioHrvState, CoachVoice.Line.BIO_HRV_STATE)
-                .set(R.id.bioHrvStateSub, CoachVoice.Line.BIO_HRV_STATE_SUB)
-                .set(R.id.bioTrendState, CoachVoice.Line.BIO_TREND_STATE)
                 .set(R.id.bioPenaltySub, CoachVoice.Line.BIO_PENALTY_SUB)
                 .set(R.id.bioPenaltyFootnote, CoachVoice.Line.BIO_PENALTY_FOOTNOTE);
     }

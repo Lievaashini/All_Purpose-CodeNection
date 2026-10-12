@@ -172,9 +172,15 @@
     <string name="bio_event_pill_hype">Sleep Alert!</string>
     <string name="bio_anomaly_title_hype">Whoa, only %1$s of sleep last night!</string>
     <string name="bio_anomaly_body_hype">Your body\'s running on empty. I\'ve got your back today!</string>
+    <!-- HRV and trend states. The plain slot is the warning, shown only when the reading
+         supports it (HRV under HealthConnectReader.LOW_HRV_MS, newest night under the sleep
+         target); the _calm / _steady slot is shown otherwise. With no reading, neither is. -->
     <string name="bio_hrv_state_hype">Body on high alert!</string>
     <string name="bio_hrv_state_sub_hype">Your nervous system is working overtime</string>
+    <string name="bio_hrv_state_calm_hype">Body feels calm!</string>
+    <string name="bio_hrv_state_sub_calm_hype">Your nervous system is recovering well</string>
     <string name="bio_trend_state_hype">Big sleep dip!</string>
+    <string name="bio_trend_state_steady_hype">Sleep on track!</string>
     <string name="bio_penalty_sub_hype">Low sleep = heavier day. Let\'s lighten the load!</string>
     <string name="bio_penalty_footnote_hype">I\'ll jump in and move tasks when your day overflows, or hit Rebalance on Home anytime!</string>
     <!-- "6h short of your 8h goal!": shortfall, then the target. -->

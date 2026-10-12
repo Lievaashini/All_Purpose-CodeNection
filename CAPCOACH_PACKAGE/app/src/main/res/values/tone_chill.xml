@@ -150,7 +150,10 @@
     <string name="bio_anomaly_body_chill">That\'s okay. Your body just needs a softer day.</string>
     <string name="bio_hrv_state_chill">Running a little tense</string>
     <string name="bio_hrv_state_sub_chill">Your body is working hard to keep up</string>
+    <string name="bio_hrv_state_calm_chill">Nice and relaxed</string>
+    <string name="bio_hrv_state_sub_calm_chill">Your body is keeping up fine</string>
     <string name="bio_trend_state_chill">Sleep\'s been dipping lately</string>
+    <string name="bio_trend_state_steady_chill">Sleep\'s been steady</string>
     <string name="bio_penalty_sub_chill">Less rest means today may feel heavier, and that\'s fine.</string>
     <string name="bio_penalty_footnote_chill">If your day gets too full, I\'ll gently offer to move things. Rebalance on Home is always there too.</string>
     <!-- "6h under your 8h goal": shortfall, then the target. -->
