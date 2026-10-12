@@ -53,6 +53,11 @@ public interface TaskDao {
     @Query("SELECT COUNT(*) FROM tasks WHERE is_completed = 1 AND date >= :startDate AND date <= :endDate")
     int countCompletedInDateRange(String startDate, String endDate);
 
+    // For the Add Task work-cap panel: every task filed under one category in a date range
+    @Query("SELECT tasks.* FROM tasks INNER JOIN categories ON tasks.category_id = categories.id "
+            + "WHERE categories.name = :categoryName AND tasks.date >= :startDate AND tasks.date <= :endDate")
+    List<Task> findByCategoryNameInDateRange(String categoryName, String startDate, String endDate);
+
     // Update an existing task
     @Update
     void update(Task task);

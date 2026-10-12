@@ -7,15 +7,15 @@ import com.example.codenection2026_package.R;
 import com.example.codenection2026_package.model.CoachVoice;
 
 /**
- * Zone grading for the "Total Committed Load" banner.
+ * Zone grading for the "Total hours" banner.
  *
  * <p>Extracted from {@code hard-limits.html}, which computed the same thing in JavaScript.
  * Ported verbatim - these thresholds are part of the product definition, not a guess:
  *
  * <pre>
- *   total &lt;= 52  ->  SAFE ZONE / BALANCED
- *   total &lt;= 60  ->  ELEVATED CAPACITY
- *   total &gt;  60  ->  OVERLOAD WARNING
+ *   total &lt;= 52  ->  SAFE      (Hype: BALANCED)
+ *   total &lt;= 60  ->  ELEVATED  (Hype: GETTING BUSY)
+ *   total &gt;  60  ->  OVERLOAD  (Hype: TOO MUCH)
  * </pre>
  *
  * <p>Kept as a standalone, pure class so it can be unit-tested without an emulator.

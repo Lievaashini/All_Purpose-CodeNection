@@ -542,6 +542,7 @@ public class BiometricsFragment extends Fragment {
      * the triage model cannot disagree about how depleted today is.
      */
     private void bindDeficitAndPenalty(@NonNull View view, @NonNull Snapshot snapshot) {
+        ToneType tone = tone();
         TextView badge = view.findViewById(R.id.deficitBadge);
         if (badge != null) {
             String goal = formatShortDuration(SCALE_MINUTES);
@@ -549,12 +550,12 @@ public class BiometricsFragment extends Fragment {
                 // In hours rather than a percentage: "6h short of your 8h goal" reads at a
                 // glance, where "-75% Deficit" has to be worked out.
                 badge.setVisibility(View.VISIBLE);
-                badge.setText(getString(R.string.bio_deficit_badge,
+                badge.setText(getString(CoachVoice.Line.BIO_DEFICIT_BADGE.pick(tone),
                         formatShortDuration(SCALE_MINUTES - snapshot.lastNightMinutes), goal));
             } else if (snapshot.lastNightMinutes > 0) {
                 // Slept at or past the target, so the shortfall is a real, reportable zero.
                 badge.setVisibility(View.VISIBLE);
-                badge.setText(getString(R.string.bio_deficit_none, goal));
+                badge.setText(getString(CoachVoice.Line.BIO_DEFICIT_NONE.pick(tone), goal));
             } else {
                 // No reading, so there is no shortfall to claim in either direction.
                 badge.setVisibility(View.GONE);
@@ -562,7 +563,7 @@ public class BiometricsFragment extends Fragment {
         }
 
         penaltyFraction = snapshot.recoveryDebtScore / 100f;
-        penaltyBand = getString(debtBand(snapshot));
+        penaltyBand = getString(debtBand(snapshot).pick(tone));
     }
 
     /**
@@ -571,18 +572,18 @@ public class BiometricsFragment extends Fragment {
      * more. Without a sleep reading the score is the neutral default, so it says so rather
      * than describing a measurement that never happened.
      */
-    @StringRes
-    private static int debtBand(@NonNull Snapshot snapshot) {
+    @NonNull
+    private static CoachVoice.Line debtBand(@NonNull Snapshot snapshot) {
         if (snapshot.lastNightMinutes <= 0) {
-            return R.string.bio_debt_band_no_data;
+            return CoachVoice.Line.BIO_DEBT_BAND_NO_DATA;
         }
         if (snapshot.recoveryDebtScore > 80) {
-            return R.string.bio_debt_band_high;
+            return CoachVoice.Line.BIO_DEBT_BAND_HIGH;
         }
         if (snapshot.recoveryDebtScore > 60) {
-            return R.string.bio_debt_band_moderate;
+            return CoachVoice.Line.BIO_DEBT_BAND_MODERATE;
         }
-        return R.string.bio_debt_band_low;
+        return CoachVoice.Line.BIO_DEBT_BAND_LOW;
     }
 
     /**

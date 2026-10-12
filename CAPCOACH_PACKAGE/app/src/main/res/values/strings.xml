@@ -2,7 +2,8 @@
     <string name="app_name">CapCoach</string>
 
     <!-- ==================== Onboarding (Screen 1) ==================== -->
-    <string name="onboarding_phase_badge">PHASE 01 / SETUP</string>
+    <!-- First-run progress badge: step number, then OnboardingPrefs.SETUP_STEPS. -->
+    <string name="onboarding_step_badge">STEP %1$d OF %2$d</string>
     <string name="onboarding_title">Meet CapCoach</string>
         <string name="onboarding_talk_to_me">TALK TO ME</string>
     <string name="onboarding_synced">SYNCED</string>
@@ -35,10 +36,10 @@
 
     <string name="onboarding_cta">Continue to Hard Limits</string>
         <!-- ==================== Hard limits (Screen 2) ==================== -->
-    <string name="limits_phase_badge">PHASE 02: BOUNDARIES</string>
+    <!-- Shown instead of the step badge when the limits are reopened after setup. -->
+    <string name="limits_edit_badge">YOUR LIMITS</string>
     <string name="limits_title">Set Limits</string>
         <string name="dino_guard_label">DEMCHING DINO</string>
-    <string name="dino_guard_suffix">- GUARDIAN AI</string>
     <string name="dino_guard_speech_default">"20h cap locked."</string>
     <!-- The limits-screen guard dialogue is per coaching tone, in the dino_*.xml files.
          LoadZones.WorkBand carries the slot and HardLimitsFragment resolves it. -->
@@ -46,7 +47,7 @@
     <string name="profile_label">STUDENT PROFILE</string>
     <string name="profile_value">Full-Time Undergrad</string>
 
-    <string name="total_load_label">Total Committed Load</string>
+    <string name="total_load_label">Total hours</string>
     <string name="total_load_unit">HRS / WEEK</string>
                 <!-- Study slider -->
     <string name="study_title">Study &amp; Classes</string>
@@ -57,17 +58,15 @@
     <string name="hours_per_week_short">h/wk</string>
 
     <!-- Work slider -->
-    <string name="work_title">Weekly Shift Ceiling</string>
+    <string name="work_title">Work hours</string>
     <string name="work_subtitle">Work &amp; gigs</string>
-    <string name="work_locked_cap">LOCKED CAP</string>
-    <!-- The work-hours badge, one whole string per band. It used to be a
-         "Protected:\n" prefix with the hours and the "h" unit glued on in Java,
-         which left the hours' position untranslatable. -->
-    <string name="work_badge_protected">Protected:\n%1$dh</string>
-    <string name="work_badge_caution">Caution: %1$dh</string>
-    <string name="work_badge_risk">High Risk: %1$dh</string>
+    <!-- The weekly work cap, LoadZones.WORK_CAP_HOURS. -->
+    <string name="work_cap_chip">MAX %1$dH</string>
+    <!-- How far the slider is past the cap. Hidden while it is within the cap, where the
+         status line already says so. -->
+    <string name="work_badge_over">%1$dh over</string>
     <string name="work_min_label">0 hrs</string>
-    <string name="work_limit_label">20h Limit</string>
+    <string name="work_limit_label">%1$dh limit</string>
     <string name="work_max_label">40 hrs</string>
     <string name="hours_per_week">HRS / WEEK</string>
 
@@ -137,15 +136,18 @@
     <string name="dash_sleep_hours">%1$.1fh</string>
     <!-- Shown in its place when Health Connect has no reading for last night. -->
     <string name="dash_sleep_unknown">--</string>
+    <!-- The user's weekly work hours from Set Limits, then the weekly cap. -->
+    <string name="dash_work_hours">%1$d/%2$dh</string>
     <string name="dash_month">October 2025</string>
     <string name="dash_week_number">Week %1$d</string>
     <string name="dash_today">TODAY</string>
     <string name="dash_weekly_load">Weekly Load</string>
     <string name="dash_cap_label">Cap: %1$d%%</string>
-    <string name="dash_simulation">Simulation:</string>
+    <string name="dash_quick_actions">Go to:</string>
     <string name="dash_btn_rebalance">Rebalance</string>
-    <string name="dash_btn_daily_popup">Daily Pop-up</string>
-    <string name="dash_btn_weekly_popup">Weekly Pop-up</string>
+    <!-- Opens Daily Harvest, which shows yesterday's harvest - not today's. -->
+    <string name="dash_btn_daily_popup">Daily Harvest</string>
+    <string name="dash_btn_weekly_popup">Weekly Feast</string>
     <!-- The other filter chips are the five baseline categories, so they reuse the
          cat_* labels rather than repeating them here. -->
     <string name="dash_filter_all">All (%1$d)</string>
@@ -172,8 +174,8 @@
     <!-- Triage sheet (opened by the dashboard's Rebalance button).
          Its prose is tone-dependent; what remains here is the eyebrow, the metric
          names and figures, the sample task names and the machine tags. -->
-    <string name="triage_eyebrow">AUTONOMOUS ML TRIAGE</string>
-    <string name="triage_metric_load">Cognitive Load</string>
+    <string name="triage_eyebrow">REBALANCE</string>
+    <string name="triage_metric_load">Day load</string>
     <!-- The recovery debt the triage model was given: sleep and HRV, 0-100. It replaces a
          fixed "+3.5h Sleep Secured" that no part of the app ever measured. -->
     <string name="triage_metric_debt">Recovery Debt</string>
@@ -184,7 +186,7 @@
     <string name="triage_debt_low">Rested: most tasks stay</string>
     <string name="triage_debt_moderate">A bit tired: only easy tasks move</string>
     <string name="triage_debt_high">Exhausted: moving more tasks</string>
-    <string name="triage_plan_label">PROPOSED SCHEDULE MODIFICATIONS</string>
+    <string name="triage_plan_label">SUGGESTED CHANGES</string>
     <string name="triage_tag_protected">PROTECTED</string>
     <string name="triage_tag_kept">KEPT</string>
     <string name="triage_tag_postponed">POSTPONED</string>
@@ -203,7 +205,7 @@
     <!-- The three different reasons the plan can be empty. They are genuinely
          different news, so they do not share one sentence. -->
     <string name="triage_empty_no_tasks">Nothing scheduled for this day yet, so there is nothing to rebalance.</string>
-    <string name="triage_empty_under_threshold">This day is below the intervention threshold. Nothing needs moving.</string>
+    <string name="triage_empty_under_threshold">This day isn\'t too full. Nothing needs moving.</string>
     <string name="triage_empty_nothing_movable">This day is heavy, but everything on it is either fixed or worth keeping.</string>
     <string name="triage_plan_failed">Couldn\'t measure this day right now. Please try again.</string>
     <string name="triage_nothing_applied">No task had a free day to move to, so nothing changed.</string>
@@ -256,8 +258,10 @@
     <string name="addtask_start_label">START TIME</string>
     <string name="addtask_end_label">END TIME</string>
     <string name="addtask_duration_hours">%1$s hrs</string>
-    <string name="addtask_cap_label">Weekly Cap:</string>
-    <string name="addtask_cap_value">16h / 20h</string>
+    <string name="addtask_cap_label">Work this week:</string>
+    <!-- Work hours booked that week including this shift, then the user's own weekly work
+         hours from Set Limits. %1$s is already formatted ("16" or "16.5"). -->
+    <string name="addtask_cap_value">%1$sh / %2$dh</string>
         <string name="addtask_buffer_label">COGNITIVE LOAD &amp; BUFFER</string>
         <!-- Deferral is a choice, not a constant: the user decides how late it may slip. -->
     <string name="addtask_buffer_deferral">DEFERRAL WINDOW</string>
@@ -276,7 +280,7 @@
     <!-- The two Dino lines under the sheet are per coaching tone, in the dino_*.xml files.
          The scheduler variant echoes the deferral window and priority, so it stays a
          format string: %1$s window, %2$s priority label. -->
-    <string name="addtask_save_work">Save &amp; Shield Shift</string>
+    <string name="addtask_save_work">Save Shift</string>
     <string name="addtask_save_academic">Save Academic Task</string>
     <string name="addtask_save_category">Save %1$s Task</string>
     <string name="addtask_cancel">Cancel</string>
@@ -300,11 +304,8 @@
     <string name="bio_anomaly_time">%1$s</string>
 
     <string name="bio_metrics_title">SLEEP &amp; RECOVERY</string>
-    <!-- Bound at runtime to the real shortfall against the 8h target. The literal
-         percent has to be escaped because this string carries a format argument. -->
-    <!-- How far last night fell short of the target, e.g. "6h short of your 8h goal". -->
-    <string name="bio_deficit_badge">%1$s short of your %2$s goal</string>
-    <string name="bio_deficit_none">Met your %1$s goal</string>
+    <!-- The deficit badge ("6h short of your 8h goal") is tone copy: bio_deficit_badge_*
+         in the tone files. -->
     <string name="bio_baseline_label">Your usual sleep</string>
     <string name="bio_lastnight_label">Last night</string>
     <string name="bio_hrv_label">HRV</string>
@@ -319,12 +320,8 @@
     <!-- The recovery debt the triage model uses (0-100), shown under the same name the
          Rebalance sheet uses so the two screens never disagree about what it is. -->
     <string name="bio_penalty_rate">RECOVERY DEBT</string>
+    <!-- The band word after the score is tone copy: bio_debt_band_* in the tone files. -->
     <string name="bio_debt_value">%1$d/100 · %2$s</string>
-    <!-- One word for the debt level, using the bands the model was trained on. -->
-    <string name="bio_debt_band_no_data">No sleep data</string>
-    <string name="bio_debt_band_low">Rested</string>
-    <string name="bio_debt_band_moderate">A bit tired</string>
-    <string name="bio_debt_band_high">Very tired</string>
 
     <!-- Manual Data Entry Dialogs -->
     <!-- Opens Hard Limits (the weekly study, work and co-curricular hours). -->
@@ -448,10 +445,9 @@
     <string name="settings_report_bug">Report a Bug</string>
     <string name="settings_report_bug_failed">No app available to open the issue page.</string>
 
-    <string name="settings_institutional">INSTITUTIONAL DATA CONTROLS</string>
-        <string name="settings_share_sub">UNIVERSITY B2B ANALYTICS LINK</string>
-    <string name="settings_link_status">Academic Link Status</string>
-                <string name="cd_telemetry_switch">Share anonymized burnout data</string>
+    <string name="settings_institutional">SHARE WITH YOUR UNIVERSITY</string>
+    <string name="settings_link_status">Sharing</string>
+                <string name="cd_telemetry_switch">Share anonymous stress stats</string>
 
     <!-- ==================================================================
          SCREEN 9 - COMPANION / VOICE  (port of Prototype/companion.html)

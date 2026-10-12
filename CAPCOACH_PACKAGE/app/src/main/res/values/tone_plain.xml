@@ -19,9 +19,9 @@
 
     <string name="dino_onboarding_plain">"Telemetry active. Zero fluff."</string>
 
-    <string name="dino_work_safe_plain">"%1$dh committed. Overruns are deferred automatically."</string>
-    <string name="dino_work_caution_plain">"Above the recovery threshold. Sleep buffer is shrinking."</string>
-    <string name="dino_work_risk_plain">"Burnout risk. Shedding required to hold the baseline."</string>
+    <string name="dino_work_safe_plain">"%1$dh of work set. Study moves around it if needed."</string>
+    <string name="dino_work_caution_plain">"Above the safe limit. Less time for sleep."</string>
+    <string name="dino_work_risk_plain">"Burnout risk. Some tasks need to move."</string>
 
     <plurals name="dino_harvest_apples_plain">
         <item quantity="one">"1 apple logged yesterday."</item>
@@ -39,7 +39,7 @@
     <string name="dino_feast_quote_4_plain">"Intake complete."</string>
     <string name="dino_feast_quote_5_plain">"Stamina restored. Resuming."</string>
 
-    <string name="dino_addtask_guard_plain">"Shift locked. No conflicts detected."</string>
+    <string name="dino_addtask_guard_plain">"Shift locked. Never moved."</string>
     <string name="dino_addtask_sched_plain">Buffer: %1$s. Priority %2$s excluded from shedding.</string>
 
     <!-- Spontaneous dashboard reaction bubble. See tone_hype.xml for the shared
@@ -66,22 +66,22 @@
          ================================================================== -->
 
     <string name="limits_subtitle_plain">Non-negotiable time is protected.</string>
-    <string name="limits_footnote_plain">Editable from triage.</string>
+    <string name="limits_footnote_plain">Editable anytime.</string>
     <string name="limits_name_label_plain">DISPLAY NAME</string>
 
-    <!-- Work-band status words and their warnings. The band picks the slot, the tone
-         picks the wording; the safe warning takes %1$d weekly hours. -->
-    <string name="work_status_safe_plain">Safe Labor Cap</string>
-    <string name="work_status_caution_plain">Fatigue Warning</string>
-    <string name="work_status_risk_plain">Burnout Risk &gt; 20h</string>
-    <string name="work_warning_safe_plain">Cap at 20h. Overages flagged.</string>
-    <string name="work_warning_caution_plain">Past 20 weekly hours, sleep buffers and grades are at risk.</string>
-    <string name="work_warning_risk_plain">Academic collision risk high. Shift shedding triggers on deadlines.</string>
+    <!-- Work-band status words and their warnings. See tone_hype.xml: every warning is
+         given %1$d, the weekly work cap. -->
+    <string name="work_status_safe_plain">Within limit</string>
+    <string name="work_status_caution_plain">Above limit</string>
+    <string name="work_status_risk_plain">Far above limit</string>
+    <string name="work_warning_safe_plain">Limit: %1$dh. Going over is flagged.</string>
+    <string name="work_warning_caution_plain">Over %1$dh a week. Sleep and grades at risk.</string>
+    <string name="work_warning_risk_plain">Work will clash with study deadlines.</string>
 
-    <!-- Total-committed-load zone grading. -->
-    <string name="zone_safe_plain">SAFE ZONE</string>
-    <string name="zone_elevated_plain">ELEVATED</string>
-    <string name="zone_overload_plain">OVERLOAD</string>
+    <!-- Total weekly hours, graded. -->
+    <string name="zone_safe_plain">BALANCED</string>
+    <string name="zone_elevated_plain">HIGH</string>
+    <string name="zone_overload_plain">TOO HIGH</string>
 
     <!-- ==================================================================
          SCREEN 3 - DASHBOARD
@@ -98,13 +98,14 @@
     <string name="dash_no_tasks_plain">No tasks recorded.</string>
     <string name="dash_saved_other_week_plain">Saved to %1$s. Outside current week.</string>
 
-    <string name="triage_title_plain">Load Shedding Proposal</string>
+    <string name="triage_title_plain">Day over limit</string>
+    <string name="triage_title_calm_plain">No changes needed</string>
     <string name="triage_load_sub_plain" formatted="false">Crash risk to 0%</string>
     <string name="triage_sleep_sub_plain">Recovery window reserved</string>
     <string name="triage_kept_sub_plain">Reduced to a 45m block</string>
     <string name="triage_postponed_sub_plain">Moved to Thu 10:00 AM. Low-fatigue slot.</string>
     <string name="triage_deferred_sub_plain">Deferred to Saturday afternoon</string>
-    <string name="triage_accept_plain">Apply Shedding</string>
+    <string name="triage_accept_plain">Apply changes</string>
     <string name="triage_dismiss_plain">Cancel</string>
 
     <string name="toast_rebalanced_title_plain">Rebalance applied. Rest reserved.</string>
@@ -122,15 +123,17 @@
     <string name="addtask_subtitle_flexible_category_plain">%1$s Mode: Flexible</string>
 
     <string name="addtask_mode_work_desc_plain">Fixed hours. Not deferred.</string>
-    <string name="addtask_mode_work_badge_plain">Under the 20h cap</string>
-    <string name="addtask_mode_academic_desc_plain">Eligible for auto-deferral during overload.</string>
+    <string name="addtask_mode_work_badge_plain">Under the %1$dh cap</string>
+    <string name="addtask_mode_academic_desc_plain">Moves to another day when overloaded.</string>
     <string name="addtask_mode_academic_badge_plain">Auto-deferral enabled</string>
 
     <string name="addtask_hint_sheddable_plain">Sheddable</string>
     <string name="addtask_hint_locked_plain">Shift locked</string>
-    <string name="addtask_cap_footnote_plain">Protected shift. Not deferred.</string>
+    <string name="addtask_cap_footnote_plain">Shifts are never moved.</string>
+    <string name="addtask_cap_over_limit_plain">%1$sh over %2$dh limit.</string>
+    <string name="addtask_cap_over_cap_plain">Overloaded: %1$sh over %2$dh cap.</string>
     <string name="addtask_buffer_eligible_plain">Shed-eligible</string>
-    <string name="addtask_priority_hint_plain">Protects priority work</string>
+    <string name="addtask_priority_hint_plain">High = kept first</string>
     <string name="addtask_deferral_hint_plain">Maximum deferral window for the scheduler.</string>
 
     <string name="addtask_saved_work_plain">Work shift saved. Locked.</string>
@@ -143,14 +146,23 @@
          SCREEN 5 - BIOMETRICS
          ================================================================== -->
 
-    <string name="bio_event_pill_plain">Sleep alert</string>
-    <string name="bio_anomaly_title_plain">You slept %1$s last night</string>
-    <string name="bio_anomaly_body_plain">Your body may not have recovered fully.</string>
-    <string name="bio_hrv_state_plain">Sympathetic stress</string>
-    <string name="bio_hrv_state_sub_plain">Nervous load elevated</string>
-    <string name="bio_trend_state_plain">Critical dip</string>
-    <string name="bio_penalty_sub_plain">Short sleep makes today\'s tasks heavier.</string>
-    <string name="bio_penalty_footnote_plain">CapCoach suggests moving tasks when your day overflows. You can also tap Rebalance on Home.</string>
+    <string name="bio_event_pill_plain">Short sleep</string>
+    <string name="bio_anomaly_title_plain">%1$s sleep last night</string>
+    <!-- "5h" is BiometricsFragment.ANOMALY_SLEEP_HOURS: the card only shows below it. -->
+    <string name="bio_anomaly_body_plain">Under 5h. Recovery likely incomplete.</string>
+    <string name="bio_hrv_state_plain">Stress high</string>
+    <string name="bio_hrv_state_sub_plain">Heart-rate pattern shows strain</string>
+    <string name="bio_trend_state_plain">Sleep below usual</string>
+    <string name="bio_penalty_sub_plain">Less sleep, less capacity today.</string>
+    <string name="bio_penalty_footnote_plain">Tasks move when the day overflows. Manual option: Rebalance on Home.</string>
+    <!-- "−6h vs 8h goal": shortfall, then the target. -->
+    <string name="bio_deficit_badge_plain">−%1$s vs %2$s goal</string>
+    <string name="bio_deficit_none_plain">%1$s goal met</string>
+    <!-- One word for the recovery debt, using the bands the model was trained on. -->
+    <string name="bio_debt_band_no_data_plain">No data</string>
+    <string name="bio_debt_band_low_plain">Low</string>
+    <string name="bio_debt_band_moderate_plain">Moderate</string>
+    <string name="bio_debt_band_high_plain">High</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST
@@ -180,10 +192,10 @@
          ================================================================== -->
 
     <string name="settings_theme_sub_plain">Switches the UI between dark and bright surfaces.</string>
-    <string name="settings_share_title_plain">Share anonymized burnout data</string>
-    <string name="settings_link_disconnected_plain">Disconnected</string>
-    <string name="settings_link_active_plain">Anonymized sharing active</string>
-    <string name="settings_link_info_plain">Opt-in and off by default. No data leaves the device until enabled. Only aggregated, non-identifying burnout statistics are shared.</string>
+    <string name="settings_share_title_plain">Share anonymous stress stats</string>
+    <string name="settings_link_disconnected_plain">Off</string>
+    <string name="settings_link_active_plain">On (anonymous)</string>
+    <string name="settings_link_info_plain">Off by default. No data leaves the device until turned on. Only group stats that can\'t identify you are shared.</string>
 
     <!-- ==================================================================
          SCREEN 9 - COMPANION / VOICE
