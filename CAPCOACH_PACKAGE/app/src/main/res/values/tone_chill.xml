@@ -148,7 +148,8 @@
     <string name="bio_hrv_state_chill">Running Tense</string>
     <string name="bio_hrv_state_sub_chill">Nervous system is working hard</string>
     <string name="bio_trend_state_chill">A Real Dip</string>
-    <string name="bio_penalty_sub_chill">Easing today\'s capacity to match your sleep...</string>
+    <!-- Same sentence as the other two tones on purpose - see tone_plain.xml. -->
+    <string name="bio_penalty_sub_chill">Short sleep makes today heavier. CapCoach will suggest moving tasks when your day overflows, or tap Rebalance on Home anytime.</string>
     <string name="bio_penalty_footnote_chill">Working out what to shed, on-device...</string>
 
     <!-- ==================================================================

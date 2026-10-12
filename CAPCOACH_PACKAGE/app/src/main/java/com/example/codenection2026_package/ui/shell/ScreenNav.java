@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.ColorRes;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -93,20 +94,49 @@ public final class ScreenNav {
      * prefs read; see {@link PopupGate#resolveAppOpenPopup}.
      */
     public static void showDuePopup(@NonNull Fragment from) {
+        showDuePopup(from, null);
+    }
+
+    /**
+     * As {@link #showDuePopup(Fragment)}, with something for the caller to do when the day owes
+     * no pop-up at all.
+     *
+     * <p>Added for the dashboard, which has one other thing it may open on arrival of its own
+     * accord - the Rebalance offer - and must not compete with a pop-up for the same moment.
+     * The follow-up runs only on a genuine "nothing to show", and only while the asking screen is
+     * still the one on screen: when a pop-up was owed and then dropped because the user moved on,
+     * the caller hears nothing, exactly as before.
+     *
+     * <p><b>Why a callback and not a check of the caller's own.</b> "Nothing to show" is not the
+     * same question as {@link PopupGate#isDailyDue}. A morning whose harvest would have been empty
+     * is still due all day - nothing was marked as seen, deliberately - so anything gated on that
+     * flag would wait for a pop-up that is never coming and never run on exactly those days. The
+     * answer handed over here is the same one the pop-up itself was decided on.
+     *
+     * @param onNothingDue run on the main thread when there is nothing to open, or null
+     */
+    public static void showDuePopup(@NonNull Fragment from, @Nullable Runnable onNothingDue) {
         final Context context = from.getContext();
         if (context == null) {
             return;
         }
 
         PopupGate.resolveAppOpenPopup(context, popup -> {
-            if (popup == null || !from.isAdded()) {
+            // The answer takes a database read, so the screen the user asked from may be gone by
+            // the time it lands - they tapped Biometrics, or left the app. Rather than
+            // interrupting whatever they are doing now, both the pop-up and the caller's
+            // follow-up are dropped, and because a pop-up is only marked as seen once it is on
+            // screen (PopupGate.markShown), nothing is spent by that.
+            if (!isStillOnScreen(from)) {
+                return;
+            }
+            if (popup == null) {
+                if (onNothingDue != null) {
+                    onNothingDue.run();
+                }
                 return;
             }
             FragmentManager fragments = from.getParentFragmentManager();
-            Fragment visible = fragments.findFragmentById(R.id.nav_host_container);
-            if (visible != from || fragments.isStateSaved()) {
-                return;
-            }
             String tag = popup instanceof FeastFragment ? "feast" : "daily_harvest";
             fragments.beginTransaction()
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -114,6 +144,23 @@ public final class ScreenNav {
                     .addToBackStack(tag)
                     .commit();
         });
+    }
+
+    /**
+     * True while {@code from} is still the screen in the container and its state has not been
+     * saved.
+     *
+     * <p>Anything opened against a screen that fails this would either land on top of a screen the
+     * user has already moved on to, or be committed after the state was saved - which is a
+     * transaction the framework refuses.
+     */
+    private static boolean isStillOnScreen(@NonNull Fragment from) {
+        if (!from.isAdded()) {
+            return false;
+        }
+        FragmentManager fragments = from.getParentFragmentManager();
+        return fragments.findFragmentById(R.id.nav_host_container) == from
+                && !fragments.isStateSaved();
     }
 
     public static void showBiometrics(@NonNull Fragment from) {

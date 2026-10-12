@@ -247,11 +247,16 @@ public class DashboardFragment extends Fragment {
      * <p>Cheap when nothing is owed: the answer comes from stored dates, so the usual resume -
      * a sheet closing, a tab switch, coming back from the background later the same day - does
      * no database work at all.
+     *
+     * <p>When the day owes no pop-up at all, the moment is handed to
+     * {@link #offerRebalanceOnReturn}, which is the only other thing allowed to open a screen here
+     * on its own. It goes second on purpose: a morning that owes a harvest opens the harvest, and
+     * the rebalance offer gets its turn on the next arrival at this screen.
      */
     @Override
     public void onResume() {
         super.onResume();
-        ScreenNav.showDuePopup(this);
+        ScreenNav.showDuePopup(this, this::offerRebalanceOnReturn);
     }
 
     @Override
@@ -1280,7 +1285,7 @@ public class DashboardFragment extends Fragment {
     }
 
     /**
-     * Offers the rebalance sheet by itself when a task has just tipped a day over the line.
+     * Offers the rebalance sheet by itself when a day has just tipped over the line.
      *
      * <p>The three conditions are all read off the plan the engine already produced - this
      * method decides nothing about workload itself:
@@ -1292,19 +1297,38 @@ public class DashboardFragment extends Fragment {
      *       judged movable but also given a day to move to. The sheet hides its Accept button
      *       when there is no destination, so opening it on anything less would be an offer the
      *       user cannot accept;</li>
-     *   <li>the caller - only a task arriving calls this, so browsing days or ticking a task
-     *       off never prompts.</li>
+     *   <li>the caller - a task arriving ({@link #onTaskSaved}, {@link #onTaskChanged}, a finished
+     *       sync, the demo injector) or a return to this screen ({@link #offerRebalanceOnReturn}).
+     *       Browsing days and ticking a task off never prompt.</li>
      * </ul>
      *
-     * <p>The offer is made once per arrival, which is the honest reading of "a new task came
-     * in": adding four tasks to a loaded day offers four times, and the day stops offering as
+     * <p>The offer is made once per arrival, which is the honest reading of "something just
+     * changed": adding four tasks to a loaded day offers four times, and the day stops offering as
      * soon as accepting brings it back under the threshold or the model finds nothing to move.
-     * A sheet already on screen is never doubled up.
+     * A sheet already on screen is never doubled up. The return-to-dashboard path adds its own
+     * once-a-day limit on top - see {@link #offerRebalanceOnReturn} - because there the app is
+     * acting entirely on its own initiative.
      *
      * <p>The Rebalance button is untouched and still opens the same sheet on demand.
      */
     private void offerRebalanceIfOverloaded(@Nullable String isoDate) {
-        if (isoDate == null || !isAdded() || getView() == null) {
+        offerRebalanceIfOverloaded(isoDate, null);
+    }
+
+    /**
+     * As {@link #offerRebalanceIfOverloaded(String)}, reporting the moment the sheet really opens.
+     *
+     * @param onOffered run once {@link #showTriageSheet} has been reached, or never when the day
+     *                  turned out to need no offer. The returning-dashboard offer writes its
+     *                  once-a-day marker here rather than at the decision, so a day that is
+     *                  measured and found to be fine is not charged for a sheet it never saw.
+     */
+    private void offerRebalanceIfOverloaded(@Nullable String isoDate,
+                                            @Nullable Runnable onOffered) {
+        // isStateSaved() closes a narrow window the two asynchronous reads below open: the user
+        // can lock the phone or leave while the plan is being measured, and committing a
+        // DialogFragment after the state was saved is a transaction the framework refuses.
+        if (isoDate == null || !isAdded() || getView() == null || isStateSaved()) {
             return;
         }
         if (getChildFragmentManager().findFragmentByTag(TriageSheetFragment.TAG) != null) {
@@ -1317,15 +1341,68 @@ public class DashboardFragment extends Fragment {
             }
             RebalancePlanner.plan(requireContext(), isoDate, feed, plan -> {
                 // A failed measurement says nothing about the day, so it opens nothing.
-                if (!isAdded() || getView() == null || plan == null) {
+                if (!isAdded() || getView() == null || plan == null || isStateSaved()) {
                     return;
                 }
                 if (!plan.isOverThreshold() || plan.placedCount() == 0) {
                     return;
                 }
                 showTriageSheet(plan);
+                if (onOffered != null) {
+                    onOffered.run();
+                }
             });
         });
+    }
+
+    /**
+     * Offers the Rebalance sheet on a return to the dashboard, at most once a day.
+     *
+     * <p><b>Why this trigger exists.</b> Last night's sleep is the one thing that changes today's
+     * load without a task being added or edited: it is logged on Biometrics or synced from a watch,
+     * and it is the most common reason a day crosses the 90% line. Every other trigger offers on a
+     * task arriving ({@link #onTaskSaved}, {@link #onTaskChanged}, a finished sync, the demo
+     * injector), so a morning where sleep alone tipped the day over had nothing to raise it - the
+     * user would have to be told to press the button themselves.
+     *
+     * <p><b>Today, not the selected day.</b> {@link RebalancePlanner#measureWeek} applies the sleep
+     * penalty to today and to no other date, so a day the user is merely looking at is not this
+     * offer's business. The date comes from the strip's own today cell rather than from the
+     * selection - and the offer is skipped outright when that cell is no longer the real date.
+     * A dashboard left open overnight still holds the week it was built with, and offering to move
+     * tasks off a day that has already been and gone would be nonsense; the strip is rebuilt on the
+     * next arrival here, which is when the offer gets its turn.
+     *
+     * <p><b>Once a day, and only for a sheet that really opens.</b> The marker is written by
+     * {@link #offerRebalanceIfOverloaded}'s callback into {@link RebalancePrefs}, so "Not now"
+     * means not again today, while a day that was measured and found fine - or that the model
+     * could find nothing to move in - costs nothing and is looked at again on the next return.
+     * The task-arrival triggers do not read that marker and are unchanged: adding a task can still
+     * offer later the same day.
+     *
+     * <p><b>Second in line.</b> Only reached when the day owes no reward pop-up, so a morning that
+     * owes a harvest opens the harvest first and this offer follows on the next arrival - which is
+     * exactly the order the user needs, since the load they would be shedding is the load the
+     * harvest is reporting on.
+     */
+    private void offerRebalanceOnReturn() {
+        if (!isAdded() || getView() == null) {
+            return;
+        }
+        String today = weekDates[todayIndex];
+        if (today == null || !today.equals(todayIso())) {
+            return;
+        }
+        if (RebalancePrefs.wasOfferedToday(requireContext())) {
+            return;
+        }
+        offerRebalanceIfOverloaded(today, () -> RebalancePrefs.markOfferedToday(requireContext()));
+    }
+
+    /** The real date right now, "yyyy-MM-dd" - what the strip's today cell has to match. */
+    @NonNull
+    private static String todayIso() {
+        return new SimpleDateFormat(ISO_PATTERN, Locale.US).format(new Date());
     }
 
     /**

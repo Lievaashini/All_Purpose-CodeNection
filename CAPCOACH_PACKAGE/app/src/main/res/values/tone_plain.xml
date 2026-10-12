@@ -149,7 +149,11 @@
     <string name="bio_hrv_state_plain">Sympathetic stress</string>
     <string name="bio_hrv_state_sub_plain">Nervous load elevated</string>
     <string name="bio_trend_state_plain">Critical dip</string>
-    <string name="bio_penalty_sub_plain">Applying biometric penalty to today\'s capacity...</string>
+    <!-- Identical in all three tone files on purpose: this line is a promise about what the app
+         will and will not do about short sleep, so it is not a place for tone variation. It says
+         "will suggest" rather than naming the automatic sheet, so it stays true whether the
+         offer arrives by itself or the user taps Rebalance. -->
+    <string name="bio_penalty_sub_plain">Short sleep makes today heavier. CapCoach will suggest moving tasks when your day overflows, or tap Rebalance on Home anytime.</string>
     <string name="bio_penalty_footnote_plain">Computing load-shedding recommendations on-device (TFLite)...</string>
 
     <!-- ==================================================================
