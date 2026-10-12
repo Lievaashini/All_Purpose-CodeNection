@@ -39,9 +39,9 @@
          ================================================================== -->
 
     <string name="dino_onboarding_hype">"Energetic sleep protector ready!"</string>
-    <string name="dino_work_safe_hype">"%1$dh cap locked. I\'ll auto-deflect exam week overruns!"</string>
-    <string name="dino_work_caution_hype">"Careful! We are eating into deep recovery windows."</string>
-    <string name="dino_work_risk_hype">"Red Alert! Demching Dino initiating emergency offloading!"</string>
+    <string name="dino_work_safe_hype">"%1$dh of work locked in. I\'ll stop exam week from eating into it!"</string>
+    <string name="dino_work_caution_hype">"Careful! This cuts into your rest time."</string>
+    <string name="dino_work_risk_hype">"Red alert! Time to move some tasks off your plate!"</string>
     <plurals name="dino_harvest_apples_hype">
         <item quantity="one">"1 ripe apple! Yum!"</item>
         <item quantity="other">"%1$d ripe apples! Yum!"</item>
@@ -55,7 +55,7 @@
     <string name="dino_feast_quote_3_hype">"Nom nom! Protected sleep tastes good!"</string>
     <string name="dino_feast_quote_4_hype">"BURP! Best Sunday feast ever!"</string>
     <string name="dino_feast_quote_5_hype">"Full energy! Ready for next week!"</string>
-    <string name="dino_addtask_guard_hype" formatted="false">"Locking shift. 0% chance of study-hall collisions."</string>
+    <string name="dino_addtask_guard_hype">"Shift locked in! I won\'t move it for anything."</string>
     <string name="dino_addtask_sched_hype">Shedding buffer: %1$s. Priority %2$s is held back from the shed list!</string>
 
     <!-- Spontaneous dashboard reaction bubble - the Dino leaning in next to its own
@@ -90,23 +90,24 @@
          ================================================================== -->
 
     <string name="limits_subtitle_hype">Protect your non-negotiable time.</string>
-    <string name="limits_footnote_hype">Editable anytime from triage.</string>
+    <string name="limits_footnote_hype">You can change these anytime!</string>
     <string name="limits_name_label_hype">WHAT SHOULD WE CALL YOU?</string>
 
     <!-- Work-band status words and their warnings. The band picks the slot, the tone
-         picks the wording. None of these take a format argument: the wording is fixed
-         per band, and the hours appear elsewhere on the card. -->
-    <string name="work_status_safe_hype">Safe Labor Cap</string>
-    <string name="work_status_caution_hype">Fatigue Warning</string>
-    <string name="work_status_risk_hype">Burnout Risk &gt; 20h</string>
-    <string name="work_warning_safe_hype">Shielded up to 20h. Overages trigger alert.</string>
-    <string name="work_warning_caution_hype">Caution: Beyond 20 weekly hours, sleep buffers and academic grades face risk.</string>
-    <string name="work_warning_risk_hype">Severe risk of academic collision. Shift shedding will trigger on deadlines.</string>
+         picks the wording. The status words take no argument. Every warning is given
+         %1$d, the weekly work cap (LoadZones.WORK_CAP_HOURS); a warning that does not
+         name it simply leaves it unused. -->
+    <string name="work_status_safe_hype">Safe amount</string>
+    <string name="work_status_caution_hype">Getting tiring</string>
+    <string name="work_status_risk_hype">Burnout risk</string>
+    <string name="work_warning_safe_hype">You\'re covered up to %1$dh. I\'ll warn you if you go over!</string>
+    <string name="work_warning_caution_hype">Over %1$dh a week, your sleep and grades start to suffer.</string>
+    <string name="work_warning_risk_hype">Way too much! This much work will clash with study deadlines.</string>
 
-    <!-- Total-committed-load zone grading. -->
-    <string name="zone_safe_hype">SAFE ZONE / BALANCED</string>
-    <string name="zone_elevated_hype">ELEVATED CAPACITY</string>
-    <string name="zone_overload_hype">OVERLOAD WARNING</string>
+    <!-- Total weekly hours, graded. -->
+    <string name="zone_safe_hype">BALANCED</string>
+    <string name="zone_elevated_hype">GETTING BUSY</string>
+    <string name="zone_overload_hype">TOO MUCH</string>
 
     <!-- ==================================================================
          SCREEN 3 - DASHBOARD
@@ -120,7 +121,10 @@
     <string name="dash_headline_overload_hype">"Overload risk. Let me shed something."</string>
     <string name="dash_no_tasks_hype">No tasks yet. Tap Add Task to create one.</string>
     <string name="dash_saved_other_week_hype">Saved for %1$s, which is outside this week.</string>
-    <string name="triage_title_hype">Overload Prevention Action</string>
+    <!-- Sheet title. TRIAGE_TITLE when the day is over the limit, TRIAGE_TITLE_CALM when
+         it is not, so the title never claims an overload the plan did not find. -->
+    <string name="triage_title_hype">Your day is too full!</string>
+    <string name="triage_title_calm_hype">Nothing to move right now!</string>
     <string name="triage_load_sub_hype" formatted="false">Crash risk drops to 0%</string>
     <string name="triage_sleep_sub_hype">Recovery window locked</string>
     <string name="triage_kept_sub_hype">Condensed to 45m focused sprint</string>
@@ -141,14 +145,19 @@
     <string name="addtask_subtitle_work_hype">Inflexible %1$s Mode Active</string>
     <string name="addtask_subtitle_flexible_category_hype">Flexible %1$s Mode Active</string>
     <string name="addtask_mode_work_desc_hype">Fixed hours. Never deferred.</string>
-    <string name="addtask_mode_work_badge_hype">Protected under 20h cap</string>
-    <string name="addtask_mode_academic_desc_hype">Eligible for auto-deferral during crunch.</string>
+    <!-- %1$d is the weekly work cap, LoadZones.WORK_CAP_HOURS. -->
+    <string name="addtask_mode_work_badge_hype">Protected under %1$dh cap</string>
+    <string name="addtask_mode_academic_desc_hype">Can move to another day if you\'re too busy.</string>
     <string name="addtask_mode_academic_badge_hype">Auto-deferral active</string>
     <string name="addtask_hint_sheddable_hype">Auto-Sheddable</string>
     <string name="addtask_hint_locked_hype">Work Shift Auto-Locked</string>
-    <string name="addtask_cap_footnote_hype">Protected Shift - Never deferred by algorithm.</string>
+    <string name="addtask_cap_footnote_hype">Work shifts never get moved.</string>
+    <!-- Replace the footnote when the week's work runs over. %1$s is the hours over
+         ("4" or "1.5"), %2$d the user's own limit or the weekly cap. -->
+    <string name="addtask_cap_over_limit_hype">This puts you %1$sh over your %2$dh limit!</string>
+    <string name="addtask_cap_over_cap_hype">Overloaded! %1$sh over the %2$dh cap.</string>
     <string name="addtask_buffer_eligible_hype">Eligible for Auto-Shed</string>
-    <string name="addtask_priority_hint_hype">Protects urgent work</string>
+    <string name="addtask_priority_hint_hype">High = kept first!</string>
     <string name="addtask_deferral_hint_hype">How late the scheduler may push this activity.</string>
     <string name="addtask_saved_work_hype">Work shift saved and locked against auto-cancellation!</string>
     <string name="addtask_saved_academic_hype">Flexible academic task saved and queued for triage!</string>
@@ -160,15 +169,28 @@
          SCREEN 5 - BIOMETRICS
          ================================================================== -->
 
-    <string name="bio_event_pill_hype">Biometric Event Detected</string>
-    <string name="bio_anomaly_title_hype">Health Connect Alert: &lt; 5 Hours Sleep Detected</string>
-    <string name="bio_anomaly_body_hype">Last night\'s recorded sleep: %1$s (Target: %2$s). Severe restorative deficit.</string>
-    <string name="bio_hrv_state_hype">Sympathetic Stress</string>
-    <string name="bio_hrv_state_sub_hype">Elevated nervous load</string>
-    <string name="bio_trend_state_hype">Critical Dip</string>
-    <!-- Same sentence as the other two tones on purpose - see tone_plain.xml. -->
-    <string name="bio_penalty_sub_hype">Short sleep makes today heavier. CapCoach will suggest moving tasks when your day overflows, or tap Rebalance on Home anytime.</string>
-    <string name="bio_penalty_footnote_hype">Calculating Cognitive Load Shedding recommendations via on-device TFLite...</string>
+    <string name="bio_event_pill_hype">Sleep Alert!</string>
+    <string name="bio_anomaly_title_hype">Whoa, only %1$s of sleep last night!</string>
+    <string name="bio_anomaly_body_hype">Your body\'s running on empty. I\'ve got your back today!</string>
+    <!-- HRV and trend states. The plain slot is the warning, shown only when the reading
+         supports it (HRV under HealthConnectReader.LOW_HRV_MS, newest night under the sleep
+         target); the _calm / _steady slot is shown otherwise. With no reading, neither is. -->
+    <string name="bio_hrv_state_hype">Body on high alert!</string>
+    <string name="bio_hrv_state_sub_hype">Your nervous system is working overtime</string>
+    <string name="bio_hrv_state_calm_hype">Body feels calm!</string>
+    <string name="bio_hrv_state_sub_calm_hype">Your nervous system is recovering well</string>
+    <string name="bio_trend_state_hype">Big sleep dip!</string>
+    <string name="bio_trend_state_steady_hype">Sleep on track!</string>
+    <string name="bio_penalty_sub_hype">Low sleep = heavier day. Let\'s lighten the load!</string>
+    <string name="bio_penalty_footnote_hype">I\'ll jump in and move tasks when your day overflows, or hit Rebalance on Home anytime!</string>
+    <!-- "6h short of your 8h goal!": shortfall, then the target. -->
+    <string name="bio_deficit_badge_hype">%1$s short of your %2$s goal!</string>
+    <string name="bio_deficit_none_hype">Hit your %1$s goal!</string>
+    <!-- One word for the recovery debt, using the bands the model was trained on. -->
+    <string name="bio_debt_band_no_data_hype">No data yet</string>
+    <string name="bio_debt_band_low_hype">Fresh!</string>
+    <string name="bio_debt_band_moderate_hype">Kinda tired</string>
+    <string name="bio_debt_band_high_hype">Running on empty</string>
 
     <!-- ==================================================================
          SCREEN 6 - DAILY HARVEST
@@ -198,10 +220,10 @@
          ================================================================== -->
 
     <string name="settings_theme_sub_hype">Switch UI between dark contrast &amp; crisp bright surfaces</string>
-    <string name="settings_share_title_hype">Share anonymized burnout data</string>
-    <string name="settings_link_disconnected_hype">Disconnected</string>
-    <string name="settings_link_active_hype">Anonymized Active</string>
-    <string name="settings_link_info_hype">This link is opt-in and off by default. Nothing leaves your device until you enable it, and only aggregated, non-identifying burnout statistics are ever shared.</string>
+    <string name="settings_share_title_hype">Share anonymous stress stats</string>
+    <string name="settings_link_disconnected_hype">Off</string>
+    <string name="settings_link_active_hype">On, anonymous</string>
+    <string name="settings_link_info_hype">This is off by default. Nothing leaves your phone until you turn it on, and only group stats that can\'t identify you are ever shared.</string>
 
     <!-- ==================================================================
          SCREEN 9 - COMPANION / VOICE

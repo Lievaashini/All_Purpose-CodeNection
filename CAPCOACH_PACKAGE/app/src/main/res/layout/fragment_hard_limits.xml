@@ -64,7 +64,7 @@
                     android:background="@drawable/bg_pill_badge"
                     android:paddingHorizontal="@dimen/space_md"
                     android:paddingVertical="@dimen/space_xs"
-                    android:text="@string/limits_phase_badge"
+                    tools:text="STEP 2 OF 2"
                     android:textColor="@color/text_muted_dark"
                     android:textStyle="bold" />
 
@@ -163,13 +163,6 @@
                             android:text="@string/dino_guard_label"
                             android:textColor="@color/brand_mint"
                             android:textStyle="bold" />
-
-                        <TextView
-                            style="@style/Text.MicroLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/space_xs"
-                            android:text="@string/dino_guard_suffix" />
                     </LinearLayout>
 
                     <TextView
@@ -480,14 +473,16 @@
                                 android:text="@string/work_title" />
 
                             <TextView
+                                android:id="@+id/workCapChip"
                                 style="@style/Text.MicroLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="@dimen/space_sm"
                                 android:background="@drawable/bg_tone_tag"
+                                android:maxLines="1"
                                 android:paddingHorizontal="@dimen/space_sm"
                                 android:paddingVertical="2dp"
-                                android:text="@string/work_locked_cap"
+                                tools:text="MAX 20H"
                                 android:textColor="@color/brand_mint"
                                 android:textStyle="bold" />
                         </LinearLayout>
@@ -510,7 +505,9 @@
                         android:paddingVertical="@dimen/space_xxs"
                         android:textColor="@color/brand_mint"
                         android:textStyle="bold"
-                        tools:text="Protected: 20h" />
+                        android:visibility="gone"
+                        tools:text="5h over"
+                        tools:visibility="visible" />
                 </LinearLayout>
 
                 <!-- Big metric + status -->
@@ -587,10 +584,11 @@
                         android:text="@string/work_min_label" />
 
                     <TextView
+                        android:id="@+id/workLimitLabel"
                         style="@style/Text.MicroLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/work_limit_label"
+                        tools:text="20h limit"
                         android:textColor="@color/brand_mint"
                         android:textStyle="bold" />
 
@@ -650,7 +648,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/space_sm"
                         android:layout_weight="1"
-                        android:text="@string/work_warning_safe_hype"
+                        tools:text="You're covered up to 20h. I'll warn you if you go over!"
                         android:textSize="@dimen/text_label" />
                 </LinearLayout>
             </LinearLayout>

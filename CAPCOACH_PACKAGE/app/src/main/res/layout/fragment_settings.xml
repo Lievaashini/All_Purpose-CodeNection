@@ -465,14 +465,6 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="@string/settings_share_title_hype" />
-
-                            <TextView
-                                style="@style/Text.MicroLabel"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="@string/settings_share_sub"
-                                android:textAllCaps="true" />
                         </LinearLayout>
 
                         <com.google.android.material.materialswitch.MaterialSwitch
