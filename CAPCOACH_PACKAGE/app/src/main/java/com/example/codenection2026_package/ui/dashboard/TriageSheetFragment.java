@@ -414,7 +414,18 @@ public class TriageSheetFragment extends BottomSheetDialogFragment {
         }
         ToneType tone = OnboardingPrefs.getTone(requireContext());
 
-        set(view, R.id.triageTitle, CoachVoice.Line.TRIAGE_TITLE, tone);
+        // "Your day is too full" only when the plan says so. A failed plan has no verdict
+        // either way, so it gets no title rather than a guess.
+        View title = view.findViewById(R.id.triageTitle);
+        if (plan == null) {
+            if (title != null) {
+                title.setVisibility(View.GONE);
+            }
+        } else {
+            set(view, R.id.triageTitle, plan.isOverThreshold()
+                    ? CoachVoice.Line.TRIAGE_TITLE
+                    : CoachVoice.Line.TRIAGE_TITLE_CALM, tone);
+        }
         set(view, R.id.triageAccept, CoachVoice.Line.TRIAGE_ACCEPT, tone);
         set(view, R.id.triageDismiss, CoachVoice.Line.TRIAGE_DISMISS, tone);
     }

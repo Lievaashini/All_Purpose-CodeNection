@@ -638,7 +638,9 @@ public class DashboardFragment extends Fragment {
             telemetry.setText(getString(
                     R.string.dash_telemetry,
                     sleep,
-                    OnboardingPrefs.getWorkHours(context) + "/20h"));
+                    getString(R.string.dash_work_hours,
+                            OnboardingPrefs.getWorkHours(context),
+                            com.example.codenection2026_package.ui.onboarding.LoadZones.WORK_CAP_HOURS)));
         }
 
         ImageView mascot = getView() == null ? null : getView().findViewById(R.id.heroMascot);

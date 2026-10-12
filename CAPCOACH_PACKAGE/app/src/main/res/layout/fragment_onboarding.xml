@@ -47,7 +47,7 @@
                 android:background="@drawable/bg_pill_badge"
                 android:paddingHorizontal="@dimen/space_md"
                 android:paddingVertical="@dimen/space_xs"
-                android:text="@string/onboarding_phase_badge"
+                tools:text="STEP 1 OF 2"
                 android:textColor="@color/brand_mint"
                 android:textStyle="bold" />
 
