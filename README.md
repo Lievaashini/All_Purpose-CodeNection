@@ -3,6 +3,8 @@
 **Team:** Lievaashini Thanasegaran, Dhanya Gotami K.D, Lee Jian Cheng, Wong Yan Wen  
 **Problem Statement:** Lifestyle Track: Beating the Burnout (Stress & Workload Manager)  
 **Video Presentation:** https://youtu.be/cX_QuVTY19g?si=78LXkAYxkxL6Fqsv 
+**Deployment link:** https://github.com/Lievaashini/All_Purpose-CodeNection/releases/download/Release-1.0.1-Beta/CapCoach-release-v1.0.1-Beta.apk
+**User guide (docs / pdf link):** <em>to be updated<em>
 <br>**Presentation Slides:** https://canva.link/af67hfyhan5ktfx
 
 
