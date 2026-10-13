@@ -1,10 +1,11 @@
 # CapCoach by All Purpose
 
 **Team:** Lievaashini Thanasegaran, Dhanya Gotami K.D, Lee Jian Cheng, Wong Yan Wen  
-**Problem Statement:** Lifestyle Track: Beating the Burnout (Stress & Workload Manager)  
-**Video Presentation:** https://youtu.be/cX_QuVTY19g?si=78LXkAYxkxL6Fqsv 
-**Deployment link:** https://github.com/Lievaashini/All_Purpose-CodeNection/releases/download/Release-1.0.1-Beta/CapCoach-release-v1.0.1-Beta.apk
-**User guide (docs / pdf link):** <em>to be updated<em>
+<br>**Problem Statement:** Lifestyle Track: Beating the Burnout (Stress & Workload Manager)  
+<br>**Video Presentation:** https://youtu.be/cX_QuVTY19g?si=78LXkAYxkxL6Fqsv 
+<br>**Deployment link:** https://github.com/Lievaashini/All_Purpose-CodeNection/releases/download/Release-1.0.1-Beta/CapCoach-release-v1.0.1-Beta.apk
+<br>**User guide (docs / pdf link):** https://docs.google.com/document/d/1GDeX0yO5My5Yo3n37yxzn_ye48-k9ARg4p0ShaqUYI4/edit?usp=sharing
+<br>**Full Demo Video:** https://drive.google.com/file/d/17kQvXCNfSo7twA_7zrMztSPAu9b62it1/view?usp=drivesdk
 <br>**Presentation Slides:** https://canva.link/af67hfyhan5ktfx
 
 
