@@ -178,7 +178,7 @@
     <string name="bio_hrv_state_hype">Body on high alert!</string>
     <string name="bio_hrv_state_sub_hype">Your nervous system is working overtime</string>
     <string name="bio_hrv_state_calm_hype">Body feels calm!</string>
-    <string name="bio_hrv_state_sub_calm_hype">Your nervous system is recovering well</string>
+    <string name="bio_hrv_state_sub_calm_hype">Nervous system recovering</string>
     <string name="bio_trend_state_hype">Big sleep dip!</string>
     <string name="bio_trend_state_steady_hype">Sleep on track!</string>
     <string name="bio_penalty_sub_hype">Low sleep = heavier day. Let\'s lighten the load!</string>
