@@ -101,3 +101,11 @@ Fonts: Plus Jakarta Sans, Inter. Colors: Primary Blue #1D70B8, Green #107C41, Re
 - Proves 57.3% struggle to balance work and school, establishing the >20-hour work threshold for critical academic strain.
 
 - Saddique , F. (2026). Influence of part-time employment on grade point average and academic outcomes of university students. Social Sciences Spectrum, 5(1), 251–259. https://doi.org/10.71085/sss.05.01.481
+
+
+### **6. Acknowledgments & Credits**
+
+We would like to thank and credit the following creators for the incredible pixel art assets used to bring CapCoach's interactive mascot and gamification loop to life:
+
+- **Dino Mascot (CapCoach Companion):** [Dino Family](https://demching.itch.io/dino-family) by [demching](https://demching.itch.io/)
+- **Gamification Assets (Apple Harvest):** [Apple Pixel art](https://mohking511.itch.io/apple) by [moho](https://mohking511.itch.io/)
