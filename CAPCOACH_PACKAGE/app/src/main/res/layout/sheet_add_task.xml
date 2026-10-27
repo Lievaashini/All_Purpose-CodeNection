@@ -908,10 +908,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:ellipsize="end"
-                    android:maxLines="2"
                     android:textColor="@color/text_muted_dark"
-                    tools:text="Shedding buffer: 48h. Priority High is held back." />
+                    tools:text="If your day gets too full, I can move this up to 48h later! It's High priority, so it's the last to go!" />
             </LinearLayout>
         </LinearLayout>
 

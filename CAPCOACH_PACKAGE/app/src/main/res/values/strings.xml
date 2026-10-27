@@ -39,7 +39,7 @@
     <!-- Shown instead of the step badge when the limits are reopened after setup. -->
     <string name="limits_edit_badge">YOUR LIMITS</string>
     <string name="limits_title">Set Limits</string>
-        <string name="dino_guard_label">DEMCHING DINO</string>
+        <string name="dino_guard_label">CAPCOACH</string>
     <string name="dino_guard_speech_default">"20h cap locked."</string>
     <!-- The limits-screen guard dialogue is per coaching tone, in the dino_*.xml files.
          LoadZones.WorkBand carries the slot and HardLimitsFragment resolves it. -->
