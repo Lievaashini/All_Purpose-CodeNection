@@ -371,11 +371,8 @@ public class HardLimitsFragment extends Fragment {
         }
 
         if (dinoGuardSpeech != null) {
-            // Only the safe band's copy names the number, so only that one takes the hours.
-            int line = band.dinoQuote.pick(tone);
-            dinoGuardSpeech.setText(band == LoadZones.WorkBand.SAFE
-                    ? getString(line, work)
-                    : getString(line));
+            // Every band's line names the hours, so the Dino reacts to the number on screen.
+            dinoGuardSpeech.setText(getString(band.dinoQuote.pick(tone), work));
         }
         if (dinoGuardAvatar != null) {
             loadDinoSprite(dinoGuardAvatar, avatarFor(band));

@@ -857,36 +857,6 @@
                     android:layout_marginTop="@dimen/space_xs"
                     android:text="@string/addtask_deferral_hint_hype"
                     android:textColor="@color/text_dim_dark" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/stroke_thin"
-                    android:layout_marginTop="@dimen/space_sm"
-                    android:background="@color/divider_dark" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_sm"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/addtask_buffer_effort"
-                        android:textColor="@color/text_muted_dark" />
-
-                    <TextView
-                        style="@style/Text.MicroLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/addtask_buffer_effort_value"
-                        android:textColor="@color/brand_mint"
-                        android:textStyle="bold" />
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

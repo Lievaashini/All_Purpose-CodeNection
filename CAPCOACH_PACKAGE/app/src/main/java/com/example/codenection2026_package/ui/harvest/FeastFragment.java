@@ -60,7 +60,7 @@ public class FeastFragment extends Fragment {
     /** Sunday is day 7 of the streak, per the prototype pill. */
     private static final int FEAST_DAY = 7;
     /** Kept quiet: the clip is mastered loud, and it repeats quickly during "feed all". */
-    private static final float MUNCH_VOLUME = 0.2f;
+    private static final float MUNCH_VOLUME = 0.4f;
 
     /** The week's actual harvest total, loaded live from completed tasks. */
     private int totalApples = 0;

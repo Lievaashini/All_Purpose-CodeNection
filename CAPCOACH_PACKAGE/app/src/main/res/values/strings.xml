@@ -220,8 +220,8 @@
          The two mode names map onto Task.classification FLEXIBLE / INFLEXIBLE.
          ================================================================== -->
     <string name="addtask_title">Add Activity</string>
-            <string name="addtask_classification_label">CLASSIFICATION ARCHITECTURE</string>
-    <string name="addtask_mode_hint">Selectable Mode</string>
+            <string name="addtask_classification_label">TASK TYPE</string>
+    <string name="addtask_mode_hint">Pick one</string>
     <string name="addtask_mode_work_title">Inflexible Shift</string>
     <string name="addtask_mode_work_tag">Work</string>
             <string name="addtask_mode_academic_title">Flexible Deadline</string>
@@ -262,23 +262,18 @@
     <!-- Work hours booked that week including this shift, then the user's own weekly work
          hours from Set Limits. %1$s is already formatted ("16" or "16.5"). -->
     <string name="addtask_cap_value">%1$sh / %2$dh</string>
-        <string name="addtask_buffer_label">COGNITIVE LOAD &amp; BUFFER</string>
+        <string name="addtask_buffer_label">IF YOUR DAY GETS TOO FULL</string>
         <!-- Deferral is a choice, not a constant: the user decides how late it may slip. -->
-    <string name="addtask_buffer_deferral">DEFERRAL WINDOW</string>
-        <string name="addtask_deferral_none">Locked - never deferred</string>
-    <string name="addtask_deferral_24">Up to 24h late</string>
-    <string name="addtask_deferral_48">Up to 48h late</string>
-    <string name="addtask_deferral_72">Up to 72h late</string>
-    <!-- Spoken back by the Dino line under the sheet. -->
-    <string name="addtask_deferral_summary_none">a locked, never-deferred task</string>
-    <string name="addtask_deferral_summary_hours">a %1$dh deferral window</string>
-    <string name="addtask_buffer_effort">Effort</string>
-    <string name="addtask_buffer_effort_value">45m</string>
+    <string name="addtask_buffer_deferral">HOW LATE IT CAN MOVE</string>
+        <string name="addtask_deferral_none">Never move it</string>
+    <string name="addtask_deferral_24">Up to 24h later</string>
+    <string name="addtask_deferral_48">Up to 48h later</string>
+    <string name="addtask_deferral_72">Up to 72h later</string>
     <string name="addtask_dino_guard_label">CapCoach Dino Guard</string>
-    <string name="addtask_dino_scheduler_label">CapCoach ML Scheduler</string>
-    <!-- The two Dino lines under the sheet are per coaching tone, in the dino_*.xml files.
-         The scheduler variant echoes the deferral window and priority, so it stays a
-         format string: %1$s window, %2$s priority label. -->
+    <string name="addtask_dino_scheduler_label">CapCoach Dino Planner</string>
+    <!-- The Dino lines under the sheet are per coaching tone, in the tone_*.xml files.
+         The planner line takes the deferral window in hours (%1$d), then gets a priority
+         sentence appended for High or Low. -->
     <string name="addtask_save_work">Save Shift</string>
     <string name="addtask_save_academic">Save Academic Task</string>
     <string name="addtask_save_category">Save %1$s Task</string>

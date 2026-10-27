@@ -20,8 +20,8 @@
     <string name="dino_onboarding_chill">"Smooth pacing, calm focus."</string>
 
     <string name="dino_work_safe_chill">"%1$dh is your line. The rest of the week stays yours."</string>
-    <string name="dino_work_caution_chill">"This is getting past comfortable. Leave room to rest."</string>
-    <string name="dino_work_risk_chill">"That\'s a lot for one week. Let\'s shed something together."</string>
+    <string name="dino_work_caution_chill">"%1$dh is past comfortable. Leave yourself time to rest."</string>
+    <string name="dino_work_risk_chill">"%1$dh is a lot for one week. Study time will get squeezed."</string>
 
     <plurals name="dino_harvest_apples_chill">
         <item quantity="one">"One apple grew back overnight."</item>
@@ -40,7 +40,11 @@
     <string name="dino_feast_quote_5_chill">"Steady energy. No rush."</string>
 
     <string name="dino_addtask_guard_chill">"Shift locked in. Nothing collides with study time."</string>
-    <string name="dino_addtask_sched_chill">Shedding buffer: %1$s. %2$s stays off the shed list.</string>
+    <string name="dino_addtask_sched_chill">If things get full, this can move up to %1$dh later.</string>
+    <string name="dino_addtask_sched_locked_chill">This one stays where you put it.</string>
+    <string name="dino_addtask_priority_high_chill">It\'s high priority, so it\'ll be the last to move.</string>
+    <string name="dino_addtask_priority_low_chill">It\'s low priority, so it would move first.</string>
+    <string name="dino_addtask_fixed_chill">Locked in. This stays where you put it.</string>
 
     <!-- Spontaneous dashboard reaction bubble. See tone_hype.xml for the shared
          rules: one slot per capacity state plus one for good sleep, every slot
@@ -127,17 +131,19 @@
     <string name="addtask_mode_work_badge_chill">Held under the %1$dh cap</string>
     <string name="addtask_mode_academic_desc_chill">We may move this in a busy week.</string>
     <string name="addtask_mode_academic_badge_chill">Can be moved</string>
-    <string name="addtask_hint_sheddable_chill">Can Shed</string>
-    <string name="addtask_hint_locked_chill">Shift Locked In</string>
+    <string name="addtask_hint_sheddable_chill">Can move</string>
+    <string name="addtask_hint_locked_chill">Stays put</string>
     <string name="addtask_cap_footnote_chill">Protected shift. The scheduler leaves it alone.</string>
     <string name="addtask_cap_over_limit_chill">This takes you %1$sh past your %2$dh limit.</string>
     <string name="addtask_cap_over_cap_chill">That\'s %1$sh past the %2$dh cap. It\'s a lot.</string>
-    <string name="addtask_buffer_eligible_chill">Available to shed</string>
+    <string name="addtask_buffer_eligible_chill">Can move</string>
+    <string name="addtask_buffer_off_chill">Stays put</string>
     <string name="addtask_priority_hint_chill">High priority is kept first</string>
-    <string name="addtask_deferral_hint_chill">How far we may push this, if needed.</string>
+    <string name="addtask_deferral_hint_chill">How far it can move, if needed.</string>
     <string name="addtask_saved_work_chill">Shift saved and locked. It stays put.</string>
-    <string name="addtask_saved_academic_chill">Saved. We\'ll take a look in triage.</string>
-    <string name="addtask_saved_category_chill">%1$s task saved. Triage will take a look.</string>
+    <string name="addtask_saved_fixed_chill">%1$s task saved. It stays put.</string>
+    <string name="addtask_saved_academic_chill">Saved. It can move if things get busy.</string>
+    <string name="addtask_saved_category_chill">%1$s task saved. It can move if things get busy.</string>
     <string name="addtask_save_failed_chill">We couldn\'t save that. Try again in a moment.</string>
     <string name="addtask_name_required_chill">Add a name before saving.</string>
 
