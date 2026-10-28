@@ -20,8 +20,8 @@
     <string name="dino_onboarding_plain">"Telemetry active. Zero fluff."</string>
 
     <string name="dino_work_safe_plain">"%1$dh of work set. Study moves around it if needed."</string>
-    <string name="dino_work_caution_plain">"Above the safe limit. Less time for sleep."</string>
-    <string name="dino_work_risk_plain">"Burnout risk. Some tasks need to move."</string>
+    <string name="dino_work_caution_plain">"%1$dh. Above the safe limit. Less rest time."</string>
+    <string name="dino_work_risk_plain">"%1$dh. Burnout risk. Study tasks will move."</string>
 
     <plurals name="dino_harvest_apples_plain">
         <item quantity="one">"1 apple logged yesterday."</item>
@@ -40,7 +40,11 @@
     <string name="dino_feast_quote_5_plain">"Stamina restored. Resuming."</string>
 
     <string name="dino_addtask_guard_plain">"Shift locked. Never moved."</string>
-    <string name="dino_addtask_sched_plain">Buffer: %1$s. Priority %2$s excluded from shedding.</string>
+    <string name="dino_addtask_sched_plain">Can move up to %1$dh later if overloaded.</string>
+    <string name="dino_addtask_sched_locked_plain">Will not be moved.</string>
+    <string name="dino_addtask_priority_high_plain">High priority: moved last.</string>
+    <string name="dino_addtask_priority_low_plain">Low priority: moved first.</string>
+    <string name="dino_addtask_fixed_plain">Fixed time. Never moved.</string>
 
     <!-- Spontaneous dashboard reaction bubble. See tone_hype.xml for the shared
          rules. Plain is the only tone that prints the figure, so these carry a real
@@ -125,20 +129,22 @@
     <string name="addtask_mode_work_desc_plain">Fixed hours. Not deferred.</string>
     <string name="addtask_mode_work_badge_plain">Under the %1$dh cap</string>
     <string name="addtask_mode_academic_desc_plain">Moves to another day when overloaded.</string>
-    <string name="addtask_mode_academic_badge_plain">Auto-deferral enabled</string>
+    <string name="addtask_mode_academic_badge_plain">Movable</string>
 
-    <string name="addtask_hint_sheddable_plain">Sheddable</string>
-    <string name="addtask_hint_locked_plain">Shift locked</string>
+    <string name="addtask_hint_sheddable_plain">Movable</string>
+    <string name="addtask_hint_locked_plain">Fixed</string>
     <string name="addtask_cap_footnote_plain">Shifts are never moved.</string>
     <string name="addtask_cap_over_limit_plain">%1$sh over %2$dh limit.</string>
     <string name="addtask_cap_over_cap_plain">Overloaded: %1$sh over %2$dh cap.</string>
-    <string name="addtask_buffer_eligible_plain">Shed-eligible</string>
+    <string name="addtask_buffer_eligible_plain">On</string>
+    <string name="addtask_buffer_off_plain">Off</string>
     <string name="addtask_priority_hint_plain">High = kept first</string>
-    <string name="addtask_deferral_hint_plain">Maximum deferral window for the scheduler.</string>
+    <string name="addtask_deferral_hint_plain">Max delay if moved.</string>
 
     <string name="addtask_saved_work_plain">Work shift saved. Locked.</string>
-    <string name="addtask_saved_academic_plain">Academic task saved. Queued for triage.</string>
-    <string name="addtask_saved_category_plain">%1$s task saved. Queued for triage.</string>
+    <string name="addtask_saved_fixed_plain">%1$s task saved. Locked.</string>
+    <string name="addtask_saved_academic_plain">Academic task saved. Movable if overloaded.</string>
+    <string name="addtask_saved_category_plain">%1$s task saved. Movable if overloaded.</string>
     <string name="addtask_save_failed_plain">Save failed.</string>
     <string name="addtask_name_required_plain">Name required.</string>
 

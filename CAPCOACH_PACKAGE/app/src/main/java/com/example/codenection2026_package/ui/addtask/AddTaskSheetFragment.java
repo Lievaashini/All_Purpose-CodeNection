@@ -522,7 +522,6 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
                 .set(R.id.modeAcademicDesc, CoachVoice.Line.ADDTASK_MODE_ACADEMIC_DESC)
                 .set(R.id.modeAcademicBadge, CoachVoice.Line.ADDTASK_MODE_ACADEMIC_BADGE)
                 .set(R.id.capFootnote, CoachVoice.Line.ADDTASK_CAP_FOOTNOTE)
-                .set(R.id.bufferEligible, CoachVoice.Line.ADDTASK_BUFFER_ELIGIBLE)
                 .set(R.id.priorityHint, CoachVoice.Line.ADDTASK_PRIORITY_HINT)
                 .set(R.id.deferralHint, CoachVoice.Line.ADDTASK_DEFERRAL_HINT);
     }
@@ -654,7 +653,9 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         deferralSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // The Dino line repeats whichever window is selected.
+                // "Never move it" turns the movable labels off, and the Dino line repeats
+                // whichever window is selected.
+                renderMovable();
                 updateDinoCopy();
             }
 
@@ -678,6 +679,12 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         if (priorityGroup.getCheckedButtonId() == View.NO_ID) {
             priorityGroup.check(R.id.priorityMed);
         }
+        // The Dino line names what the priority means, so it follows every change.
+        priorityGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                updateDinoCopy();
+            }
+        });
     }
 
     private void setupTimes() {
@@ -894,15 +901,7 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
                     : R.color.secondary_blue));
         }
 
-        // Task name hint and default copy, exactly as the prototype swaps its value.
-        if (titleHint != null) {
-            titleHint.setText(flexible
-                    ? CoachVoice.Line.ADDTASK_HINT_SHEDDABLE.pick(tone())
-                    : CoachVoice.Line.ADDTASK_HINT_LOCKED.pick(tone()));
-            titleHint.setTextColor(color(flexible
-                    ? R.color.brand_mint
-                    : R.color.secondary_blue));
-        }
+        renderMovable();
         if (taskNameInput != null) {
             String academic = getString(R.string.addtask_academic_default);
             String work = getString(R.string.addtask_work_default);
@@ -913,8 +912,11 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             taskNameInput.setHint(hintFor(category));
         }
 
+        // The weekly work panel only means something for a Work entry: a fixed lecture
+        // does not count toward work hours.
+        boolean work = CategoryRepository.WORK.equals(category);
         show(panelCognitiveBuffer, flexible);
-        show(panelWorkCap, !flexible);
+        show(panelWorkCap, !flexible && work);
         // The category decides whether this entry counts toward the week's work.
         refreshWorkCap();
 
@@ -936,9 +938,9 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             // filing anything new, so it just says what the button does.
             button.setText(editingTask != null
                     ? getString(R.string.edittask_save)
-                    : (flexible
-                            ? getString(R.string.addtask_save_category, category)
-                            : getString(R.string.addtask_save_work)));
+                    : (!flexible && work
+                            ? getString(R.string.addtask_save_work)
+                            : getString(R.string.addtask_save_category, category)));
             button.setIconResource(flexible
                     ? R.drawable.ic_event_available
                     : R.drawable.ic_shield);
@@ -948,11 +950,34 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     }
 
     /**
-     * The Dino line under the sheet. It repeats the deferral window and priority the
-     * user just chose, so the sheet visibly reads the same values it is about to save.
+     * Whether this entry can be moved: the name hint and the "if your day gets too full"
+     * pill. A flexible task set to "Never move it" is as fixed as a shift, so it says so.
+     */
+    private void renderMovable() {
+        boolean movable = MODE_FLEXIBLE.equals(mode) && selectedDeferralHours() > 0;
+        if (titleHint != null) {
+            titleHint.setText(movable
+                    ? CoachVoice.Line.ADDTASK_HINT_SHEDDABLE.pick(tone())
+                    : CoachVoice.Line.ADDTASK_HINT_LOCKED.pick(tone()));
+            titleHint.setTextColor(color(MODE_FLEXIBLE.equals(mode)
+                    ? R.color.brand_mint
+                    : R.color.secondary_blue));
+        }
+        TextView eligible = root == null ? null : root.findViewById(R.id.bufferEligible);
+        if (eligible != null) {
+            eligible.setText(movable
+                    ? CoachVoice.Line.ADDTASK_BUFFER_ELIGIBLE.pick(tone())
+                    : CoachVoice.Line.ADDTASK_BUFFER_OFF.pick(tone()));
+        }
+    }
+
+    /**
+     * The Dino line under the sheet. It repeats the category, deferral window and priority
+     * the user just chose, so the sheet visibly reads the same values it is about to save.
      */
     private void updateDinoCopy() {
         boolean flexible = MODE_FLEXIBLE.equals(mode);
+        ToneType tone = tone();
 
         if (dinoTitle != null) {
             dinoTitle.setText(flexible
@@ -963,13 +988,26 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
             return;
         }
         if (!flexible) {
-            dinoMessage.setText(CoachVoice.Line.DINO_ADDTASK_GUARD.pick(tone()));
+            dinoMessage.setText(CategoryRepository.WORK.equals(currentCategory())
+                    ? CoachVoice.Line.DINO_ADDTASK_GUARD.pick(tone)
+                    : CoachVoice.Line.DINO_ADDTASK_FIXED.pick(tone));
             return;
         }
-        dinoMessage.setText(getString(
-                CoachVoice.Line.DINO_ADDTASK_SCHED.pick(tone()),
-                deferralSummary(),
-                getString(priorityLabelRes())));
+        int hours = selectedDeferralHours();
+        if (hours == 0) {
+            // Never moved, so its priority has nothing to decide.
+            dinoMessage.setText(CoachVoice.Line.DINO_ADDTASK_SCHED_LOCKED.pick(tone));
+            return;
+        }
+        String line = getString(CoachVoice.Line.DINO_ADDTASK_SCHED.pick(tone), hours);
+        // Medium is the default and needs no comment; High and Low change the order.
+        int weight = selectedPriorityWeight();
+        if (weight == Task.WEIGHT_HIGH) {
+            line += " " + getString(CoachVoice.Line.DINO_ADDTASK_PRIORITY_HIGH.pick(tone));
+        } else if (weight == Task.WEIGHT_LOW) {
+            line += " " + getString(CoachVoice.Line.DINO_ADDTASK_PRIORITY_LOW.pick(tone));
+        }
+        dinoMessage.setText(line);
     }
 
     /** The coaching tone chosen in onboarding or Settings. */
@@ -1023,18 +1061,6 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
         return Task.WEIGHT_MED;
     }
 
-    @StringRes
-    private int priorityLabelRes() {
-        int checked = priorityGroup == null ? View.NO_ID : priorityGroup.getCheckedButtonId();
-        if (checked == R.id.priorityHigh) {
-            return R.string.addtask_priority_high;
-        }
-        if (checked == R.id.priorityLow) {
-            return R.string.addtask_priority_low;
-        }
-        return R.string.addtask_priority_med;
-    }
-
     /** @return the deferral window index, clamped to the table in this class */
     private int deferralIndex() {
         int position = deferralSpinner == null
@@ -1049,14 +1075,6 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     /** @return the deferral window in hours: 0 when the task may not be deferred */
     private int selectedDeferralHours() {
         return DEFERRAL_HOURS[deferralIndex()];
-    }
-
-    @NonNull
-    private String deferralSummary() {
-        int hours = selectedDeferralHours();
-        return hours == 0
-                ? getString(R.string.addtask_deferral_summary_none)
-                : getString(R.string.addtask_deferral_summary_hours, hours);
     }
 
     @NonNull
@@ -1408,7 +1426,9 @@ public class AddTaskSheetFragment extends BottomSheetDialogFragment {
     @NonNull
     private String savedMessage(boolean flexible, @NonNull String category) {
         if (!flexible) {
-            return getString(CoachVoice.Line.ADDTASK_SAVED_WORK.pick(tone()));
+            return CategoryRepository.WORK.equals(category)
+                    ? getString(CoachVoice.Line.ADDTASK_SAVED_WORK.pick(tone()))
+                    : getString(CoachVoice.Line.ADDTASK_SAVED_FIXED.pick(tone()), category);
         }
         if (CategoryRepository.ACADEMIC.equals(category)) {
             return getString(CoachVoice.Line.ADDTASK_SAVED_ACADEMIC.pick(tone()));
